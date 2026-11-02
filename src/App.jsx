@@ -9,20 +9,10 @@ import {
   Search, Bell, MoreHorizontal, Plus, Minus, LocateFixed, RotateCw, Leaf, X,
 } from 'lucide-react'
 import { PAL, ROUTES, STOPS } from './data'
+import { routeToGeoJSON, elevationProfile, pointAt, formatNumber, statusColor } from './lib'
 
 const MAPBOX_TOKEN = import.meta.env?.VITE_MAPBOX_TOKEN || 'YOUR_MAPBOX_TOKEN'
 const CO2_PER_KM = 0.29 // kg CO₂/km, facteur moyen simplifié
-
-const STATUS_COLOR = (s) => (s.startsWith('Retard') ? PAL.pink : s === 'En avance' ? PAL.blue : PAL.indigo)
-
-const geo = (r) => ({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: r.coords } })
-const profile = (coords, w = 96, h = 28) => {
-  const a = coords.map((c) => c[2]); const mn = Math.min(...a); const mx = Math.max(...a)
-  const pts = coords.map((c, i) => [(i / (coords.length - 1)) * w, h - 3 - ((c[2] - mn) / (mx - mn || 1)) * (h - 6)])
-  return { d: pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' '), pts }
-}
-const pointAt = (pts, t) => { const f = t * (pts.length - 1); const i = Math.min(Math.floor(f), pts.length - 2); const k = f - i
-  return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k] }
 
 // ---------- Composants ----------
 function Pin({ s, color, active, onClick }) {
@@ -37,7 +27,7 @@ function Pin({ s, color, active, onClick }) {
 }
 
 function Elevation({ route, t, color }) {
-  const { d, pts } = useMemo(() => profile(route.coords), [route])
+  const { d, pts } = useMemo(() => elevationProfile(route.coords), [route])
   const [x, y] = pointAt(pts, t)
   return (
     <svg viewBox="0 0 96 28" className="h-8 w-24 overflow-visible">
@@ -86,7 +76,7 @@ function Journey({ r, active, onClick }) {
       </div>
       <div className="flex items-center justify-between text-xs font-semibold">
         <span className="text-slate-200">{r.from}</span>
-        <span className="rounded-full bg-[var(--color-muted-bg)] px-2 py-0.5 text-[11px] font-light text-slate-300">{r.km.toString().replace('.', ',')} km · {r.load} % rempli</span>
+        <span className="rounded-full bg-[var(--color-muted-bg)] px-2 py-0.5 text-[11px] font-light text-slate-300">{formatNumber(r.km)} km · {r.load} % rempli</span>
         <span className="text-slate-200">{r.to}</span>
       </div>
     </motion.button>
@@ -137,7 +127,7 @@ export default function App() {
             {ROUTES.map((r) => {
               const on = r.id === route.id
               return (
-                <Source key={r.id} id={`route-${r.id}`} type="geojson" data={geo(r)}>
+                <Source key={r.id} id={`route-${r.id}`} type="geojson" data={routeToGeoJSON(r)}>
                   <Layer id={`glow-${r.id}`} type="line" layout={{ 'line-cap': 'round', 'line-join': 'round' }}
                     paint={{ 'line-color': r.color, 'line-width': on ? 16 : 0, 'line-blur': 10, 'line-opacity': 0.6 }} />
                   <Layer id={`core-${r.id}`} type="line" layout={{ 'line-cap': 'round', 'line-join': 'round' }}
@@ -187,8 +177,8 @@ export default function App() {
                     <h3 className="text-lg font-extrabold leading-tight tracking-tight text-slate-900">{stop.name}</h3>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: `${STATUS_COLOR(stop.status)}22`, color: '#0f172a' }}>
-                      <span className="h-1.5 w-1.5 rounded-full" style={{ background: STATUS_COLOR(stop.status) }} />{stop.status}
+                    <span className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: `${statusColor(stop.status)}22`, color: '#0f172a' }}>
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusColor(stop.status) }} />{stop.status}
                     </span>
                     <button aria-label="Fermer" onClick={() => setHud(false)} className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:text-slate-900"><X size={13} /></button>
                   </div>
@@ -243,7 +233,7 @@ export default function App() {
           </section>
 
           <section className="grid grid-cols-3 gap-3">
-            {[['Distance', totalKm.toFixed(1).replace('.', ','), 'km'], ['Colis', parcels, 'livrés'], ['Remplissage', Math.round(ROUTES.reduce((a, r) => a + r.load, 0) / ROUTES.length), '%']].map(([l, v, u]) => (
+            {[['Distance', formatNumber(totalKm, 1), 'km'], ['Colis', parcels, 'livrés'], ['Remplissage', Math.round(ROUTES.reduce((a, r) => a + r.load, 0) / ROUTES.length), '%']].map(([l, v, u]) => (
               <div key={l} className="rounded-2xl bg-white p-3.5 shadow-sm">
                 <p className="text-[11px] font-light text-slate-400">{l}</p>
                 <p className="text-2xl font-black tracking-tight text-slate-900">{v}<span className="ml-1 text-xs font-light text-slate-400">{u}</span></p>
@@ -256,7 +246,7 @@ export default function App() {
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-muted-bg)] text-[var(--color-accent-blue)]"><Leaf size={22} /></div>
               <div>
-                <p className="text-3xl font-black tracking-tight">−{saved.toFixed(1).replace('.', ',')} <span className="text-sm font-light text-[var(--color-muted-text)]">kg de CO₂</span></p>
+                <p className="text-3xl font-black tracking-tight">−{formatNumber(saved, 1)} <span className="text-sm font-light text-[var(--color-muted-text)]">kg de CO₂</span></p>
                 <p className="mt-0.5 text-xs font-light text-slate-300">Par rapport à une tournée non optimisée, soit environ {Math.max(1, Math.round(saved / 112))} aller-retour Paris–Lyon en voiture évité.</p>
               </div>
             </div>
