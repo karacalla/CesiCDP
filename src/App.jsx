@@ -13,21 +13,6 @@ const MAPBOX_TOKEN = import.meta.env?.VITE_MAPBOX_TOKEN || 'YOUR_MAPBOX_TOKEN'
 const CO2_PER_KM = 0.29 // kg CO₂/km, facteur moyen simplifié
 const PAL = { pink: '#f471b5', indigo: '#818cf8', blue: '#3abdf8' }
 
-const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;800;900&display=swap');
-:root{--color-bg:#0f172a;--color-bg-dark:#0c1425;--color-bg-darker:#0a1120;--color-muted-bg:#1e293b;--color-muted-text:#6d7580;--color-accent-pink:#f471b5;--color-accent-indigo:#818cf8;--color-accent-blue:#3abdf8}
-.cdp *{font-family:Inter,system-ui,sans-serif}
-.no-scrollbar{scrollbar-width:none}.no-scrollbar::-webkit-scrollbar{display:none}
-.glass{background:rgba(15,23,42,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14)}
-.glass-light{background:rgba(255,255,255,.92);backdrop-filter:blur(18px);box-shadow:0 24px 50px -18px rgba(2,6,23,.6)}
-@keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.3);opacity:0}}
-.pulse-ring::after{content:'';position:absolute;inset:0;border-radius:9999px;border:1.5px solid var(--c);animation:ring 2.2s ease-out infinite}
-@keyframes sheen{0%{background-position:0 0}100%{background-position:200% 0}}
-.sheen{background-size:200% 100%;animation:sheen 4s linear infinite}
-.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-bottom-right{opacity:.3}
-@media (prefers-reduced-motion:reduce){.pulse-ring::after,.sheen{animation:none}}
-`
-
 // ---------- Données : vallée de Chamonix, coordonnées [lng, lat, altitude m] ----------
 const ROUTES = [
   { id: 'A', name: 'Camion 1 · Vallée nord', color: PAL.blue, date: '28 oct', start: '08:10', end: '09:42', km: 27.4, load: 92, from: 'Les Houches', to: 'Le Tour',
@@ -156,7 +141,6 @@ export default function App() {
 
   return (
     <div className="cdp flex min-h-screen items-center justify-center bg-[var(--color-bg-darker)] p-2 sm:p-4 lg:p-6">
-      <style>{CSS}</style>
       <main className="relative flex h-[920px] max-h-[calc(100vh-16px)] min-h-[640px] w-full max-w-[1536px] flex-col overflow-hidden rounded-[36px] border border-white/10 bg-[var(--color-bg)] shadow-2xl lg:flex-row">
 
         {/* ============ CARTE 3D ============ */}

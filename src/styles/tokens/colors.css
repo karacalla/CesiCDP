@@ -8,4 +8,14 @@
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
+
+  /* Palette CesiCDP */
+  --color-bg: #0f172a;
+  --color-bg-dark: #0c1425;
+  --color-bg-darker: #0a1120;
+  --color-muted-bg: #1e293b;
+  --color-muted-text: #6d7580;
+  --color-accent-pink: #f471b5;
+  --color-accent-indigo: #818cf8;
+  --color-accent-blue: #3abdf8;
 }
