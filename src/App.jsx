@@ -1,5 +1,5 @@
 // npm i react-map-gl@7 mapbox-gl framer-motion lucide-react
-// Tailwind CSS doit être actif. Ajoute VITE_MAPBOX_TOKEN=pk.xxx dans .env (ou remplace YOUR_MAPBOX_TOKEN).
+// Tailwind CSS doit être actif. Le token Mapbox se configure dans src/config.js.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Marker, Source, Layer } from 'react-map-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -8,11 +8,9 @@ import {
   Truck, Home, BarChart3, Route as RouteIcon, Star, SlidersHorizontal, Share2, Package,
   Search, Bell, MoreHorizontal, Plus, Minus, LocateFixed, RotateCw, Leaf, X,
 } from 'lucide-react'
+import { MAPBOX_TOKEN, CO2_PER_KM, NAIVE_ROUTE_OVERHEAD, CO2_PARIS_LYON_ROUND_TRIP } from './config'
 import { PAL, ROUTES, STOPS } from './data'
 import { routeToGeoJSON, elevationProfile, pointAt, formatNumber, statusColor } from './lib'
-
-const MAPBOX_TOKEN = import.meta.env?.VITE_MAPBOX_TOKEN || 'YOUR_MAPBOX_TOKEN'
-const CO2_PER_KM = 0.29 // kg CO₂/km, facteur moyen simplifié
 
 // ---------- Composants ----------
 function Pin({ s, color, active, onClick }) {
@@ -93,7 +91,7 @@ export default function App() {
   const route = ROUTES.find((r) => r.id === stop.route)
 
   const totalKm = ROUTES.reduce((a, r) => a + r.km, 0)
-  const saved = ROUTES.reduce((a, r) => a + r.km * 0.28 * CO2_PER_KM, 0) // tournée naïve ≈ +28 % de km
+  const saved = ROUTES.reduce((a, r) => a + r.km * NAIVE_ROUTE_OVERHEAD * CO2_PER_KM, 0)
   const parcels = STOPS.reduce((a, s) => a + s.parcels, 0)
 
   const select = (s) => {
@@ -247,7 +245,7 @@ export default function App() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-muted-bg)] text-[var(--color-accent-blue)]"><Leaf size={22} /></div>
               <div>
                 <p className="text-3xl font-black tracking-tight">−{formatNumber(saved, 1)} <span className="text-sm font-light text-[var(--color-muted-text)]">kg de CO₂</span></p>
-                <p className="mt-0.5 text-xs font-light text-slate-300">Par rapport à une tournée non optimisée, soit environ {Math.max(1, Math.round(saved / 112))} aller-retour Paris–Lyon en voiture évité.</p>
+                <p className="mt-0.5 text-xs font-light text-slate-300">Par rapport à une tournée non optimisée, soit environ {Math.max(1, Math.round(saved / CO2_PARIS_LYON_ROUND_TRIP))} aller-retour Paris–Lyon en voiture évité.</p>
               </div>
             </div>
           </section>
