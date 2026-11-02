@@ -1,4 +1,6 @@
 export { routeToGeoJSON } from './geo'
-export { elevationProfile, pointAt } from './elevation'
+export { elevationProfile, pointAt, PROFILE_W, PROFILE_H } from './elevation'
 export { formatNumber } from './format'
 export { statusColor } from './status'
+export { cx } from './cx'
+export { fleetStats } from './stats'

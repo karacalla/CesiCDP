@@ -1,0 +1,6 @@
+@reference "../../styles/index.css";
+
+.root { @apply relative h-[55%] w-full overflow-hidden lg:h-full lg:w-[62%]; }
+.shade { @apply pointer-events-none absolute inset-0 bg-gradient-to-t from-(--color-bg-darker)/70 via-transparent to-(--color-bg-darker)/60; }
+.arrival { @apply glass absolute bottom-6 left-6 z-10 flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/95; }
+.arrivalIcon { @apply text-white/80; }

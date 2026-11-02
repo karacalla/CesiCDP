@@ -1,0 +1,6 @@
+@reference "../../styles/index.css";
+
+.root { @apply relative flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300; }
+.active { @apply scale-110 border-white bg-white text-slate-900; }
+.idle { @apply border-white/40 bg-(--color-bg)/55 text-white hover:scale-110; }
+.ring { @apply absolute inset-0 rounded-full; }

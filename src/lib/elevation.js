@@ -1,8 +1,12 @@
+/** Dimensions (viewBox) du profil d'altitude. */
+export const PROFILE_W = 96
+export const PROFILE_H = 28
+
 /**
  * Profil d'altitude d'un tracé ([lng, lat, alt][]) mis à l'échelle d'une boîte w × h.
  * Renvoie le chemin SVG (`d`) et les points calculés (`pts`).
  */
-export const elevationProfile = (coords, w = 96, h = 28) => {
+export const elevationProfile = (coords, w = PROFILE_W, h = PROFILE_H) => {
   const alts = coords.map((c) => c[2])
   const min = Math.min(...alts)
   const max = Math.max(...alts)

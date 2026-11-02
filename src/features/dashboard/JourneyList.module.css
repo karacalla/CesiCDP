@@ -1,0 +1,6 @@
+@reference "../../styles/index.css";
+
+.root { @apply space-y-3 pb-2; }
+.head { @apply flex items-center justify-between; }
+.title { @apply text-base font-extrabold tracking-tight text-slate-900; }
+.count { @apply text-xs font-light text-slate-400; }

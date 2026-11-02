@@ -1,0 +1,4 @@
+@reference "../../../styles/index.css";
+
+.root { @apply rounded-2xl bg-white shadow-sm; }
+.padded { @apply p-3.5; }

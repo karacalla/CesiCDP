@@ -1,0 +1,3 @@
+@reference "../../styles/index.css";
+
+.root { @apply h-8 w-24 overflow-visible; }
