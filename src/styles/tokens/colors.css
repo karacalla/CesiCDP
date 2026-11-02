@@ -1,10 +1,6 @@
+/* Couleurs d'accent : communes aux thèmes clair et sombre.
+   Les couleurs de fond / texte dépendent du thème : voir themes/. */
 :root {
-  /* Palette CesiCDP */
-  --color-bg: #0f172a;
-  --color-bg-dark: #0c1425;
-  --color-bg-darker: #0a1120;
-  --color-muted-bg: #1e293b;
-  --color-muted-text: #6d7580;
   --color-accent-pink: #f471b5;
   --color-accent-indigo: #818cf8;
   --color-accent-blue: #3abdf8;

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @import "./tokens/index.css";
+@import "./themes/dark.css";
+@import "./themes/light.css";
 @import "./base/reset.css";
 @import "./base/global.css";
 @import "./utilities.css";
