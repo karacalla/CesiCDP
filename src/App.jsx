@@ -8,28 +8,11 @@ import {
   Truck, Home, BarChart3, Route as RouteIcon, Star, SlidersHorizontal, Share2, Package,
   Search, Bell, MoreHorizontal, Plus, Minus, LocateFixed, RotateCw, Leaf, X,
 } from 'lucide-react'
+import { PAL, ROUTES, STOPS } from './data'
 
 const MAPBOX_TOKEN = import.meta.env?.VITE_MAPBOX_TOKEN || 'YOUR_MAPBOX_TOKEN'
 const CO2_PER_KM = 0.29 // kg CO₂/km, facteur moyen simplifié
-const PAL = { pink: '#f471b5', indigo: '#818cf8', blue: '#3abdf8' }
 
-// ---------- Données : vallée de Chamonix, coordonnées [lng, lat, altitude m] ----------
-const ROUTES = [
-  { id: 'A', name: 'Camion 1 · Vallée nord', color: PAL.blue, date: '28 oct', start: '08:10', end: '09:42', km: 27.4, load: 92, from: 'Les Houches', to: 'Le Tour',
-    coords: [[6.7979,45.8908,1010],[6.8453,45.8987,1060],[6.8694,45.9237,1035],[6.8886,45.9503,1060],[6.9253,45.9806,1252],[6.9667,46.0056,1462]] },
-  { id: 'B', name: 'Camion 2 · Col des Montets', color: PAL.pink, date: '28 oct', start: '08:30', end: '09:25', km: 14.1, load: 78, from: 'Argentière', to: 'Vallorcine',
-    coords: [[6.9253,45.9806,1252],[6.9,46.0,1380],[6.9231,46.0211,1461],[6.9439,46.0344,1260]] },
-  { id: 'C', name: 'Camion 3 · Pays du Mont-Blanc', color: PAL.indigo, date: '27 oct', start: '14:05', end: '14:51', km: 12.6, load: 85, from: 'Saint-Gervais', to: 'Servoz',
-    coords: [[6.7114,45.8933,820],[6.733,45.91,900],[6.7667,45.9242,816]] },
-]
-const STOPS = [
-  { id: 's1', name: 'Chamonix centre', route: 'A', coord: [6.8694,45.9237], parcels: 24, status: 'À l’heure', eta: '08:52', win: '08:30–09:00', dist: '300 m', min: 3, t: 0.4 },
-  { id: 's2', name: 'Argentière', route: 'A', coord: [6.9253,45.9806], parcels: 11, status: 'En avance', eta: '09:14', win: '09:10–09:40', dist: '6,8 km', min: 14, t: 0.8 },
-  { id: 's3', name: 'Le Tour', route: 'A', coord: [6.9667,46.0056], parcels: 6, status: 'À l’heure', eta: '09:42', win: '09:30–10:00', dist: '10,1 km', min: 21, t: 1 },
-  { id: 's4', name: 'Vallorcine', route: 'B', coord: [6.9439,46.0344], parcels: 4, status: 'Retard 6 min', eta: '09:25', win: '09:00–09:20', dist: '14,1 km', min: 38, t: 1 },
-  { id: 's5', name: 'Saint-Gervais', route: 'C', coord: [6.7114,45.8933], parcels: 9, status: 'À l’heure', eta: '14:05', win: '14:00–14:20', dist: '0 m', min: 0, t: 0 },
-  { id: 's6', name: 'Servoz', route: 'C', coord: [6.7667,45.9242], parcels: 5, status: 'En avance', eta: '14:51', win: '14:45–15:15', dist: '12,6 km', min: 46, t: 1 },
-]
 const STATUS_COLOR = (s) => (s.startsWith('Retard') ? PAL.pink : s === 'En avance' ? PAL.blue : PAL.indigo)
 
 const geo = (r) => ({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: r.coords } })
