@@ -25,7 +25,7 @@ const CSS = `
 @keyframes sheen{0%{background-position:0 0}100%{background-position:200% 0}}
 .sheen{background-size:200% 100%;animation:sheen 4s linear infinite}
 .mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-bottom-right{opacity:.3}
-@media (prefers-reduced-motion:reduce){.pulse-ring::after,.sheen{animation:none}}
+@media (max-width:640px){.cdp{padding:.5rem}.cdp .app-shell{min-height:auto;border-radius:22px;max-height:none}.cdp .map-panel{height:440px;min-height:440px}.cdp .map-header{left:.75rem;right:.75rem;top:.75rem;gap:.5rem;align-items:flex-start}.cdp .map-brand{font-size:1.5rem}.cdp .map-nav{display:none}.cdp .map-meta{left:.75rem;top:4.8rem}.cdp .map-meta h2{font-size:1.45rem}.cdp .floating-hud{left:.75rem;right:.75rem;width:auto;bottom:4.5rem}.cdp .map-location-pill{left:.75rem;bottom:1rem;right:auto;max-width:calc(100% - 5.5rem)}.cdp .map-zoom{bottom:1rem;right:1rem}.cdp .dashboard-panel{height:auto;min-height:0;padding:1rem}.cdp .dashboard-header{flex-direction:column;align-items:stretch}.cdp .dashboard-controls{width:100%}.cdp .stats-grid{grid-template-columns:1fr}} @media (min-width:641px) and (max-width:1023px){.cdp .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}} @media (prefers-reduced-motion:reduce){.pulse-ring::after,.sheen{animation:none}}
 `
 
 // ---------- Données : vallée de Chamonix, coordonnées [lng, lat, altitude m] ----------
@@ -157,10 +157,10 @@ export default function App() {
   return (
     <div className="cdp flex min-h-screen items-center justify-center bg-[var(--color-bg-darker)] p-2 sm:p-4 lg:p-6">
       <style>{CSS}</style>
-      <main className="relative flex h-[920px] max-h-[calc(100vh-16px)] min-h-[640px] w-full max-w-[1536px] flex-col overflow-hidden rounded-[36px] border border-white/10 bg-[var(--color-bg)] shadow-2xl lg:flex-row">
+      <main className="app-shell relative flex h-[920px] max-h-[calc(100vh-16px)] min-h-[640px] w-full max-w-[1536px] flex-col overflow-hidden rounded-[36px] border border-white/10 bg-[var(--color-bg)] shadow-2xl lg:flex-row">
 
         {/* ============ CARTE 3D ============ */}
-        <section className="relative h-[55%] w-full overflow-hidden lg:h-full lg:w-[62%]">
+        <section className="map-panel relative h-[55%] w-full overflow-hidden lg:h-full lg:w-[62%]">
           <Map ref={mapRef} mapboxAccessToken={MAPBOX_TOKEN} mapStyle="mapbox://styles/mapbox/satellite-v9"
             initialViewState={{ longitude: 6.86, latitude: 45.94, zoom: 11.3, pitch: 65, bearing: -25 }} maxPitch={80}
             terrain={{ source: 'mapbox-dem', exaggeration: 1.6 }}
@@ -187,10 +187,10 @@ export default function App() {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-bg-darker)]/70 via-transparent to-[var(--color-bg-darker)]/60" />
 
           {/* Barre haute */}
-          <div className="absolute left-6 right-6 top-6 z-10 flex items-center justify-between">
+          <div className="map-header absolute left-6 right-6 top-6 z-10 flex items-center justify-between">
             <div className="flex items-center gap-5">
-              <span className="text-3xl font-semibold tracking-tight text-white">CesiCDP</span>
-              <nav aria-label="Navigation" className="glass flex items-center gap-1 rounded-full px-2 py-1.5">
+              <span className="map-brand text-3xl font-semibold tracking-tight text-white">CesiCDP</span>
+              <nav aria-label="Navigation" className="map-nav glass flex items-center gap-1 rounded-full px-2 py-1.5">
                 {[Home, BarChart3, Truck, RouteIcon, Star].map((I, i) => (
                   <button key={i} aria-label={['Accueil', 'Statistiques', 'Flotte', 'Tournées', 'Favoris'][i]}
                     className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${i === 0 ? 'bg-white text-slate-900' : 'text-white/80 hover:bg-white/10'}`}><I size={16} /></button>
@@ -204,7 +204,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="absolute left-6 top-[88px] z-10">
+          <div className="map-meta absolute left-6 top-[88px] z-10">
             <h2 className="text-2xl font-light tracking-tight text-white">Tournées du jour</h2>
             <p className="mt-0.5 text-xs font-light text-white/70">{ROUTES.length} camions · {STOPS.length} arrêts · {parcels} colis</p>
           </div>
@@ -213,7 +213,7 @@ export default function App() {
           <AnimatePresence mode="wait">
             {hud && (
               <motion.div key={stop.id} initial={{ opacity: 0, y: 16, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 240, damping: 24 }}
-                className="glass-light absolute bottom-20 left-6 z-20 w-[320px] rounded-3xl p-5 text-slate-800">
+                className="floating-hud glass-light absolute bottom-20 left-6 z-20 w-[320px] rounded-3xl p-5 text-slate-800">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-light text-slate-400">{route.name}</p>
@@ -242,10 +242,10 @@ export default function App() {
             )}
           </AnimatePresence>
 
-          <div className="glass absolute bottom-6 left-6 z-10 flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/95">
+          <div className="map-location-pill glass absolute bottom-6 left-6 z-10 flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/95">
             <LocateFixed size={14} className="text-white/80" />Arrivée à {stop.eta}
           </div>
-          <div className="absolute bottom-6 right-6 z-10 flex flex-col gap-2">
+          <div className="map-zoom absolute bottom-6 right-6 z-10 flex flex-col gap-2">
             {[[orbit ? 'Arrêter l’orbite' : 'Lancer l’orbite', RotateCw, toggleOrbit], ['Zoom avant', Plus, () => mapRef.current?.zoomIn()], ['Zoom arrière', Minus, () => mapRef.current?.zoomOut()]].map(([l, I, fn]) => (
               <button key={l} aria-label={l} onClick={fn} className={`glass flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/60 ${l.includes('orbite') && orbit ? 'text-[var(--color-accent-blue)]' : 'text-white/80'}`}><I size={16} /></button>
             ))}
@@ -253,9 +253,9 @@ export default function App() {
         </section>
 
         {/* ============ DASHBOARD ============ */}
-        <aside className="no-scrollbar relative z-30 flex h-[45%] w-full flex-col gap-5 overflow-y-auto bg-[#f1f3f5] p-6 text-slate-800 shadow-[-30px_0_60px_-20px_rgba(2,6,23,.55)] lg:-ml-10 lg:h-full lg:w-[42%] lg:rounded-l-[44px] lg:pl-14 lg:pr-8 lg:pt-8 md:p-8">
-          <header className="flex items-center gap-3">
-            <label className="relative flex-1">
+        <aside className="dashboard-panel no-scrollbar relative z-30 flex h-[45%] w-full flex-col gap-5 overflow-y-auto bg-[#f1f3f5] p-6 text-slate-800 shadow-[-30px_0_60px_-20px_rgba(2,6,23,.55)] lg:-ml-10 lg:h-full lg:w-[42%] lg:rounded-l-[44px] lg:pl-14 lg:pr-8 lg:pt-8 md:p-8">
+          <header className="dashboard-header flex items-center gap-3">
+            <label className="dashboard-controls relative flex-1">
               <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input placeholder="Rechercher un client ou une tournée" className="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-xs font-medium text-slate-800 shadow-sm outline-none focus:border-[var(--color-accent-indigo)] focus:ring-2 focus:ring-[var(--color-accent-indigo)]/30" />
             </label>
@@ -275,7 +275,7 @@ export default function App() {
             <div className="flex justify-center py-3"><TruckTopDown /></div>
           </section>
 
-          <section className="grid grid-cols-3 gap-3">
+          <section className="stats-grid grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[['Distance', totalKm.toFixed(1).replace('.', ','), 'km'], ['Colis', parcels, 'livrés'], ['Remplissage', Math.round(ROUTES.reduce((a, r) => a + r.load, 0) / ROUTES.length), '%']].map(([l, v, u]) => (
               <div key={l} className="rounded-2xl bg-white p-3.5 shadow-sm">
                 <p className="text-[11px] font-light text-slate-400">{l}</p>
