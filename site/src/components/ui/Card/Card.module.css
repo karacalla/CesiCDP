@@ -1,0 +1,3 @@
+@reference "../../../styles/index.css";
+
+.root { @apply rounded-2xl bg-white p-3.5 shadow-sm; }

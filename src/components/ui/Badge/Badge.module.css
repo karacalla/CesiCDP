@@ -1,9 +1,0 @@
-@reference "../../../styles/index.css";
-
-.root {
-  @apply absolute flex items-center justify-center rounded-full bg-accent-pink font-black text-slate-950;
-}
-
-.sm { @apply -right-1 -top-1 h-4 w-4 text-[10px]; }
-.sm.inset { @apply right-0.5 top-0.5; }
-.md { @apply -right-1.5 -top-1.5 h-5 min-w-5 px-1 text-[10px]; }

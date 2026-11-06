@@ -1,8 +1,0 @@
-/* Couleurs d'accent : communes aux thèmes clair et sombre.
-   `static` : variables toujours émises, même si aucune classe Tailwind ne les utilise.
-   Les couleurs de fond / texte dépendent du thème : voir themes/. */
-@theme static {
-  --color-accent-pink: #f471b5;
-  --color-accent-indigo: #818cf8;
-  --color-accent-blue: #3abdf8;
-}

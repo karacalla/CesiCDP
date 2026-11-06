@@ -9,6 +9,11 @@ lerna-debug.log*
 
 node_modules
 dist
+
+# Python
+.venv/
+__pycache__/
+.ipynb_checkpoints/
 dist-ssr
 *.local
 

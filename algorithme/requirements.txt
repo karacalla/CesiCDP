@@ -1,0 +1,11 @@
+# Bibliothèques Python utilisées (testé avec Python 3.13)
+# Installation : pip install -r requirements.txt
+#
+# recuit_simple.py et gen_carte.py n'utilisent AUCUNE bibliothèque externe.
+# Les bibliothèques ci-dessous servent au notebook et aux expériences.
+pandas==2.2.3        # tableaux de résultats dans le notebook
+matplotlib           # graphiques
+scipy                # tests statistiques (Wilcoxon, Spearman)
+pulp>=4.1            # modèle PLNE (partie 2 et 3)
+highspy              # solveur HiGHS utilisé par PuLP
+jupyter              # pour ouvrir le notebook

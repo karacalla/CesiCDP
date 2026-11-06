@@ -1,6 +1,0 @@
-@reference "../../styles/index.css";
-
-.head { @apply flex items-center justify-between; }
-.title { @apply text-2xl font-extrabold tracking-tight text-slate-900; }
-.pill { @apply mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-extrabold text-slate-950; }
-.truck { @apply flex justify-center py-3; }
