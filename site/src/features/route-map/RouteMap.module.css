@@ -1,4 +1,0 @@
-@reference "../../styles/index.css";
-
-.root { @apply relative h-[55%] w-full overflow-hidden lg:h-full lg:w-[62%]; }
-.shade { @apply pointer-events-none absolute inset-0 bg-gradient-to-t from-(--color-bg-darker)/50 via-transparent to-(--color-bg-darker)/60; }

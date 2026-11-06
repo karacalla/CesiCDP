@@ -1,5 +1,0 @@
-@reference "../../../styles/index.css";
-
-.label { @apply text-[11px] font-light text-slate-400; }
-.value { @apply text-2xl font-black tracking-tight text-slate-900; }
-.unit { @apply ml-1 text-xs font-light text-slate-400; }

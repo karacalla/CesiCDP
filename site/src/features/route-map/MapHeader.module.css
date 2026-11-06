@@ -1,7 +1,0 @@
-@reference "../../styles/index.css";
-
-.bar { @apply pointer-events-none absolute left-6 right-6 top-6 z-10 flex items-center justify-between; }
-.brand { @apply text-3xl font-semibold tracking-tight text-white; }
-.title { @apply pointer-events-none absolute left-6 top-[72px] z-10; }
-.heading { @apply text-2xl font-light tracking-tight text-white; }
-.subtitle { @apply mt-0.5 text-xs font-light text-white/70; }

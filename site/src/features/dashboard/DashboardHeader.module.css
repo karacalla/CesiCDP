@@ -1,5 +1,0 @@
-@reference "../../styles/index.css";
-
-.root { @apply flex items-start gap-2.5 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs leading-relaxed text-slate-600 shadow-sm; }
-.icon { @apply mt-0.5 shrink-0 text-accent-indigo; }
-.code { @apply rounded bg-slate-100 px-1 font-mono text-[11px] text-slate-800; }

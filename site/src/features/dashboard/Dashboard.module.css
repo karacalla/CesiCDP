@@ -1,6 +1,0 @@
-@reference "../../styles/index.css";
-
-.root {
-  @apply relative z-30 flex h-[45%] w-full flex-col gap-5 overflow-y-auto bg-[#f1f3f5] p-6 text-slate-800 shadow-[-30px_0_60px_-20px_rgba(2,6,23,.55)];
-  @apply md:p-8 lg:-ml-10 lg:h-full lg:w-[42%] lg:rounded-l-[44px] lg:pl-14 lg:pr-8 lg:pt-8;
-}

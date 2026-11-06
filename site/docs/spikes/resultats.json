@@ -1,0 +1,124 @@
+{
+  "S1": {
+    "spike": "S1",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "visibleVertices": 60,
+    "hitsZ0": 0,
+    "hitsQueriedZ": 60,
+    "elevationMinM": 919,
+    "elevationMaxM": 1246,
+    "exaggeration": 1.4
+  },
+  "S2-gpu-1000": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "gpu",
+    "n": 1000,
+    "fps": 59.6,
+    "p95FrameMs": 20.1
+  },
+  "S2-gpu-5000": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "gpu",
+    "n": 5000,
+    "fps": 60,
+    "p95FrameMs": 21.2
+  },
+  "S2-native-1000": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "native",
+    "n": 1000,
+    "fps": 59.8,
+    "p95FrameMs": 21.9
+  },
+  "S2-native-5000": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "native",
+    "n": 5000,
+    "fps": 60,
+    "p95FrameMs": 22.7
+  },
+  "S2-dom-1000": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "dom",
+    "n": 1000,
+    "fps": 1,
+    "p95FrameMs": 2266.6
+  },
+  "S2-dom-40": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "dom",
+    "n": 40,
+    "fps": 10,
+    "p95FrameMs": 116.7
+  },
+  "S3": {
+    "spike": "S3",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "svgElements": 3453,
+    "mountMs": 116,
+    "hover": {
+      "commits": 300,
+      "p95Ms": 1.5,
+      "maxMs": 3.5
+    },
+    "zoomReactRerender": {
+      "commits": 20,
+      "p95Ms": 84.6,
+      "maxMs": 84.6,
+      "p95FrameMs": 166.6,
+      "maxFrameMs": 166.6
+    },
+    "zoomSvgTransform": {
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 16.8
+    },
+    "longTasksOver50ms": 16,
+    "longestTaskMs": 162
+  },
+  "S2-dom-1": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "dom",
+    "n": 1,
+    "fps": 49.8,
+    "p95FrameMs": 33.4
+  },
+  "S2-dom-plain-40": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "dom",
+    "n": 40,
+    "fps": 11.2,
+    "p95FrameMs": 116.7
+  },
+  "S2-dom-plain-1000": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "dom",
+    "n": 1000,
+    "fps": 1,
+    "p95FrameMs": 1816.6
+  },
+  "S2-overlay-1": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "overlay",
+    "n": 1,
+    "fps": 60.2,
+    "p95FrameMs": 16.7
+  },
+  "S2-overlay-40": {
+    "spike": "S2",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "mode": "overlay",
+    "n": 40,
+    "fps": 58,
+    "p95FrameMs": 16.8
+  }
+}

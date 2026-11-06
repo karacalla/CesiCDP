@@ -1,4 +1,0 @@
-@reference "../../styles/index.css";
-
-.root { @apply relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-accent-pink bg-white text-slate-900 shadow-lg; }
-.ring { @apply absolute inset-0 rounded-full; }

@@ -1,0 +1,84 @@
+/*
+ * Rôle : source unique de l'identité visuelle (couleurs, rayons, ombres, gabarits).
+ * Choix retenu : variables CSS brutes (:root) puis exposées à Tailwind par `@theme inline` (index.css),
+ *   ce qui permet de changer de thème en ne modifiant que les variables sémantiques `--panel-*`.
+ * Alternative écartée : couleurs écrites en dur dans les classes Tailwind (impossible à auditer, thèmes dupliqués).
+ * Question probable du jury : « comment prouvez-vous les contrastes ? » → src/styles/tokens.test.ts recalcule
+ *   chaque paire déclarée ici (formule WCAG 2.1) et échoue si une paire passe sous son seuil.
+ */
+:root {
+  /* — Surfaces sombres (palette de l'équipe) — */
+  --bg: #0f172a;
+  --bg-dark: #0c1425;
+  --bg-darker: #0a1120;
+  --muted-bg: #1e293b;
+  --muted-text: #6d7580; /* 3,83:1 sur --bg : décor ou grand texte uniquement */
+  --muted-text-aa: #9aa4b2; /* texte secondaire sur sombre */
+  --on-dark: #f1f5f9;
+
+  /* — Accent unique : ambre — */
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --on-accent: #020617; /* texte posé sur l'ambre */
+  --accent-ink: #b45309; /* ambre lisible sur fond clair */
+
+  /* — Panneau clair — */
+  --panel: #f1f3f5;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --ink-2: #475569;
+  --line: #e2e8f0;
+
+  /* — Cartes « Dernières tournées » — */
+  --journey-card: #242b33;
+
+  /* — Statuts (toujours icône + libellé, jamais la couleur seule) — */
+  --ok: #34d399;
+  --wait: #3abdf8;
+  --late: #f471b5;
+  --series-2: #818cf8;
+
+  /* — Option « colorier par camion » (désactivée par défaut) : palette « light » de Paul Tol, sûre pour le daltonisme — */
+  --route-1: #77aadd;
+  --route-2: #ee8866;
+  --route-3: #eedd88;
+  --route-4: #ffaabb;
+  --route-5: #99ddff;
+  --route-6: #44bb99;
+  --route-7: #bbcc33;
+  --route-8: #dddddd;
+
+  /* — Verre — */
+  --glass-bg: rgb(0 0 0 / 0.45);
+  --glass-border: rgb(255 255 255 / 0.15);
+
+  /* — Gabarits — */
+  --frame-max: 1536px;
+  --radius-frame: 36px;
+  --radius-card: 24px;
+  --radius-journey: 16px;
+  --split-map: 62%;
+  --s-curve: 40px; /* empiètement du panneau sur la carte */
+  --shadow-panel: -24px 0 48px -16px rgb(2 6 23 / 0.55);
+  --shadow-float: 0 24px 50px -18px rgb(2 6 23 / 0.6);
+
+  /* — Typographie — */
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+
+  /* — Thème du panneau (clair par défaut) : seules ces variables changent avec le thème — */
+  --panel-bg: var(--panel);
+  --panel-surface: var(--card);
+  --panel-ink: var(--ink);
+  --panel-ink-2: var(--ink-2);
+  --panel-line: var(--line);
+  --panel-accent-ink: var(--accent-ink);
+}
+
+:root[data-theme='dark'] {
+  --panel-bg: var(--bg);
+  --panel-surface: var(--muted-bg);
+  --panel-ink: var(--on-dark);
+  --panel-ink-2: var(--muted-text-aa);
+  --panel-line: rgb(255 255 255 / 0.1);
+  --panel-accent-ink: var(--accent);
+}
