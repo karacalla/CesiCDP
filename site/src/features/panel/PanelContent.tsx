@@ -18,8 +18,8 @@ export function PanelContent() {
     <>
       <PanelHeader />
       <div>
-        <p className="text-sm font-light text-panel-ink-2">{fr.viewIntro[view]}</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-panel-ink">{fr.views[view]}</h1>
+        <p className="hidden text-sm font-light text-panel-ink-2 lg:block">{fr.viewIntro[view]}</p>
+        <h1 className="text-2xl lg:mt-1 lg:text-3xl font-semibold tracking-tight text-panel-ink">{fr.views[view]}</h1>
       </div>
       {view === 'tours' ? (
         <ToursView />

@@ -44,11 +44,11 @@ export function PanelTruck({ vehicleId, returnAt, className = '' }: { vehicleId:
       {createPortal(
         <div ref={layer} hidden aria-hidden className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
           <svg className="absolute inset-0 h-full w-full">
-            <path ref={path} fill="none" stroke="rgb(245 158 11 / 0.6)" strokeWidth={2} strokeDasharray="2 9" strokeLinecap="round" opacity={0} />
+            <path ref={path} fill="none" stroke="rgb(244 113 181 / 0.6)" strokeWidth={2} strokeDasharray="2 9" strokeLinecap="round" opacity={0} />
           </svg>
           <div ref={mover} className="absolute left-0 top-0 origin-center">
             {/* lueur des phares (avant du camion, à droite du dessin) */}
-            <span className="absolute right-[-14%] top-1/2 h-[70%] w-[30%] -translate-y-1/2 rounded-full [background:radial-gradient(closest-side,rgb(251_191_36/0.55),transparent)]" />
+            <span className="absolute right-[-14%] top-1/2 h-[70%] w-[30%] -translate-y-1/2 rounded-full [background:radial-gradient(closest-side,rgb(249_168_212/0.55),transparent)]" />
             <TruckShowcase vehicleId={id} decorative />
           </div>
         </div>,

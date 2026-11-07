@@ -81,7 +81,7 @@ export function MapStage({ children }: { children?: ReactNode }) {
         {ready && <GlobeDirector />}
       </Map>
       {/* globe « éclairé par un soleil » en haut à gauche : halo chaud et ombre portée vers le bas à droite (statique) */}
-      <div aria-hidden className={`pointer-events-none absolute inset-0 transition-opacity duration-700 [background:radial-gradient(42%_38%_at_8%_6%,rgb(251_191_36/0.12),transparent_70%),radial-gradient(70%_70%_at_78%_82%,rgb(2_6_23/0.55),transparent_70%)] ${phase === 'routes' ? 'opacity-0' : 'opacity-100'}`} />
+      <div aria-hidden className={`pointer-events-none absolute inset-0 transition-opacity duration-700 [background:radial-gradient(42%_38%_at_8%_6%,rgb(249_168_212/0.12),transparent_70%),radial-gradient(70%_70%_at_78%_82%,rgb(2_6_23/0.55),transparent_70%)] ${phase === 'routes' ? 'opacity-0' : 'opacity-100'}`} />
       {/* décor (ignoré par les technologies d'assistance) : nappes de nuages aux bords, voile haut, vignette forte */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(40%_28%_at_0%_8%,rgb(226_232_240/0.16),transparent_70%),radial-gradient(34%_24%_at_100%_96%,rgb(226_232_240/0.12),transparent_70%),radial-gradient(28%_20%_at_92%_0%,rgb(226_232_240/0.10),transparent_70%)] [filter:blur(18px)]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-transparent via-35% to-black/40" />

@@ -23,7 +23,7 @@ export function PanelHeader() {
         <AlertsButton />
         <SettingsButton
           extra={
-            <button type="button" onClick={() => emitCameo('replay')} className="inline-flex h-9 items-center gap-2 self-start rounded-full border border-panel-line px-3 text-sm font-semibold text-panel-ink hover:border-panel-ink-2">
+            <button type="button" onClick={() => emitCameo('replay')} className="inline-flex h-9 items-center gap-2 self-start whitespace-nowrap rounded-full border border-panel-line px-3 text-sm font-semibold text-panel-ink hover:border-panel-ink-2">
               <RotateCcw size={16} aria-hidden /> {fr.cameo.replay}
             </button>
           }

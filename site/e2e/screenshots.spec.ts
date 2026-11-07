@@ -10,7 +10,7 @@ const WIDTHS = [1280, 768] as const
 const THEMES = ['light', 'dark'] as const
 /** Vue → libellé du bouton de l'îlot de navigation. */
 const VIEWS: Array<{ name: string; nav: string | null }> = [
-  { name: 'donnees', nav: null },
+  { name: 'donnees', nav: 'Données' },
   { name: 'contraintes', nav: 'Contraintes' },
   { name: 'calcul', nav: 'Calcul' },
   { name: 'tournees-accueil', nav: 'Tournées' },

@@ -16,11 +16,11 @@
   --muted-text-aa: #9aa4b2; /* texte secondaire sur sombre */
   --on-dark: #f1f5f9;
 
-  /* — Accent unique : ambre — */
-  --accent: #f59e0b;
-  --accent-hover: #fbbf24;
-  --on-accent: #020617; /* texte posé sur l'ambre */
-  --accent-ink: #b45309; /* ambre lisible sur fond clair */
+  /* — Accent de marque : rose (palette de l'équipe, ADR-023) — sélection, trajet parcouru, action principale — */
+  --accent: #f471b5;
+  --accent-hover: #f9a8d4;
+  --on-accent: #020617; /* texte posé sur le rose (7,57:1) */
+  --accent-ink: #be185d; /* rose lisible sur fond clair (6,0:1 sur blanc) */
 
   /* — Panneau clair — */
   --panel: #f1f3f5;
@@ -34,11 +34,11 @@
 
   /* — Statuts (toujours icône + libellé, jamais la couleur seule) — */
   --ok: #34d399;
-  --wait: #3abdf8;
-  --late: #f471b5;
+  --wait: #3abdf8; /* bleu de la palette */
+  --late: #818cf8; /* indigo de la palette (le rose est désormais la marque) */
   --series-2: #818cf8;
   /* Variantes lisibles sur fond clair (texte et bordures d'état du panneau) */
-  --late-ink: #be185d;
+  --late-ink: #4f46e5;
   --ok-ink: #047857;
   --wait-ink: #0369a1;
 
@@ -57,7 +57,7 @@
   --glass-map-border: rgb(255 255 255 / 0.15);
 
   /* — Bulle de verre du panneau (ADR-019), thème clair. Opacité MINIMALE pour que tout texte du panneau
-       (encre, encre secondaire, encres d'état, ambre lisible) garde ≥ 4,5:1 sur un fond blanc pur ET noir pur :
+       (encre, encre secondaire, encres d'état, rose lisible) garde ≥ 4,5:1 sur un fond blanc pur ET noir pur :
        calculée et vérifiée par tokens.test.ts. Le liseré extérieur (rim), plus transparent, ne porte aucun texte. — */
   --glass-bg: rgb(255 255 255 / 0.96);
   --glass-rim: rgb(241 243 245 / 0.38);
@@ -75,7 +75,7 @@
   --shadow-float: 0 24px 50px -18px rgb(2 6 23 / 0.6);
 
   /* — Fond d'espace de la scène d'ouverture (statique, jamais animé) : halo solaire en haut à gauche, étoiles — */
-  --space: radial-gradient(38% 34% at 6% 4%, rgb(251 191 36 / 0.16), transparent 70%),
+  --space: radial-gradient(38% 34% at 6% 4%, rgb(244 113 181 / 0.14), transparent 70%),
     radial-gradient(1px 1px at 12% 22%, rgb(255 255 255 / 0.55), transparent 100%),
     radial-gradient(1px 1px at 27% 68%, rgb(255 255 255 / 0.4), transparent 100%),
     radial-gradient(1.5px 1.5px at 41% 12%, rgb(255 255 255 / 0.5), transparent 100%),
@@ -86,6 +86,10 @@
     radial-gradient(1px 1px at 7% 88%, rgb(255 255 255 / 0.35), transparent 100%),
     radial-gradient(1px 1px at 48% 46%, rgb(255 255 255 / 0.3), transparent 100%),
     radial-gradient(1px 1px at 74% 6%, rgb(255 255 255 / 0.4), transparent 100%);
+
+  /* — Barre de défilement : discrète au repos, couleur de marque au survol — */
+  --scrollbar-thumb: rgb(71 85 105 / 0.45);
+  --scrollbar-thumb-hover: var(--accent-ink);
 
   /* — Typographie — */
   --font-sans: 'Inter Variable', system-ui, sans-serif;
@@ -103,10 +107,12 @@
   --panel-wait: var(--wait-ink);
   /* Séries des graphiques (validées par dataviz/validate_palette.js : clair sur #ffffff, sombre sur #0f172a et #1e293b) */
   --chart-1: #4f46e5;
-  --chart-2: #b45309;
+  --chart-2: #be185d;
 }
 
 :root[data-theme='dark'] {
+  --scrollbar-thumb: rgb(154 164 178 / 0.35);
+  --scrollbar-thumb-hover: var(--accent);
   --glass-bg: rgb(15 23 42 / 0.88);
   --glass-rim: rgb(15 23 42 / 0.32);
   --glass-border: rgb(255 255 255 / 0.14);
@@ -121,7 +127,7 @@
   --panel-ok: var(--ok);
   --panel-wait: var(--wait);
   --chart-1: #6366f1;
-  --chart-2: #d97706;
+  --chart-2: #ec4899;
 }
 
 /* Replis opaques : transparence réduite demandée par le système, ou navigateur sans backdrop-filter */

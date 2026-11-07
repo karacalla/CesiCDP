@@ -2,7 +2,7 @@
  * Rôle : l'action principale en UN clic : « Calculer les tournées », avec ce qu'il faut savoir avant (instance,
  *   contraintes actives, ce que l'algorithme ne prend pas en compte) et la progression sur place. Les réglages fins
  *   restent dans la vue Calcul (« Réglages avancés »).
- * Effet visuel unique de l'application : bordure lumineuse ambre pendant le calcul (Magic UI, ADR-015), absente si
+ * Effet visuel unique de l'application : bordure lumineuse rose pendant le calcul (Magic UI, ADR-015), absente si
  *   l'utilisateur demande moins d'animations.
  */
 import { AlertTriangle, Loader2, Play, RotateCcw, Square } from 'lucide-react'
@@ -35,7 +35,7 @@ export function RunHero({ instance, compact }: { instance: Instance; compact: bo
 
   return (
     <section aria-labelledby="run-hero-title" className="relative flex flex-col gap-3 overflow-hidden rounded-card bg-panel-surface p-5 shadow-[0_18px_40px_-28px_rgb(2_6_23/0.5)]">
-      {running && !reduced && <BorderBeam size={90} duration={5} borderWidth={2} colorFrom="#f59e0b" colorTo="#fbbf24" />}
+      {running && !reduced && <BorderBeam size={90} duration={5} borderWidth={2} colorFrom="#f471b5" colorTo="#f9a8d4" />}
       {!compact && (
         <>
           <p className="text-sm font-light text-panel-ink-2">{fr.tours.empty} · {fr.tours.ready.toLowerCase()}</p>
@@ -58,7 +58,7 @@ export function RunHero({ instance, compact }: { instance: Instance; compact: bo
             <Square size={16} aria-hidden /> {fr.run.cancel}
           </button>
         ) : (
-          <button type="button" onClick={() => start(instance)} className="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-5 text-sm font-semibold text-on-accent shadow-[0_10px_24px_-12px_rgb(245_158_11/0.9)] hover:bg-accent-hover">
+          <button type="button" onClick={() => start(instance)} className="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-5 text-sm font-semibold text-on-accent shadow-[0_10px_24px_-12px_rgb(244_113_181/0.9)] hover:bg-accent-hover">
             <Play size={16} aria-hidden className="fill-on-accent" /> {compact ? fr.tours.recompute : fr.tours.cta}
           </button>
         )}

@@ -215,6 +215,12 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : (b). Déclencheurs dans `config/cameo.ts` : T1 changement de camion, T2/T3 début/fin de simulation (évènements prêts, câblés en P5), T4 première apparition des tournées, T5 passage de démonstration après 120 s d'inactivité, au plus 1 par 10 min, jamais pendant un calcul. Machine d'états pure, testée avec une horloge simulée ; file d'attente (jamais deux animations) ; `will-change` seulement pendant l'animation ; rien si l'onglet est caché. Réglage « Animations : complètes / réduites / aucune ».
 - **Conséquence** : effet n° 3 du budget (§3 bis : BorderBeam, globe, camion). L'information « Camion N · en tournée » reste dans le DOM en permanence ; la couche animée est `aria-hidden`.
 
+### ADR-023 — Palette de l'équipe : le rose devient l'accent de marque (remplace l'ambre)
+- **Contexte** : demande du propriétaire (07/11/2026) : utiliser la palette de l'équipe : fonds `#0f172a` / `#0c1425` / `#0a1120`, surface `#1e293b`, texte atténué `#6d7580`, accents rose `#f471b5`, indigo `#818cf8`, bleu `#3abdf8`. Aucune teinte ambre. Le rose servait au statut « retard », le bleu à « attente ».
+- **Options** : accent principal (a) indigo, (b) rose, (c) bleu ; thème clair conservé ou supprimé.
+- **Choix (propriétaire)** : **(b) rose** pour la marque, la sélection, le trajet parcouru, l'action principale, les pins, le focus ; **thème clair conservé**, avec pour le texte sur fond clair une version plus foncée de la même teinte (`--accent-ink` `#be185d`, 6,04:1 sur blanc).
+- **Conséquences** : le statut « retard » passe à l'**indigo** (`#818cf8` sur sombre, 5,98:1 ; `#4f46e5` sur clair, 6,29:1) pour qu'un camion sélectionné ne ressemble jamais à un retard ; « attente » reste bleu, « à l'heure » reste vert (hors palette, sens universel). Indigo et bleu sont proches sur fond sombre (ΔE 13,5, script dataviz) : sans gravité car l'attente est toujours hachurée, le retard toujours marqué ▼ et libellé. Graphiques : indigo + rose (`#4f46e5` / `#be185d` en clair, `#6366f1` / `#ec4899` en sombre), validés par le script dataviz dans les deux thèmes. Halo du fond d'espace, anneaux et arcs du globe, feux du camion, lueur des phares, bordure lumineuse du calcul : rose. Tous les contrastes (dont le verre composé sur blanc et noir) restent vérifiés par `tokens.test.ts` (54 tests).
+
 ## 5. Essais techniques S1–S5
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
@@ -315,7 +321,7 @@ La typographie reste **Inter** (CLAUDE.md §4 l'autorise ; une police plus arron
 
 ### 6.2 Jetons
 
-Principe : un seul accent (ambre), du noir/navy et du blanc ; la couleur porte un sens, jamais un décor. Source unique : `src/styles/tokens.css`, exposée à Tailwind par `@theme inline` (`src/styles/index.css`). Le thème ne change que les variables `--panel-*` ; la carte reste sombre.
+Principe : un seul accent de marque (rose `#f471b5`, ADR-023 ; ambre jusqu'au 07/11/2026), du noir/navy et du blanc ; la couleur porte un sens, jamais un décor. Source unique : `src/styles/tokens.css`, exposée à Tailwind par `@theme inline` (`src/styles/index.css`). Le thème ne change que les variables `--panel-*` ; la carte reste sombre.
 
 Ratios recalculés par `src/lib/contrast.ts` (formule WCAG 2.1) et vérifiés par `src/styles/tokens.test.ts` à chaque `npm test` :
 
@@ -327,15 +333,16 @@ Ratios recalculés par `src/lib/contrast.ts` (formule WCAG 2.1) et vérifiés pa
 | `--on-dark` / `--bg` | 16,30 | texte principal sombre | ✓ |
 | `--on-dark` / `--journey-card` | 13,05 | cartes de tournée | ✓ |
 | `--muted-text-aa` / `--journey-card` | 5,67 | secondaire des cartes de tournée | ✓ |
-| `--on-accent` / `--accent` | 9,39 | texte sur ambre | ✓ |
-| `--accent-ink` / `--card` | 5,02 | ambre lisible sur blanc | ✓ |
-| `--accent-ink` / `--panel` | 4,51 | ambre lisible sur panneau (limite) | ✓ |
-| `--accent` / `--card` | 2,15 | interdit en texte sur clair | ✗ |
+| `--on-accent` / `--accent` | 7,57 | texte sur le rose | ✓ |
+| `--accent-ink` / `--card` | 6,04 | rose lisible sur blanc | ✓ |
+| `--accent-ink` / `--panel` | 5,43 | rose lisible sur panneau | ✓ |
+| `--accent` / `--card` | 2,67 | interdit en texte sur clair | ✗ |
 | `--ink` / `--panel` | 16,05 | texte principal clair | ✓ |
 | `--ink-2` / `--panel` | 6,81 | texte secondaire clair | ✓ |
 | `--ink-2` / `--card` | 7,58 | secondaire des cartes | ✓ |
-| `--accent` / `--bg` | 8,31 | ambre sur sombre | ✓ |
-| `--ok` / `--wait` / `--late` sur `--bg` | 9,29 / 8,34 / 6,70 | statuts (toujours icône + libellé) | ✓ |
+| `--accent` / `--bg` · `--muted-bg` · `--bg-darker` | 6,70 · 5,49 · 7,07 | rose sur sombre, tracé actif sur la carte | ✓ |
+| `--ok` / `--wait` / `--late` sur `--bg` | 9,29 / 8,34 / 5,98 | statuts (toujours icône + libellé) ; retard = indigo | ✓ |
+| `--late` / `--muted-bg` · `--late-ink` / `--card` · `--panel` | 4,90 · 6,29 · 5,65 | retard (indigo) sur surface sombre et sur clair | ✓ |
 | `--series-2` / `--bg` | 5,98 | seconde série des graphiques | ✓ |
 
 Autres jetons : rayons (`--radius-frame` 36 px, `--radius-card` 24 px, `--radius-journey` 16 px), gabarit (`--frame-max` 1536 px, `--split-map` 62 %, `--s-curve` 40 px), verre (`--glass-bg` noir 45 %, `--glass-border` blanc 15 %, flou 24 px), palette optionnelle « colorier par camion » `--route-1…8` (schéma « light » de Paul Tol, conçu pour les daltonismes ; désactivée par défaut). Typographie : Inter Variable auto-hébergée (`@fontsource-variable/inter`), taille minimale 12 px, vérifiée par un test qui refuse toute taille inférieure dans `src/`.

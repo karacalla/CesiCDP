@@ -1,7 +1,7 @@
 /**
  * Rôle : tracés sur la carte, en couches natives drapées sur le relief (ADR-003).
  *   - autres camions : blanc 45 %, fins ;
- *   - camion sélectionné, deux états : PARCOURU = ambre plein épais ; À VENIR = blanc pointillé posé sur un
+ *   - camion sélectionné, deux états : PARCOURU = rose plein épais ; À VENIR = blanc pointillé posé sur un
  *     contour sombre plus large (effet « route »).
  * Recadrage « drone » à la sélection : inclinaison 20°, carte tournée pour que le trajet monte vers le haut.
  */
@@ -89,7 +89,7 @@ export function RoutesLayer() {
         <Layer id="cdp-route-todo" type="line" beforeId={before} layout={{ 'line-cap': 'butt', 'line-join': 'round' }} paint={{ 'line-color': '#ffffff', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2, 13, 3.5], 'line-dasharray': [1.5, 1.6] }} />
       </Source>
       <Source id="cdp-route-done" type="geojson" data={done}>
-        <Layer id="cdp-route-done" type="line" beforeId={before} layout={{ 'line-cap': 'round', 'line-join': 'round' }} paint={{ 'line-color': '#f59e0b', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4, 13, 7] }} />
+        <Layer id="cdp-route-done" type="line" beforeId={before} layout={{ 'line-cap': 'round', 'line-join': 'round' }} paint={{ 'line-color': '#f471b5', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4, 13, 7] }} />
       </Source>
     </>
   )

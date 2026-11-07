@@ -33,7 +33,7 @@ export function GlobeControls() {
             </button>
           )}
           <p className="glass inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm text-on-dark">
-            <span aria-hidden className="size-2 rounded-full bg-accent shadow-[0_0_0_3px_rgb(245_158_11/0.25)]" />
+            <span aria-hidden className="size-2 rounded-full bg-accent shadow-[0_0_0_3px_rgb(244_113_181/0.25)]" />
             {fr.globe.legend}
           </p>
         </div>

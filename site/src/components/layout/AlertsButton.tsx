@@ -1,6 +1,6 @@
 /**
  * Rôle : cloche d'alertes : regroupe les points d'attention (FIFO, contraintes non prises en compte, retards,
- *   lignes écartées à l'import). Pastille ambre = nombre d'alertes ; panneau refermable par Échap.
+ *   lignes écartées à l'import). Pastille rose = nombre d'alertes ; panneau refermable par Échap.
  */
 import { useEffect, useId, useRef, useState } from 'react'
 import { Bell } from 'lucide-react'

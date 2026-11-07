@@ -57,7 +57,7 @@ export function ShareDialog({ vehicleId, open, onOpenChange }: Props) {
               <X size={18} aria-hidden />
             </Dialog.Close>
           </div>
-          {simulated && <p className="rounded-xl bg-panel-surface px-3 py-2 text-xs text-panel-ink">{fr.share.simulated}</p>}
+          {simulated && <p className="rounded-xl border border-panel-line bg-panel-surface px-3 py-2 text-xs text-panel-ink">{fr.share.simulated}</p>}
 
           <section aria-labelledby="share-sheet" className="flex flex-col gap-2">
             <h3 id="share-sheet" className="text-sm font-semibold">{fr.share.sheetHeading}</h3>

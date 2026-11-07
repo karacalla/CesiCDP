@@ -112,7 +112,8 @@ site/
 - **Import de MapLibre** : `import * as maplibregl from 'maplibre-gl'` (pas d'export par défaut dans les types).
 - **Vite garde l'ancienne version d'une dépendance en cache** après un changement de version : arrêter le serveur sur :5199 et relancer avec `--force`.
 - **Git Bash convertit `/chemin` en `C:/Program Files/Git/chemin`** dans les arguments : préfixer par `MSYS_NO_PATHCONV=1`.
-- Ambre `--accent` **jamais en texte sur fond clair** (2,15:1) : utiliser `--accent-ink` / `text-panel-accent-ink`.
+- Rose `--accent` (marque, ADR-023) **jamais en texte sur fond clair** (2,67:1) : utiliser `--accent-ink` / `text-panel-accent-ink`. Retard = indigo (`--late`), jamais le rose. Aucune couleur écrite en dur hors des couches de carte et des effets (et alors : `#f471b5`).
+- **Barre de défilement** : jetons `--scrollbar-thumb(-hover)` par thème ; pseudo-éléments WebKit + `scrollbar-color` pour Firefox (index.css). Les captures Playwright masquent les barres (`--hide-scrollbars`) : pour les voir, `ignoreDefaultArgs: ['--hide-scrollbars']`.
 - Pas de `Math.random()` dans les données : `mulberry32(graine)`.
 - **Jeton non exposé = classe silencieusement ignorée** : `text-ink` n'existe que si `--color-ink` est dans `@theme inline` (index.css).
 - **Tailwind, `calc` en valeur arbitraire** : espaces en `_` (`right-[calc(38%_-_var(--s-curve))]`).

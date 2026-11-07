@@ -22,7 +22,7 @@ export function useChartColors(): ChartColors {
     const v = (name: string, fallback: string): string => cs.getPropertyValue(name).trim() || fallback
     return {
       series1: v('--chart-1', '#4f46e5'),
-      series2: v('--chart-2', '#b45309'),
+      series2: v('--chart-2', '#be185d'),
       ink: v('--panel-ink', '#0f172a'),
       ink2: v('--panel-ink-2', '#475569'),
       grid: v('--panel-line', '#e2e8f0'),

@@ -1,6 +1,6 @@
 /**
  * Rôle : planning de la journée (Gantt) : une ligne par camion, fenêtres, attente hachurée, service, retard
- *   signalé par un triangle, heure affichée sur la carte en trait ambre. Survol → info-bulle ; clic → arrêt sélectionné.
+ *   signalé par un triangle, heure affichée sur la carte en trait rose. Survol → info-bulle ; clic → arrêt sélectionné.
  * Choix retenu : SVG maison + d3-scale (ADR-005) ; zoom/déplacement par `transform` pendant le geste.
  * Alternative écartée : Recharts (pas de Gantt), bibliothèque de Gantt (dépendance lourde, style imposé).
  * Question probable du jury : « et l'accessibilité d'un graphique ? » → résumé textuel (`aria-describedby`) et

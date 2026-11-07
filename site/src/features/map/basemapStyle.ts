@@ -3,7 +3,7 @@
  *   aplats estompés, libellés lisibles. Appliqué une fois, au chargement du style.
  * Choix retenu : retouche à l'exécution du style OpenFreeMap (aucun fichier de style à maintenir).
  * Alternative écartée : style JSON copié dans le dépôt (devient obsolète quand les tuiles évoluent).
- * Question probable du jury : « pourquoi désaturer le satellite ? » → la couleur est réservée au sens (ambre =
+ * Question probable du jury : « pourquoi désaturer le satellite ? » → la couleur est réservée au sens (rose =
  *   sélection, statuts) ; un fond coloré entrerait en concurrence avec elle.
  */
 import type { Map as MlMap } from 'maplibre-gl'

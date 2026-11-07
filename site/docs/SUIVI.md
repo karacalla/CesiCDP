@@ -35,7 +35,7 @@ P5 (simulation) : animer l'heure affichée, vue inclinée, camion glTF ; **appel
 | Équipe | absente | `TeamHeader` lit `config/team.ts` (noms à compléter) | P1 ✅ |
 | Données | `tournees.json` (500 clients France, sans horaires) | NANCY-60 + GEN-1000 via `services/mockApi.ts` | P2 ✅ |
 | Contrat | aucun | `types/vrp.ts` + Zod + `adapters.ts` ; fiche `docs/CONTRAT_SOLVEUR.md` | P2 ✅ |
-| Tracés | une couleur HSL par camion | couches natives drapées ; ambre = sélection ; autres blanc 45 % | P4 |
+| Tracés | une couleur HSL par camion | couches natives drapées ; rose = sélection (ADR-023) ; autres blanc 45 % | P4 |
 | Pins | cercles natifs | couche native + regroupement ; « verre » ≤ 40, positionnés par le code | P4 |
 | CO₂ | gain calculé par le front (km départ − km final) | tournée de comparaison fournie par le solveur | P4 |
 | Prototype monofichier (`bulle`, `src/App.jsx`, Mapbox, Chamonix) | identité « Roam » (verre, pin à pastille, carte d'info + profil, camion vu de dessus, timeline) | identité reprise, code non copié (Google Fonts, 10–11 px, chiffres ad hoc) | P1–P4 |
@@ -56,10 +56,11 @@ P5 (simulation) : animer l'heure affichée, vue inclinée, camion glTF ; **appel
 - ADR-012 Trafic : l'éditeur ILLUSTRE le modèle « temps × coefficient de la tranche de départ » ; toute baisse de coefficient viole FIFO → alerte chiffrée (NANCY-60 en contient une à 09:30, volontairement visible).
 - ADR-013 Calcul simulé : seul le recuit sur NANCY-60 non modifiée produit un résultat ; PLNE, Clarke-Wright, autre instance ou instance modifiée → refus explicite (aucun faux résultat).
 - ADR-014 Graphiques Recharts : deux graphiques (coût, température) sur un même axe des temps, jamais deux échelles ; couleurs `--chart-1/2` validées par le script dataviz dans chaque thème.
-- ADR-015 Un seul effet visuel (Magic UI `BorderBeam`) : bordure ambre pendant le calcul, absente si `prefers-reduced-motion`.
+- ADR-015 Effet `BorderBeam` (Magic UI) : bordure lumineuse pendant le calcul, absente si animations réduites.
 - ADR-016 Parcours en 1 clic : vue d'accueil « Tournées » ; « Calculer les tournées » → bascule automatique sur les tournées, camion 1 sélectionné ; réglages fins dans « Calcul ».
 - ADR-017 shadcn/ui : pont de variables vers nos jetons ; `--accent`, `--card`, `--chart-*` jamais redéfinis ; composants dans `components/shadcn/`, effets dans `components/fx/`.
 - ADR-018 Plein écran (remplace le cadre de CLAUDE.md §4) ; ADR-019 panneau en verre, opacité minimale garantissant 4,5:1 sur blanc ET noir ; ADR-020 globe natif MapLibre (S4 : 57–60 img/s ; cadrage en Mercator car `cameraForBounds` faux sur le globe ; Mercator explicite à l'arrivée) ; ADR-021 partage local (impression, liens, GPX/GeoJSON/CSV) ; ADR-022 camion du panneau en WAAPI `transform` (S5 : `offset-path` non composé).
+- ADR-023 Palette de l'équipe : **rose = marque** (remplace l'ambre), thème clair conservé avec encres foncées (`#be185d`), retard → indigo, graphiques indigo + rose validés.
 - ADR-011 NANCY-60 : clients fictifs + 5 requêtes OSRM uniques (1 matrice, 4 tracés) ; résultat **simulé** commité, marqué comme tel.
 
 ## Décisions ouvertes (à trancher par l'équipe)
@@ -87,14 +88,13 @@ P5 (simulation) : animer l'heure affichée, vue inclinée, camion glTF ; **appel
 - Éditeur de trafic : après validation par Entrée, l'éditeur est recréé (clé) et le focus revient au début de la page ; validation par sortie de champ sans perte.
 - Courbe de convergence simulée en mode mock (seuls les coûts initial et final viennent du résultat simulé) ; étiquetée dans l'interface.
 - Rotation du globe : la carte se redessine ≈ 60 fois/s tant que les anneaux pulsent (37/s sans) ; ≤ 60 s, 0 ensuite.
-- < 1024 px : le bouton « Calculer les tournées » est sous le pli de la feuille du bas (défilement d'un écran).
 - Mesures S2–S5 et P4b sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
 
 ## Journal
 
+- 07/11/2026 — Palette de l'équipe (ADR-023, rose = marque, retard indigo), barre de défilement stylée, accrocs corrigés : roues/rétroviseurs du camion qui dépassaient, bouton principal sous le pli de la feuille (768 px), menu Réglages (libellé coupé), contour du camion sélectionné masqué par la carte suivante, bandeau « Résultat simulé » invisible en clair.
 - 07/11/2026 — P4b lot 4 : camion du panneau (machine d'états + WAAPI, T1/T4/T5 actifs, T2/T3 prêts pour P5, « Rejouer l'animation »), script de démonstration et questions 13–18 au dossier Lot 3 : partage (feuille de route imprimable, Google Maps découpé N = 9, Waze arrêt suivant, GPX/GeoJSON/CSV, Web Share, QR code via `uqr`, confirmation avant tout service tiers).
-- 07/11/2026 — P4b lot 2 : globe d'ouverture (MapLibre globe, dépôts fictifs, arcs, anneaux, fond d'espace CSS), vol 4,5 s + « Passer l'animation »/Échap, retour au globe, réglage « Animations » ; `fadeDuration` 0 ; correctif : enfants du panneau qui se tassaient (feuille du bas).
-- 07/11/2026 — P4b lot 1 : plein écran (ADR-018), bulle de verre à deux couches (blanc 96 % / navy 88 %, testé sur blanc et noir), feuille du bas < 1024 px, `lib/cameraPadding`, CLAUDE.md §4 (Cadre, Panneau) et §3 bis (budget d'effets) mis à jour.
+- 07/11/2026 — P4b lot 2 : globe d'ouverture (MapLibre globe, dépôts fictifs, arcs, anneaux, fond d'espace CSS), vol 4,5 s + « Passer l'animation »/Échap, retour au globe, réglage « Animations » ; `fadeDuration` 0 ; correctif : enfants du panneau qui se tassaient (feuille du bas). Lot 1 : plein écran (ADR-018), bulle de verre à deux couches (blanc 96 % / navy 88 %, testé sur blanc et noir), feuille du bas < 1024 px, `lib/cameraPadding`, CLAUDE.md §4 (Cadre, Panneau) et §3 bis (budget d'effets) mis à jour.
 - 07/11/2026 — Fin de P4 : Gantt SVG (fenêtres, attente hachurée, retard ▼, heure affichée, info-bulle, zoom Ctrl+molette/boutons/glisser par transform) ; mesure sur le composant réel 20×50. Dépendances : retrait de `@deck.gl/extensions` et `@loaders.gl/gltf` (inutilisées), `shadcn` (CLI) passé en dépendance de développement. Puis P4b lot 0 : essais S4 (globe) et S5 (camion du panneau), ADR-018→022.
 - 07/11/2026 — Refonte UX/identité (analyse d'écart avec la maquette « Roam ») : parcours en 1 clic, vue Tournées, tracé à deux états, curseur à cône, pins verre, carte d'info à coin concave, vitrine du camion, cartes de tournées à onglet, navigation détachée, en-tête compact (recherche active, alertes), correction de la palette écrasée par shadcn ; 60 tests unitaires, e2e parcours ×4, axe 20/20.
 

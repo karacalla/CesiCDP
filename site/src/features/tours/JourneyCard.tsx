@@ -1,6 +1,6 @@
 /**
  * Rôle : carte d'une tournée, sombre et neutre, avec la texture discrète d'un plan de rues à gauche et un coin
- *   supérieur droit découpé (onglet). Ligne ambre très fine avec le camion au centre, distance en pastille centrée,
+ *   supérieur droit découpé (onglet). Ligne rose très fine avec le camion au centre, distance en pastille centrée,
  *   heures petites et grises, durée en gras. Toute la carte est un bouton (sélection du camion).
  */
 import { Truck } from 'lucide-react'
@@ -42,7 +42,7 @@ export function JourneyCard({ route, Q, selected, onSelect, className = '' }: Pr
       onClick={onSelect}
       aria-pressed={selected}
       className={`relative w-full overflow-hidden rounded-journey bg-journey p-4 text-left text-on-dark shadow-[0_18px_36px_-18px_rgb(2_6_23/0.75)] transition-transform [mask:radial-gradient(circle_18px_at_100%_0,transparent_17px,#000_18px)] hover:-translate-y-0.5 ${
-        selected ? 'outline-2 -outline-offset-2 outline-accent' : ''
+        selected ? 'z-10 outline-2 -outline-offset-2 outline-accent' : ''
       } ${className}`}
     >
       <Streets />

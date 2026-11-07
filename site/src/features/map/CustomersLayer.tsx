@@ -81,7 +81,7 @@ export function CustomersLayer() {
         <Layer id="cdp-customer-points" type="circle" beforeId={before} filter={['!', ['has', 'point_count']]} paint={{ 'circle-color': result ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.9)', 'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 3, 12, 6], 'circle-stroke-color': '#0f172a', 'circle-stroke-width': 1.5 }} />
       </Source>
       <Source id="cdp-depot" type="geojson" data={depot}>
-        {/* le dépôt n'est pas ambre : l'ambre est réservé à l'actif et au parcouru */}
+        {/* le dépôt n'est pas rose : le rose est réservé à l'actif et au parcouru */}
         <Layer id="cdp-depot-point" type="circle" beforeId={before} paint={{ 'circle-color': '#0f172a', 'circle-radius': 8, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 }} />
       </Source>
     </>

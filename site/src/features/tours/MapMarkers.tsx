@@ -1,9 +1,9 @@
 /**
  * Rôle : éléments « verre » sur la carte pour le camion sélectionné (≤ 40, ADR-004) :
- *   - pins d'arrêt : cercle de verre sombre 36 px, icône blanche, petit badge ambre (ordre de passage) ;
+ *   - pins d'arrêt : cercle de verre sombre 36 px, icône blanche, petit badge rose (ordre de passage) ;
  *     l'arrêt actif est un cercle blanc plein ;
  *   - dépôt ;
- *   - curseur de navigation : flèche ambre dans un halo de verre, cône de visée orienté selon le trajet.
+ *   - curseur de navigation : flèche rose dans un halo de verre, cône de visée orienté selon le trajet.
  * Les pins sont de vrais boutons (clavier, nom accessible complet) ; la liste des arrêts du panneau dit la même chose.
  */
 import { useMemo } from 'react'
@@ -76,8 +76,8 @@ export function MapMarkers() {
       </div>
       {hasCursor && (
         <div ref={ref(cursorIndex)} className="absolute left-0 top-0 size-0" style={{ zIndex: 4 }}>
-          {/* cône de visée : dégradé conique ambre, estompé vers l'extérieur */}
-          <span aria-hidden className="absolute size-28 -translate-x-1/2 -translate-y-1/2 rounded-full [background:conic-gradient(from_-28deg,rgb(245_158_11/0.55),rgb(245_158_11/0)_56deg,transparent_56deg)] [mask:radial-gradient(circle,#000_30%,transparent_70%)]" />
+          {/* cône de visée : dégradé conique rose, estompé vers l'extérieur */}
+          <span aria-hidden className="absolute size-28 -translate-x-1/2 -translate-y-1/2 rounded-full [background:conic-gradient(from_-28deg,rgb(244_113_181/0.55),rgb(244_113_181/0)_56deg,transparent_56deg)] [mask:radial-gradient(circle,#000_30%,transparent_70%)]" />
           <span role="img" aria-label={`${fr.tours.truck(selected.route.vehicleId)} : ${fr.tours.phase[state?.phase ?? 'driving']}`} className="glass absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full ring-1 ring-white/25">
             <Navigation2 size={20} aria-hidden className="fill-accent text-accent" />
           </span>

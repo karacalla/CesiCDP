@@ -51,7 +51,7 @@ Points à valider par un essai court (« spike ») en phase 0, résultat noté d
 
 ## 4. Identité visuelle (inspirée de la maquette « Roam », sans copier son code)
 
-Principe : **un seul accent (ambre), du noir/navy et du blanc**. La couleur signifie quelque chose, jamais de décor.
+Principe : **un seul accent de marque (rose `#f471b5`, palette de l'équipe, ADR-023), du noir/navy et du blanc**. La couleur signifie quelque chose, jamais de décor.
 
 - **Cadre** (ADR-018) : **plein écran**, la carte occupe toute la fenêtre (`100dvh`, aucun défilement de page, ni cadre ni bord). L'identité « Roam » (rayon 36 px, bord clair, ombre) est portée par le panneau flottant ; toute animation de caméra passe par `lib/cameraPadding` pour cadrer dans la zone visible.
 - **Carte** : vue de drone, **pitch 0–30° par défaut** (la 3D se révèle à la sélection d'un camion : pitch 60–70°). Satellite désaturé + voile sombre + vignette. Trajet à deux états : **parcouru = ambre plein épais**, **à venir = blanc pointillé avec fond de route**. Curseur de navigation = flèche ambre dans un disque de verre avec cône de visée.
@@ -68,14 +68,14 @@ Principe : **un seul accent (ambre), du noir/navy et du blanc**. La couleur sign
 | `--muted-bg` | `#1e293b` | pastilles et fonds secondaires sombres |
 | `--muted-text` | `#6d7580` | **3,83:1 sur `--bg` → interdit pour le texte courant** (décor, grand texte seulement) |
 | `--muted-text-aa` | `#9aa4b2` | texte secondaire sombre (7,08:1) |
-| `--accent` | `#f59e0b` (hover `#fbbf24`) | marque, sélection, trajet actif. **Sur blanc : 2,15:1 → jamais en texte sur clair** ; texte sur ambre = `#020617` (9,39:1) ; texte ambre sur clair = `#b45309` (5,02:1) |
+| `--accent` | `#f471b5` (hover `#f9a8d4`) | marque, sélection, trajet actif. **Sur blanc : 2,67:1 → jamais en texte sur clair** ; texte sur le rose = `#020617` (7,57:1) ; texte rose sur clair = `#be185d` (6,04:1) |
 | `--panel` / `--card` | `#f1f3f5` / `#ffffff` | panneau clair et cartes |
 | `--ink` / `--ink-2` | `#0f172a` / `#475569` | texte sur clair (`#64748b` sur `#f1f3f5` = 4,28:1 ✗ ; `#94a3b8` sur blanc = 2,56:1 ✗) |
 | `--journey-card` | `#242b33` | cartes de tournées sombres |
-| `--ok` / `--wait` / `--late` | `#34d399` / `#3abdf8` / `#f471b5` | statuts Gantt et pins ; toujours **icône + libellé**, jamais la couleur seule. Remplace vert/orange/rouge : l'orange entrerait en conflit avec l'ambre de la marque |
-| Indigo `#818cf8` | | seconde série des graphiques (5,98:1 sur sombre) |
+| `--ok` / `--wait` / `--late` | `#34d399` / `#3abdf8` / `#818cf8` | statuts Gantt et pins ; toujours **icône + libellé**, jamais la couleur seule. Retard = indigo (le rose est la marque) ; sur clair : `#047857` / `#0369a1` / `#4f46e5` |
+| `--chart-1` / `--chart-2` | indigo / rose | séries des graphiques : `#4f46e5` / `#be185d` (clair), `#6366f1` / `#ec4899` (sombre), validées par le script dataviz |
 
-Règles couleur : camion sélectionné = ambre ; les autres = blanc 45 %. Option « colorier par camion » (palette catégorielle sûre pour le daltonisme, jetons `--route-1…8`) **désactivée par défaut**. La couleur d'un camion n'est jamais utilisée pour un statut.
+Règles couleur : camion sélectionné = rose ; les autres = blanc 45 %. Option « colorier par camion » (palette catégorielle sûre pour le daltonisme, jetons `--route-1…8`) **désactivée par défaut**. La couleur d'un camion n'est jamais utilisée pour un statut.
 Thèmes : **Clair** = panneau `--panel` (défaut). **Sombre** = panneau en `--bg`. La carte reste sombre dans les deux cas.
 Texte sur le verre : toujours sur voile (`bg-black/45` minimum) ; vérifier le contraste sur une capture réelle, pas en théorie.
 

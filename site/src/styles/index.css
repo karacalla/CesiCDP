@@ -102,7 +102,7 @@
     background: var(--bg-darker);
     color: var(--on-dark);
   }
-  /* Focus toujours visible, en ambre (contraste ≥ 3:1 sur sombre comme sur clair grâce au double anneau) */
+  /* Focus toujours visible, en rose (contraste ≥ 3:1 sur sombre comme sur clair grâce au double anneau) */
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -110,6 +110,36 @@
   }
   * {
     @apply border-border;
+  }
+}
+
+/* Barre de défilement (panneau, tables, listes) : fine, arrondie, piste transparente, dégagée des coins arrondis
+   de la bulle. Chromium / WebKit : pseudo-éléments ; Firefox : propriétés standard. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 22px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-hover);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 }
 
@@ -233,7 +263,7 @@
 
 
 /* Pont shadcn/ui → nos jetons (CLAUDE.md §3 bis). On ne redéfinit JAMAIS --accent, --card ni --chart-* :
-   ce sont nos jetons (ambre, blanc des cartes, séries validées). Les composants shadcn qui utilisent `accent`
+   ce sont nos jetons (rose, blanc des cartes, séries validées). Les composants shadcn qui utilisent `accent`
    sont corrigés au cas par cas après chaque `add`. */
 :root {
   --background: var(--panel-bg);

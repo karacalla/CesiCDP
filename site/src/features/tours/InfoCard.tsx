@@ -1,7 +1,7 @@
 /**
  * Rôle : carte d'information flottante (camion ou arrêt sélectionné), forme « organique » de l'identité :
  *   blanche, rayon 28 px, coin inférieur droit creusé en concave où s'accroche le bouton ✕ sombre.
- * Lecture : titre gras sur deux lignes → statut (point ambre + libellé) → deux pastilles étiquetées → distance,
+ * Lecture : titre gras sur deux lignes → statut (point rose + libellé) → deux pastilles étiquetées → distance,
  *   durée et petit profil d'altitude. Région nommée et annoncée (aria-live) quand la sélection change.
  * Technique : `mask` radial pour le coin concave (pas de canvas, pas de filtre coûteux).
  */

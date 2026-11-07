@@ -22,20 +22,22 @@ const PAIRS: Array<[string, string, number, string]> = [
   ['on-dark', 'bg', 4.5, 'texte principal sur sombre'],
   ['on-dark', 'journey-card', 4.5, 'texte des cartes de tournée'],
   ['muted-text-aa', 'journey-card', 4.5, 'texte secondaire des cartes de tournée'],
-  ['on-accent', 'accent', 4.5, 'texte sur ambre'],
-  ['accent-ink', 'card', 4.5, 'ambre lisible sur blanc'],
-  ['accent-ink', 'panel', 4.5, 'ambre lisible sur panneau'],
+  ['on-accent', 'accent', 4.5, 'texte sur le rose'],
+  ['accent-ink', 'card', 4.5, 'rose lisible sur blanc'],
+  ['accent-ink', 'panel', 4.5, 'rose lisible sur panneau'],
   ['ink', 'panel', 4.5, 'texte principal du panneau'],
   ['ok-ink', 'panel', 4.5, 'à l’heure sur surface du panneau'],
   ['wait-ink', 'panel', 4.5, 'attente sur surface du panneau'],
   ['ink-2', 'panel', 4.5, 'texte secondaire du panneau'],
   ['ink-2', 'card', 4.5, 'texte secondaire des cartes'],
-  ['accent', 'bg', 4.5, 'ambre sur sombre (thème sombre)'],
+  ['accent', 'bg', 4.5, 'rose sur sombre (thème sombre)'],
   ['ok', 'bg', 4.5, 'statut « à l’heure » sur sombre'],
   ['wait', 'bg', 4.5, 'statut « attente » sur sombre'],
   ['late', 'bg', 4.5, 'statut « retard » sur sombre'],
   ['series-2', 'bg', 4.5, 'seconde série des graphiques'],
   ['accent', 'bg-darker', 3, 'tracé actif sur la carte'],
+  ['accent', 'muted-bg', 4.5, 'rose sur surface sombre (thème sombre)'],
+  ['late-ink', 'panel', 4.5, 'retard (indigo) sur surface du panneau'],
   ['late-ink', 'card', 4.5, 'retard / erreur sur clair'],
   ['late-ink', 'panel', 4.5, 'retard / erreur sur panneau'],
   ['ok-ink', 'card', 4.5, 'à l’heure sur clair'],
@@ -51,7 +53,7 @@ describe('jetons de couleur : contrastes WCAG 2.1 AA', () => {
   })
 
   it('confirme les interdits documentés', () => {
-    expect(contrastRatio(token('accent'), token('card'))).toBeLessThan(3) // ambre en texte sur blanc : interdit
+    expect(contrastRatio(token('accent'), token('card'))).toBeLessThan(3) // rose en texte sur blanc : interdit (2,66:1)
     expect(contrastRatio(token('muted-text'), token('bg'))).toBeLessThan(4.5) // --muted-text : décor seulement
   })
 })

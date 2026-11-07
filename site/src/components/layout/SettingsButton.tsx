@@ -43,7 +43,7 @@ export function SettingsButton({ extra }: { extra?: ReactNode }) {
         <Settings2 size={18} aria-hidden />
       </button>
       {open && (
-        <div id={id} role="region" aria-label={fr.settings.label} className="absolute right-0 top-12 z-30 flex w-64 flex-col gap-3 rounded-2xl border border-panel-line bg-panel-surface p-3 shadow-[var(--shadow-float)]">
+        <div id={id} role="region" aria-label={fr.settings.label} className="absolute right-0 top-12 z-30 flex w-72 flex-col gap-3 rounded-2xl border border-panel-line bg-panel-surface p-3 shadow-[var(--shadow-float)]">
           <fieldset className="flex flex-col gap-1.5">
             <legend className="mb-1 text-sm font-semibold text-panel-ink">{fr.settings.animations}</legend>
             {LEVELS.map((l) => (
