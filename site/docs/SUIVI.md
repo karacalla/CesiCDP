@@ -8,7 +8,7 @@
 |---|---|---|---|
 | P0 Socle | ✅ terminé (07/11/2026) | build OK ; matrice d'écart + S1–S3 au dossier | `docs/spikes/resultats.json`, `docs/captures/s*.png`, `p0-*.png` |
 | P1 Coque et identité | ✅ terminé (07/11/2026) | 1280/768 sans défilement horizontal ; axe sur la coque | `e2e/a11y.spec.ts` (0 violation × 4), `captures/p1-*.png` |
-| P2 Données | à faire | import 1000 clients sans tâche > 100 ms ; erreurs ligne à ligne | |
+| P2 Données | ✅ terminé (07/11/2026) | import 1000 clients sans tâche > 100 ms ; erreurs ligne à ligne | `e2e/import.spec.ts` (build prod : 0 tâche > 50 ms), `docs/perf/import-1000.json`, `captures/p2-*.png` |
 | P3 Contraintes et lancement | à faire | « non pris en compte » si contrainte non gérée | |
 | P4 Résultats | à faire | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
@@ -16,7 +16,7 @@
 
 ## Prochaine action
 
-P2 : contrat `types/vrp.ts` (+ Zod, adaptateurs), mock déterministe, NANCY-60 (géométrie pré-calculée une fois) et GEN-1000, formulaires dépôt/flotte, table clients TanStack virtualisée, import CSV/JSON/VRPLIB/Solomon en Web Worker.
+P3 : éditeur de trafic (tranches contiguës, coefficients, courbe, alerte FIFO), interrupteurs fenêtres/attente, panneau de lancement (algo, recuit, durée, graine), tâche simulée avec convergence en direct + annulation, « non pris en compte » selon les capacités de l'algorithme.
 
 ## Matrice d'écart (existant → cible)
 
@@ -28,8 +28,8 @@ P2 : contrat `types/vrp.ts` (+ Zod, adaptateurs), mock déterministe, NANCY-60 (
 | Thèmes | sombre seul (clair abandonné, `TODO.md`) | panneau clair (défaut) / sombre via `--panel-*` | P1 ✅ |
 | Carte | MapLibre 6 + OpenFreeMap, 2D, vue France | MapLibre 5.24 + relief + satellite désaturé + ombrage + brouillard + voile | P1 ✅ |
 | Équipe | absente | `TeamHeader` lit `config/team.ts` (noms à compléter) | P1 ✅ |
-| Données | `tournees.json` (500 clients France, sans horaires) | NANCY-60 + GEN-1000 via `services/mockApi.ts` | P2 |
-| Contrat | aucun | `types/vrp.ts` + Zod + `adapters.ts` | P2 |
+| Données | `tournees.json` (500 clients France, sans horaires) | NANCY-60 + GEN-1000 via `services/mockApi.ts` | P2 ✅ |
+| Contrat | aucun | `types/vrp.ts` + Zod + `adapters.ts` ; fiche `docs/CONTRAT_SOLVEUR.md` | P2 ✅ |
 | Tracés | une couleur HSL par camion | couches natives drapées ; ambre = sélection ; autres blanc 45 % | P4 |
 | Pins | cercles natifs | couche native + regroupement ; « verre » ≤ 40, positionnés par le code | P4 |
 | CO₂ | gain calculé par le front (km départ − km final) | tournée de comparaison fournie par le solveur | P4 |
@@ -46,6 +46,9 @@ P2 : contrat `types/vrp.ts` (+ Zod, adaptateurs), mock déterministe, NANCY-60 (
 - ADR-006 TypeScript 7 (compilateur natif) ; oxlint conservé au lieu d'ESLint.
 - ADR-007 Imagerie satellite Sentinel-2 cloudless **2016** (EOX, seul millésime CC BY 4.0), désaturée.
 - ADR-008 Navigation par état (Zustand), sans routeur : la carte reste montée d'une vue à l'autre.
+- ADR-009 Contrat : schémas Zod = source unique (types déduits) ; horaires d'arrêt **nullables** (le solveur actuel n'en produit pas) ; coordonnées planes acceptées (VRPLIB, Solomon).
+- ADR-010 Import dans un Web Worker, parseurs maison (CSV, JSON, VRPLIB, Solomon), store toujours valide.
+- ADR-011 NANCY-60 : clients fictifs + 5 requêtes OSRM uniques (1 matrice, 4 tracés) ; résultat **simulé** commité, marqué comme tel.
 
 ## Décisions ouvertes (à trancher par l'équipe)
 
@@ -55,15 +58,20 @@ P2 : contrat `types/vrp.ts` (+ Zod, adaptateurs), mock déterministe, NANCY-60 (
 4. CLAUDE.md §3 (lignes « Carte », « Pins nombreux ») à mettre à jour selon ADR-002/004 ? (non modifié sans accord).
 5. Profil Mapbox (`VITE_BASEMAP=mapbox`) : déclaré dans `config/basemap.ts` mais **non opérationnel** avec MapLibre (URL `mapbox://`) ; le garder (ADR + `transformRequest`) ou le retirer ?
 6. Pousser `bulle` : exige `git push --force` (divergence avec `origin/bulle`).
+7. Transmettre `docs/CONTRAT_SOLVEUR.md` + `src/types/vrp.ts` à l'équipe solveur (clés françaises attendues, `contraintes_ignorees`, `comparaison`).
 
 ## Écarts connus
 
 - `tournees.json` et le prototype JSX retirés du site (restent dans l'historique git et dans `algorithme/gen_carte.py`).
 - Attribution de la carte repliée (bouton « i ») sous 1024 px pour ne pas masquer la carte ; dépliée au-dessus.
 - Le relief de la vue initiale (plateau lorrain, inclinaison 28°) reste discret ; il se révèle à l'inclinaison (`captures/p1-relief-dark-1280.png`) et en P5.
+- NANCY-60 : fenêtres tirées APRÈS la construction des tournées simulées (pour montrer attente et retard) → le résultat simulé déclare `ignoredConstraints: ['timeWindows']`.
+- Perf d'import mesurée sur le **build de production** (`npm run test:perf`) ; en dev, le recadrage de la carte sur le relief produit une image de ≈ 120 ms (MapLibre), sans lien avec l'import.
+- Table clients : défilement horizontal interne au panneau (9 colonnes dans 38 %).
 - Mesures S2/S3 faites sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
 
 ## Journal
 
 - 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.
+- 07/11/2026 — P2 : contrat Zod, mock + http + adaptateurs, NANCY-60 (OSRM une fois) et GEN-1000, formulaires, table TanStack v9 virtualisée éditable, import Worker (4 formats), carte des clients ; 47 tests, axe 0 violation.
 - 07/11/2026 — P1 : coque (cadre, split 62/38, bord en S + poignée, îlot de navigation, en-tête équipe, thèmes, RGPD), carte drone (satellite, ombrage, relief, ciel/brouillard, voile), axe 0 violation, 24 tests. README racine réécrit, `TODO.md` supprimé (réalisé).

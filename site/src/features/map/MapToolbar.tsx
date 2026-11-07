@@ -8,7 +8,7 @@ import { IconButton } from '@/components/ui/IconButton'
 import { CAMERA_MS, DEPOT_FOCUS, INITIAL_VIEW, type CameraView } from '@/config/app'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { fr } from '@/i18n/fr'
-import { MAP_ID } from './MapStage'
+import { MAP_ID } from './mapId'
 
 function toCamera(v: CameraView) {
   return { center: [v.longitude, v.latitude] as [number, number], zoom: v.zoom, pitch: v.pitch, bearing: v.bearing }

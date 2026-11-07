@@ -1,0 +1,762 @@
+{
+ "id": "NANCY-60",
+ "name": "NANCY-60 — Nancy et vallées vosgiennes (fictif)",
+ "depot": {
+  "name": "Dépôt fictif — Nancy",
+  "lat": 48.6862,
+  "lng": 6.2045,
+  "tw": {
+   "a": 420,
+   "b": 1140
+  }
+ },
+ "customers": [
+  {
+   "id": 1,
+   "name": "Client 01 — Nancy",
+   "lat": 48.69722,
+   "lng": 6.18117,
+   "demand": 2,
+   "tw": {
+    "a": 680,
+    "b": 840
+   },
+   "service": 8
+  },
+  {
+   "id": 2,
+   "name": "Client 02 — Nancy",
+   "lat": 48.6847,
+   "lng": 6.17208,
+   "demand": 5,
+   "tw": null,
+   "service": 10
+  },
+  {
+   "id": 3,
+   "name": "Client 03 — Nancy",
+   "lat": 48.68253,
+   "lng": 6.19291,
+   "demand": 1,
+   "tw": {
+    "a": 645,
+    "b": 715
+   },
+   "service": 8
+  },
+  {
+   "id": 4,
+   "name": "Client 04 — Nancy",
+   "lat": 48.69925,
+   "lng": 6.18893,
+   "demand": 5,
+   "tw": {
+    "a": 725,
+    "b": 855
+   },
+   "service": 9
+  },
+  {
+   "id": 5,
+   "name": "Client 05 — Nancy",
+   "lat": 48.69975,
+   "lng": 6.17423,
+   "demand": 3,
+   "tw": {
+    "a": 730,
+    "b": 905
+   },
+   "service": 8
+  },
+  {
+   "id": 6,
+   "name": "Client 06 — Nancy",
+   "lat": 48.6813,
+   "lng": 6.18758,
+   "demand": 4,
+   "tw": {
+    "a": 570,
+    "b": 710
+   },
+   "service": 8
+  },
+  {
+   "id": 7,
+   "name": "Client 07 — Nancy",
+   "lat": 48.7018,
+   "lng": 6.17858,
+   "demand": 1,
+   "tw": {
+    "a": 725,
+    "b": 880
+   },
+   "service": 7
+  },
+  {
+   "id": 8,
+   "name": "Client 08 — Vandœuvre-lès-Nancy",
+   "lat": 48.66499,
+   "lng": 6.17663,
+   "demand": 5,
+   "tw": {
+    "a": 555,
+    "b": 680
+   },
+   "service": 6
+  },
+  {
+   "id": 9,
+   "name": "Client 09 — Vandœuvre-lès-Nancy",
+   "lat": 48.66391,
+   "lng": 6.17992,
+   "demand": 4,
+   "tw": {
+    "a": 455,
+    "b": 615
+   },
+   "service": 10
+  },
+  {
+   "id": 10,
+   "name": "Client 10 — Vandœuvre-lès-Nancy",
+   "lat": 48.65646,
+   "lng": 6.17972,
+   "demand": 4,
+   "tw": {
+    "a": 520,
+    "b": 650
+   },
+   "service": 8
+  },
+  {
+   "id": 11,
+   "name": "Client 11 — Vandœuvre-lès-Nancy",
+   "lat": 48.65972,
+   "lng": 6.17634,
+   "demand": 3,
+   "tw": {
+    "a": 570,
+    "b": 675
+   },
+   "service": 7
+  },
+  {
+   "id": 12,
+   "name": "Client 12 — Laxou",
+   "lat": 48.68167,
+   "lng": 6.1422,
+   "demand": 2,
+   "tw": {
+    "a": 625,
+    "b": 750
+   },
+   "service": 5
+  },
+  {
+   "id": 13,
+   "name": "Client 13 — Laxou",
+   "lat": 48.68833,
+   "lng": 6.15273,
+   "demand": 1,
+   "tw": {
+    "a": 680,
+    "b": 820
+   },
+   "service": 9
+  },
+  {
+   "id": 14,
+   "name": "Client 14 — Laxou",
+   "lat": 48.68831,
+   "lng": 6.14929,
+   "demand": 2,
+   "tw": {
+    "a": 720,
+    "b": 850
+   },
+   "service": 5
+  },
+  {
+   "id": 15,
+   "name": "Client 15 — Malzéville",
+   "lat": 48.70824,
+   "lng": 6.21518,
+   "demand": 2,
+   "tw": {
+    "a": 760,
+    "b": 885
+   },
+   "service": 10
+  },
+  {
+   "id": 16,
+   "name": "Client 16 — Malzéville",
+   "lat": 48.71286,
+   "lng": 6.20793,
+   "demand": 1,
+   "tw": {
+    "a": 770,
+    "b": 900
+   },
+   "service": 5
+  },
+  {
+   "id": 17,
+   "name": "Client 17 — Malzéville",
+   "lat": 48.70749,
+   "lng": 6.21306,
+   "demand": 2,
+   "tw": {
+    "a": 775,
+    "b": 950
+   },
+   "service": 7
+  },
+  {
+   "id": 18,
+   "name": "Client 18 — Essey-lès-Nancy",
+   "lat": 48.70652,
+   "lng": 6.22693,
+   "demand": 2,
+   "tw": {
+    "a": 820,
+    "b": 970
+   },
+   "service": 5
+  },
+  {
+   "id": 19,
+   "name": "Client 19 — Essey-lès-Nancy",
+   "lat": 48.6995,
+   "lng": 6.21926,
+   "demand": 4,
+   "tw": {
+    "a": 835,
+    "b": 965
+   },
+   "service": 6
+  },
+  {
+   "id": 20,
+   "name": "Client 20 — Essey-lès-Nancy",
+   "lat": 48.70466,
+   "lng": 6.22147,
+   "demand": 2,
+   "tw": {
+    "a": 875,
+    "b": 985
+   },
+   "service": 9
+  },
+  {
+   "id": 21,
+   "name": "Client 21 — Jarville-la-Malgrange",
+   "lat": 48.66537,
+   "lng": 6.20165,
+   "demand": 1,
+   "tw": {
+    "a": 490,
+    "b": 600
+   },
+   "service": 10
+  },
+  {
+   "id": 22,
+   "name": "Client 22 — Jarville-la-Malgrange",
+   "lat": 48.66749,
+   "lng": 6.19416,
+   "demand": 3,
+   "tw": {
+    "a": 440,
+    "b": 610
+   },
+   "service": 8
+  },
+  {
+   "id": 23,
+   "name": "Client 23 — Jarville-la-Malgrange",
+   "lat": 48.66607,
+   "lng": 6.20594,
+   "demand": 2,
+   "tw": {
+    "a": 420,
+    "b": 580
+   },
+   "service": 5
+  },
+  {
+   "id": 24,
+   "name": "Client 24 — Villers-lès-Nancy",
+   "lat": 48.67606,
+   "lng": 6.16053,
+   "demand": 3,
+   "tw": {
+    "a": 630,
+    "b": 765
+   },
+   "service": 8
+  },
+  {
+   "id": 25,
+   "name": "Client 25 — Villers-lès-Nancy",
+   "lat": 48.6747,
+   "lng": 6.14625,
+   "demand": 3,
+   "tw": {
+    "a": 650,
+    "b": 790
+   },
+   "service": 5
+  },
+  {
+   "id": 26,
+   "name": "Client 26 — Baccarat",
+   "lat": 48.4431,
+   "lng": 6.7385,
+   "demand": 5,
+   "tw": {
+    "a": 455,
+    "b": 585
+   },
+   "service": 10
+  },
+  {
+   "id": 27,
+   "name": "Client 27 — Baccarat",
+   "lat": 48.44799,
+   "lng": 6.75214,
+   "demand": 4,
+   "tw": {
+    "a": 570,
+    "b": 660
+   },
+   "service": 12
+  },
+  {
+   "id": 28,
+   "name": "Client 28 — Rambervillers",
+   "lat": 48.33921,
+   "lng": 6.63198,
+   "demand": 4,
+   "tw": {
+    "a": 740,
+    "b": 890
+   },
+   "service": 15
+  },
+  {
+   "id": 29,
+   "name": "Client 29 — Rambervillers",
+   "lat": 48.33992,
+   "lng": 6.63544,
+   "demand": 7,
+   "tw": {
+    "a": 780,
+    "b": 940
+   },
+   "service": 11
+  },
+  {
+   "id": 30,
+   "name": "Client 30 — Rambervillers",
+   "lat": 48.34021,
+   "lng": 6.62415,
+   "demand": 6,
+   "tw": {
+    "a": 775,
+    "b": 925
+   },
+   "service": 11
+  },
+  {
+   "id": 31,
+   "name": "Client 31 — Saint-Dié-des-Vosges",
+   "lat": 48.28864,
+   "lng": 6.95178,
+   "demand": 2,
+   "tw": {
+    "a": 535,
+    "b": 690
+   },
+   "service": 10
+  },
+  {
+   "id": 32,
+   "name": "Client 32 — Saint-Dié-des-Vosges",
+   "lat": 48.2844,
+   "lng": 6.95519,
+   "demand": 2,
+   "tw": {
+    "a": 565,
+    "b": 725
+   },
+   "service": 10
+  },
+  {
+   "id": 33,
+   "name": "Client 33 — Saint-Dié-des-Vosges",
+   "lat": 48.2883,
+   "lng": 6.94425,
+   "demand": 5,
+   "tw": {
+    "a": 475,
+    "b": 595
+   },
+   "service": 13
+  },
+  {
+   "id": 34,
+   "name": "Client 34 — Saint-Dié-des-Vosges",
+   "lat": 48.28581,
+   "lng": 6.94578,
+   "demand": 8,
+   "tw": {
+    "a": 600,
+    "b": 730
+   },
+   "service": 13
+  },
+  {
+   "id": 35,
+   "name": "Client 35 — Saint-Dié-des-Vosges",
+   "lat": 48.28215,
+   "lng": 6.95755,
+   "demand": 2,
+   "tw": {
+    "a": 600,
+    "b": 780
+   },
+   "service": 8
+  },
+  {
+   "id": 36,
+   "name": "Client 36 — Saint-Dié-des-Vosges",
+   "lat": 48.28024,
+   "lng": 6.94841,
+   "demand": 5,
+   "tw": {
+    "a": 600,
+    "b": 760
+   },
+   "service": 15
+  },
+  {
+   "id": 37,
+   "name": "Client 37 — Bruyères",
+   "lat": 48.19998,
+   "lng": 6.72438,
+   "demand": 6,
+   "tw": {
+    "a": 650,
+    "b": 785
+   },
+   "service": 8
+  },
+  {
+   "id": 38,
+   "name": "Client 38 — Bruyères",
+   "lat": 48.208,
+   "lng": 6.72616,
+   "demand": 6,
+   "tw": {
+    "a": 730,
+    "b": 895
+   },
+   "service": 12
+  },
+  {
+   "id": 39,
+   "name": "Client 39 — Bruyères",
+   "lat": 48.20067,
+   "lng": 6.71958,
+   "demand": 8,
+   "tw": {
+    "a": 765,
+    "b": 875
+   },
+   "service": 14
+  },
+  {
+   "id": 40,
+   "name": "Client 40 — Gérardmer",
+   "lat": 48.06966,
+   "lng": 6.89373,
+   "demand": 3,
+   "tw": null,
+   "service": 10
+  },
+  {
+   "id": 41,
+   "name": "Client 41 — Gérardmer",
+   "lat": 48.07282,
+   "lng": 6.86686,
+   "demand": 3,
+   "tw": {
+    "a": 795,
+    "b": 925
+   },
+   "service": 14
+  },
+  {
+   "id": 42,
+   "name": "Client 42 — Gérardmer",
+   "lat": 48.06208,
+   "lng": 6.88101,
+   "demand": 3,
+   "tw": {
+    "a": 815,
+    "b": 920
+   },
+   "service": 11
+  },
+  {
+   "id": 43,
+   "name": "Client 43 — Gérardmer",
+   "lat": 48.07073,
+   "lng": 6.88669,
+   "demand": 4,
+   "tw": {
+    "a": 535,
+    "b": 685
+   },
+   "service": 12
+  },
+  {
+   "id": 44,
+   "name": "Client 44 — Gérardmer",
+   "lat": 48.06727,
+   "lng": 6.88193,
+   "demand": 7,
+   "tw": {
+    "a": 490,
+    "b": 605
+   },
+   "service": 14
+  },
+  {
+   "id": 45,
+   "name": "Client 45 — Gérardmer",
+   "lat": 48.06419,
+   "lng": 6.87589,
+   "demand": 2,
+   "tw": {
+    "a": 750,
+    "b": 915
+   },
+   "service": 10
+  },
+  {
+   "id": 46,
+   "name": "Client 46 — La Bresse",
+   "lat": 48.00026,
+   "lng": 6.87771,
+   "demand": 6,
+   "tw": null,
+   "service": 10
+  },
+  {
+   "id": 47,
+   "name": "Client 47 — La Bresse",
+   "lat": 47.99452,
+   "lng": 6.87826,
+   "demand": 7,
+   "tw": {
+    "a": 650,
+    "b": 815
+   },
+   "service": 15
+  },
+  {
+   "id": 48,
+   "name": "Client 48 — La Bresse",
+   "lat": 47.99864,
+   "lng": 6.87867,
+   "demand": 7,
+   "tw": {
+    "a": 725,
+    "b": 865
+   },
+   "service": 15
+  },
+  {
+   "id": 49,
+   "name": "Client 49 — La Bresse",
+   "lat": 47.9979,
+   "lng": 6.8714,
+   "demand": 3,
+   "tw": {
+    "a": 595,
+    "b": 720
+   },
+   "service": 13
+  },
+  {
+   "id": 50,
+   "name": "Client 50 — Épinal",
+   "lat": 48.18476,
+   "lng": 6.44932,
+   "demand": 2,
+   "tw": {
+    "a": 580,
+    "b": 675
+   },
+   "service": 15
+  },
+  {
+   "id": 51,
+   "name": "Client 51 — Épinal",
+   "lat": 48.17961,
+   "lng": 6.46526,
+   "demand": 4,
+   "tw": {
+    "a": 625,
+    "b": 720
+   },
+   "service": 13
+  },
+  {
+   "id": 52,
+   "name": "Client 52 — Épinal",
+   "lat": 48.1626,
+   "lng": 6.4404,
+   "demand": 8,
+   "tw": {
+    "a": 715,
+    "b": 810
+   },
+   "service": 14
+  },
+  {
+   "id": 53,
+   "name": "Client 53 — Épinal",
+   "lat": 48.16326,
+   "lng": 6.46509,
+   "demand": 6,
+   "tw": {
+    "a": 610,
+    "b": 765
+   },
+   "service": 12
+  },
+  {
+   "id": 54,
+   "name": "Client 54 — Épinal",
+   "lat": 48.17142,
+   "lng": 6.46046,
+   "demand": 6,
+   "tw": {
+    "a": 595,
+    "b": 765
+   },
+   "service": 13
+  },
+  {
+   "id": 55,
+   "name": "Client 55 — Épinal",
+   "lat": 48.16426,
+   "lng": 6.43765,
+   "demand": 3,
+   "tw": {
+    "a": 670,
+    "b": 805
+   },
+   "service": 9
+  },
+  {
+   "id": 56,
+   "name": "Client 56 — Remiremont",
+   "lat": 48.02569,
+   "lng": 6.59022,
+   "demand": 2,
+   "tw": {
+    "a": 770,
+    "b": 915
+   },
+   "service": 14
+  },
+  {
+   "id": 57,
+   "name": "Client 57 — Remiremont",
+   "lat": 48.01024,
+   "lng": 6.59565,
+   "demand": 7,
+   "tw": null,
+   "service": 13
+  },
+  {
+   "id": 58,
+   "name": "Client 58 — Remiremont",
+   "lat": 48.01527,
+   "lng": 6.57821,
+   "demand": 2,
+   "tw": {
+    "a": 740,
+    "b": 910
+   },
+   "service": 15
+  },
+  {
+   "id": 59,
+   "name": "Client 59 — Remiremont",
+   "lat": 48.00744,
+   "lng": 6.58969,
+   "demand": 3,
+   "tw": {
+    "a": 765,
+    "b": 940
+   },
+   "service": 8
+  },
+  {
+   "id": 60,
+   "name": "Client 60 — Remiremont",
+   "lat": 48.02737,
+   "lng": 6.59086,
+   "demand": 6,
+   "tw": {
+    "a": 775,
+    "b": 955
+   },
+   "service": 9
+  }
+ ],
+ "fleet": {
+  "k": 4,
+  "Q": 100,
+  "fixedCost": 0,
+  "baseSpeedKmh": 50
+ },
+ "traffic": {
+  "slots": [
+   {
+    "from": 0,
+    "to": 450,
+    "factor": 1
+   },
+   {
+    "from": 450,
+    "to": 570,
+    "factor": 1.6
+   },
+   {
+    "from": 570,
+    "to": 990,
+    "factor": 1.15
+   },
+   {
+    "from": 990,
+    "to": 1440,
+    "factor": 1.45
+   }
+  ]
+ },
+ "options": {
+  "timeWindows": "strict",
+  "allowWait": true
+ },
+ "meta": {
+  "source": "demo",
+  "coordinates": "geo",
+  "note": "Clients fictifs (graine 60). Distances et tracés : OSRM, calculés une fois le 2026-11-07."
+ }
+}

@@ -34,6 +34,13 @@ const PAIRS: Array<[string, string, number, string]> = [
   ['late', 'bg', 4.5, 'statut « retard » sur sombre'],
   ['series-2', 'bg', 4.5, 'seconde série des graphiques'],
   ['accent', 'bg-darker', 3, 'tracé actif sur la carte'],
+  ['late-ink', 'card', 4.5, 'retard / erreur sur clair'],
+  ['late-ink', 'panel', 4.5, 'retard / erreur sur panneau'],
+  ['ok-ink', 'card', 4.5, 'à l’heure sur clair'],
+  ['wait-ink', 'card', 4.5, 'attente sur clair'],
+  ['late', 'muted-bg', 4.5, 'retard / erreur sur surface sombre'],
+  ['ok', 'muted-bg', 4.5, 'à l’heure sur surface sombre'],
+  ['wait', 'muted-bg', 4.5, 'attente sur surface sombre'],
 ]
 
 describe('jetons de couleur : contrastes WCAG 2.1 AA', () => {

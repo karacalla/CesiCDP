@@ -41,11 +41,13 @@
       "warn",
       {
         "allow": [
-          "__spike"
+          "__spike",
+          "__long"
         ]
       }
     ],
-    "jsx-a11y/prefer-tag-over-role": "off"
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "react/incompatible-library": "off"
   },
   "ignorePatterns": [
     "dist",
@@ -57,7 +59,8 @@
     {
       "files": [
         "spikes/**",
-        "e2e/**"
+        "e2e/**",
+        "scripts/**"
       ],
       "rules": {
         "react/only-export-components": "off",

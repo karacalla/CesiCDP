@@ -9,7 +9,7 @@ const PHASE = process.env.SHOTS_PHASE ?? 'p1'
 const WIDTHS = [1280, 768] as const
 const THEMES = ['light', 'dark'] as const
 /** Vue → libellé du bouton de l'îlot de navigation. */
-const VIEWS: Array<{ name: string; nav: string | null }> = [{ name: 'coque', nav: null }]
+const VIEWS: Array<{ name: string; nav: string | null }> = [{ name: 'donnees', nav: null }]
 
 
 for (const v of VIEWS) {

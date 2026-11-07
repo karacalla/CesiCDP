@@ -17,8 +17,9 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "types": ["vite/client", "node", "@testing-library/jest-dom/vitest"],
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src", "spikes", "e2e", "scripts", "vite.config.ts", "playwright.config.ts"]
+  "include": ["src", "spikes", "e2e", "scripts", "vite.config.ts", "playwright.config.ts", "playwright.perf.config.ts"]
 }

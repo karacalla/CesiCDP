@@ -31,6 +31,9 @@
   --color-panel-ink-2: var(--panel-ink-2);
   --color-panel-line: var(--panel-line);
   --color-panel-accent-ink: var(--panel-accent-ink);
+  --color-panel-late: var(--panel-late);
+  --color-panel-ok: var(--panel-ok);
+  --color-panel-wait: var(--panel-wait);
   --radius-frame: var(--radius-frame);
   --radius-card: var(--radius-card);
   --radius-journey: var(--radius-journey);

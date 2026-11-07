@@ -119,6 +119,26 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : (b) ; îlot de navigation à 5 boutons, `aria-current="page"` sur la vue active.
 - **Conséquence** : pas de lien profond vers une vue ; ajoutable plus tard par l'ancre d'URL sans toucher aux vues.
 
+### ADR-009 — Contrat de données : Zod comme source unique, horaires facultatifs
+- **Contexte** : le contrat doit valider les imports et les réponses du solveur, et rester aligné sur `resoudre()`, qui renvoie aujourd'hui des listes d'indices **sans horaire** ; les jeux de référence (VRPLIB, Solomon) ont des coordonnées planes et, pour Solomon, des unités de temps abstraites dépassant 24 h.
+- **Options** : (a) interfaces TS + validation écrite à la main ; (b) schémas Zod dont les types sont déduits ; (c) horaires obligatoires, calculés par l'interface quand le solveur n'en fournit pas ; (d) horaires facultatifs (`null`).
+- **Critique** : (a) deux vérités qui divergent ; (c) ferait recalculer la faisabilité par l'interface, ce que CLAUDE.md interdit, et produirait des horaires que le solveur n'a pas validés.
+- **Choix** : (b) + (d). Coordonnées `lat`/`lng` libres, contrôlées comme géographiques seulement si `meta.coordinates = "geo"` ; horizon accepté jusqu'à 7 jours.
+- **Conséquence** : sans horaire, le Gantt affichera « horaires non fournis par cet algorithme ». La fiche `docs/CONTRAT_SOLVEUR.md` décrit à l'équipe solveur les champs à ajouter.
+
+### ADR-010 — Import : Web Worker, parseurs sans dépendance, store toujours valide
+- **Contexte** : importer 1000 clients sans bloquer l'interface plus de 100 ms ; signaler les erreurs ligne par ligne ; quatre formats.
+- **Options** : (a) analyse sur le fil principal ; (b) Web Worker ; (c) bibliothèque CSV (PapaParse).
+- **Critique** : (a) bloque l'interface ; (c) dépendance pour un format simple que nous maîtrisons (guillemets, `;` ou `,`, en-têtes français ou anglais).
+- **Choix** : (b) avec des parseurs maison testés (`lib/parsers/`) ; chaque ligne passe par le schéma Zod du client ; les lignes fautives sont écartées et listées (« Ligne 12 — latitude : valeur manquante ou non numérique »). Le store n'accepte que des données valides ; une cellule invalide garde sa saisie et son message.
+- **Conséquence** : mesuré sur le build de production, 1000 lignes avec 3 erreurs : 16 ms d'analyse dans le worker, 184 à 331 ms de bout en bout, **aucune tâche longue** sur le fil principal (§9).
+
+### ADR-011 — Instance de démonstration NANCY-60 et résultat simulé
+- **Contexte** : il faut une démonstration crédible (relief, trafic, fenêtres) sans solveur branché et sans jamais appeler un service d'itinéraire depuis le navigateur avec des clients.
+- **Choix** : `scripts/make-nancy60.ts`, exécuté **une fois** : 60 clients fictifs (graine 60) tirés autour de 15 communes (25 à Nancy et sa périphérie, 35 dans les vallées vosgiennes) ; 5 requêtes au serveur de démonstration OSRM (1 matrice de distances/durées, 1 tracé par camion), sur ces seuls points fictifs ; solution **simulée** (regroupement géographique, plus proche voisin, 2-opt) et horaire calculés dans le script ; fenêtres tirées autour des heures de passage pour illustrer les trois statuts. Tout est commité (`src/data/nancy-60.*.json`).
+- **Critique** : ce résultat n'est pas celui du solveur ; il ne respecte pas les fenêtres (tirées après coup).
+- **Conséquence** : le résultat simulé est étiqueté (« Résultat simulé (mock) », objectif « … SIMULÉ ») et déclare `ignoredConstraints: ['timeWindows']`. Le tracé (≈ 350 Ko) est chargé à la demande, hors du bundle principal.
+
 ## 5. Essais techniques S1–S3
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
@@ -190,6 +210,7 @@ Autres jetons : rayons (`--radius-frame` 36 px, `--radius-card` 24 px, `--radius
 
 Cible WCAG 2.1 AA.
 - **P0** : contrastes des jetons vérifiés automatiquement, focus toujours visible (anneau ambre doublé d'un liseré sombre), `prefers-reduced-motion` coupe animations et transitions, règles `jsx-a11y` dans le lint, aucune taille de texte < 12 px.
+- **P2** : formulaires étiquetés (`label` relié), erreurs reliées par `aria-describedby` et `aria-invalid` ; table : vrai `<table>`, `aria-rowcount` / `aria-rowindex` malgré la virtualisation, tri par boutons dans les en-têtes avec `aria-sort`, chaque cellule éditable nommée (« Demande — Client 12 »), erreur de cellule annoncée (`role="alert"`) ; statut de fenêtre en icône + libellé ; rapport d'import dans une région `aria-live`. axe : 0 violation sur la vue Données (2 thèmes × 2 largeurs). Nouveaux jetons `--late-ink`, `--ok-ink`, `--wait-ink` pour les états sur fond clair (`--late` sur blanc n'atteint pas 3:1).
 - **P1** : audit axe (règles WCAG 2.0/2.1 A et AA) de la coque : **0 violation** en thème clair et sombre, à 1280 et 768 px (`npm run test:a11y`). Le canevas WebGL est exclu de l'audit (axe ne peut pas lire ses pixels) : les textes posés dessus sont vérifiés sur capture (blanc et `#9aa4b2` sur voile noir). Lien d'évitement « Aller au panneau de travail » ; régions nommées (carte, navigation, panneau, outils) ; `aria-current` sur la vue active ; `aria-expanded` sur la poignée ; `aria-busy` sur la carte pendant le chargement ; boutons-icônes nommés (`aria-label` exigé par le typage de `IconButton`) ; textes internes de MapLibre traduits (`locale`), dont les raccourcis clavier de la carte ; caméra instantanée si `prefers-reduced-motion`.
 - **À venir** : alternative textuelle complète à la carte (liste des arrêts, P4).
 
@@ -207,14 +228,35 @@ Cible WCAG 2.1 AA.
 | `npm run typecheck` | TypeScript strict, `noUncheckedIndexedAccess` |
 | `npm run lint` | oxlint : correctness en erreur, `no-explicit-any`, `ban-ts-comment`, jsx-a11y, `import/no-cycle` |
 | `npm test` | Vitest : contrastes des jetons, taille de texte minimale, en-tête d'équipe, poignée du panneau, îlot de navigation (24 tests en P1) |
-| `npm run test:a11y` | axe sur la coque, 2 thèmes × 2 largeurs |
+| `npm run test:a11y` | axe sur la vue Données (coque comprise), 2 thèmes × 2 largeurs |
+| `npm run test:perf` | build de production : import CSV de 1000 lignes (3 erreurs), tâches longues du fil principal (`docs/perf/import-1000.json`) |
+
+Mesure P2 (build de production, poste de §5) : analyse 16 ms dans le worker ; 184 à 331 ms entre le choix du fichier et l'affichage du rapport ; **0 tâche longue (> 50 ms)**. En serveur de développement, une image de ≈ 120 ms apparaît : le profil CPU (protocole CDP) l'attribue au recalcul du relief par MapLibre lors du recadrage de la carte et à React en mode développement, pas à l'import.
 | `npm run shots` | captures à 1280 et 768 px + contrôle de l'absence de défilement horizontal |
 | `npm run spikes` | essais S1–S3 |
 | `npm run build` | vérification de types puis build Vite |
 
 ## 10. Contrat de données
 
-*À rédiger en phase 2 (`src/types/vrp.ts`).* Écart déjà relevé : `recuit_simple.py` utilise 4 mouvements (`déplacer`, `échanger`, `2-opt`, `2-opt*`, probabilités par défaut 0,4 / 0,2 / 0,2 / 0,2), et non 7.
+Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destinée à l'équipe solveur : `docs/CONTRAT_SOLVEUR.md`.
+
+| Objet | Champs | Remarques |
+|---|---|---|
+| `Instance` | `id, name, depot, customers[], fleet, traffic, options, meta` | contrôles croisés : coordonnées géographiques si `meta.coordinates = "geo"`, identifiants uniques |
+| `Customer` | `id ≥ 1, name, lat, lng, demand ≥ 0, tw: {a ≤ b} \| null, service ≥ 0` | temps en minutes |
+| `Depot` | `name, lat, lng, tw` | horaires d'ouverture |
+| `Fleet` | `k ≥ 1, Q > 0, fixedCost ≥ 0, baseSpeedKmh` | flotte homogène |
+| `Traffic` | `slots[]: {from, to, factor ≥ 1}` | contiguës, 00:00 → 24:00 |
+| `Options` | `timeWindows: off \| strict, allowWait` | |
+| `SolveRequest` | `instance, algo: sa \| clarke-wright \| milp, params` | `params` = réglages de `resoudre()` (`durationS, seed, K, t0, t1, moveProbas[], kMax?`) |
+| `SolveResult` | `cost, costInitial, objective, valid, message, iterations, bks?, gap?, routes[], history[], comparison, ignoredConstraints[]` | `objective` toujours affiché près d'un écart |
+| `Route` | `vehicleId, load, distanceM?, geometry?, start?, end?, stops[], legs[]` | `?` = `null` si non fourni |
+| `Stop` | `customerId, arrival?, wait?, departure?, late?` | jamais recalculé par l'interface |
+| `Leg` | `from, to, departure, travelMin, distanceM, factor` | `factor` = tranche de trafic appliquée (vitesse en simulation) |
+
+Écart relevé avec CLAUDE.md : `recuit_simple.py` utilise **4** mouvements (`déplacer`, `échanger`, `2-opt`, `2-opt*`, probabilités par défaut 0,4 / 0,2 / 0,2 / 0,2), et non 7 ; `moveProbas` est donc un tableau de longueur libre, dans l'ordre du solveur.
+
+**Formats d'import** : CSV (`;` ou `,`, en-têtes `id, nom, lat, lng, demande, debut, fin, service` ou équivalents anglais, heures « 08:30 », « 8h30 » ou minutes), JSON (instance complète ou tableau de clients), VRPLIB `.vrp` (EUC_2D, comme le solveur ; dépôt renuméroté 0), Solomon / Gehring-Homberger `.txt` (client 0 = dépôt). Un CSV ou un tableau JSON remplace les clients et conserve dépôt, flotte et trafic.
 
 ## 11. Limites connues
 
@@ -225,6 +267,9 @@ Cible WCAG 2.1 AA.
 - Sous 1024 px, l'attribution de la carte est repliée derrière son bouton « i » (dépliée, elle masquerait un quart de la carte) ; elle est dépliée au-dessus.
 - Le profil Mapbox de `config/basemap.ts` n'est pas opérationnel avec MapLibre (URL `mapbox://`) : décision ouverte (SUIVI).
 - Imagerie satellite de 2016 (ADR-007).
+- Résultat de NANCY-60 simulé, fenêtres non respectées par construction (ADR-011).
+- Instances à coordonnées planes (VRPLIB, Solomon) : pas d'affichage cartographique.
+- Table clients : 9 colonnes dans le panneau (38 %) → défilement horizontal interne.
 
 ## 12. Glossaire
 
@@ -247,6 +292,8 @@ Cible WCAG 2.1 AA.
 3. *Comment savez-vous que vos couleurs sont accessibles ?* — Chaque paire est recalculée par un test automatique (formule WCAG 2.1) ; la suite de tests échoue si une paire passe sous son seuil.
 4. *Vos images/s sont-elles crédibles ?* — Mesurées dans Chromium avec accélération GPU ; le nom du moteur WebGL est enregistré avec chaque mesure ; protocole et données brutes en §5.
 5. *Pourquoi la carte reste-t-elle sombre en thème clair ?* — Le tracé ambre et les statuts sont conçus pour un fond sombre (contrastes de 6,7 à 9,3:1) ; sur fond clair, l'ambre tomberait à 2,15:1.
+7. *Pourquoi ne pas appeler OSRM depuis l'interface ?* — Chaque requête contiendrait les coordonnées des clients (donnée potentiellement personnelle) ; les tracés viennent du solveur, et en démonstration ils ont été calculés une fois, sur des points fictifs.
+8. *Comment prouvez-vous que l'import ne bloque pas l'interface ?* — Test automatisé sur le build de production : un `PerformanceObserver` compte les tâches longues pendant l'import de 1000 lignes ; résultat 0 (§9).
 6. *Et au clavier, sur la carte ?* — Flèches, + et −, Maj + flèches pour incliner et tourner (MapLibre) ; un lien d'évitement mène directement au panneau ; toute l'information de la carte sera aussi dans la liste des arrêts (P4).
 
 *(Liste complétée jusqu'à 15 questions en phase 6.)*
@@ -268,3 +315,4 @@ Cible WCAG 2.1 AA.
 | Relief Terrarium (AWS Open Data) | — | données libres, attribution « Mapzen Terrain Tiles » affichée |
 | Sentinel-2 cloudless 2016 (EOX IT Services) | — | CC BY 4.0 ; contient des données Copernicus Sentinel modifiées ; attribution affichée |
 | lucide-react (icônes) | 1.66 | ISC |
+| OSRM (serveur de démonstration) | — | 5 requêtes uniques sur points fictifs (ADR-011) ; données routières © OpenStreetMap (ODbL) |

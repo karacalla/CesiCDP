@@ -29,8 +29,17 @@ site/
 │  ├─ lib/team.ts             initiales et libellés des membres (« Membre n — à compléter »)
 │  ├─ store/ui.ts             Zustand : vue active, thème (localStorage), panneau replié
 │  ├─ hooks/                  useThemeAttribute (data-theme sur <html>), usePrefersReducedMotion
-│  ├─ types/vrp.ts            (P2) contrat de données aligné sur le solveur
-│  ├─ services/               (P2) api.ts (façade), mockApi.ts, httpApi.ts, adapters.ts (noms Python → TS)
+│  ├─ types/vrp.ts            CONTRAT (Zod → types) ; fiche équipe solveur : docs/CONTRAT_SOLVEUR.md
+│  ├─ services/               api.ts (façade, VITE_API_MODE), types.ts, mockApi.ts, httpApi.ts,
+│  │                          adapters.ts (+ test : noms Python → TS, horaires null si absents)
+│  ├─ data/                   nancy-60.instance.json / .result.json (générés UNE fois), gen1000.ts (graine)
+│  ├─ lib/parsers/            csv, json (index), vrplib, solomon → ImportResult {customers, issues[ligne]}
+│  ├─ lib/validation.ts       validateCustomer (messages fr), twStatus ; lib/time.ts (HH:MM ↔ minutes)
+│  ├─ store/vrp.ts            instance courante, CRUD toujours valide, rapport d'import
+│  ├─ workers/import.worker.ts  parseFile hors du fil principal
+│  ├─ features/data/          DataView, InstancePicker, ImportPanel(+useImport), DepotForm, FleetForm,
+│  │                          CustomerTable(+useCustomerTable, EditableCell, StatusBadge), useDraft
+│  ├─ features/map/CustomersLayer.tsx  clients + dépôt (couches natives, regroupement > 300)
 │  ├─ components/ui/          IconButton (aria-label obligatoire ; variantes glass / panel / solid)
 │  ├─ components/layout/      AppFrame (cadre + split 62/38), SEdge (bord en S + poignée), NavIsland,
 │  │                          PanelHeader, TeamHeader (E1), PrivacyNotice (RGPD)
@@ -40,6 +49,7 @@ site/
 │  ├─ features/<vue>/         (P2+) data, constraints, run, results, simulation, study
 │  ├─ workers/
 │  └─ test/setup.ts           jest-dom pour Vitest
+├─ scripts/make-nancy60.ts    génération unique de NANCY-60 (OSRM, points fictifs) : NE PAS relancer sans raison
 ├─ spikes/                    essais S1–S3 (jetables, servis en dev seulement)
 ├─ e2e/                       Playwright : helpers.ts (openApp), screenshots.spec.ts, a11y.spec.ts, spikes.spec.ts
 └─ docs/                      SUIVI.md, DOSSIER_CONCEPTION.md, captures/, spikes/resultats.json
@@ -47,7 +57,7 @@ site/
 
 ## Commandes
 
-`npm run check` (= typecheck && lint && test && build) · `npm run shots` (captures 1280/768, `SHOTS_PHASE=p1` pour nommer) · `npm run spikes` · `npm run test:a11y`.
+`npm run check` (= typecheck && lint && test && build) · `npm run test:perf` (build prod, import 1000) · `npm run shots` (captures 1280/768, `SHOTS_PHASE=p1` pour nommer) · `npm run spikes` · `npm run test:a11y`.
 
 ## Recettes
 
@@ -84,4 +94,9 @@ site/
 - **Surcharger le CSS de MapLibre** : préfixer par `.maplibregl-map` (sa feuille est importée après la nôtre, à spécificité égale elle gagne).
 - **Attendre la carte en test** : `section[aria-busy="false"]` (posé au premier `idle`), pas `networkidle` (les tuiles n'arrêtent jamais).
 - **Clavier de la carte en test** : chaque touche lance une animation de 300 ms ; attendre ~450 ms entre deux appuis.
+- **TanStack Table v9** : `tableFeatures({...})` + `useTable({ features, columns, data })` ; colonnes via `col.columns([...])` (sinon erreur de variance des types).
+- **Source GeoJSON** : `cluster` ne se change pas après création → `key` sur `<Source>`.
+- **Mesures de performance** : toujours sur le build de production (`playwright.perf.config.ts`), jamais en dev (React dev + recadrage du relief faussent tout).
+- **Scripts Node en TS** : `node scripts/x.ts` (types retirés par Node 24) ; imports relatifs avec extension `.ts` (`allowImportingTsExtensions`).
+- **Cycle d'imports** : `MAP_ID` vit dans `features/map/mapId.ts` (pas dans MapStage).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

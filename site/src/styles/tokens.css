@@ -37,6 +37,10 @@
   --wait: #3abdf8;
   --late: #f471b5;
   --series-2: #818cf8;
+  /* Variantes lisibles sur fond clair (texte et bordures d'état du panneau) */
+  --late-ink: #be185d;
+  --ok-ink: #047857;
+  --wait-ink: #0369a1;
 
   /* — Option « colorier par camion » (désactivée par défaut) : palette « light » de Paul Tol, sûre pour le daltonisme — */
   --route-1: #77aadd;
@@ -72,6 +76,9 @@
   --panel-ink-2: var(--ink-2);
   --panel-line: var(--line);
   --panel-accent-ink: var(--accent-ink);
+  --panel-late: var(--late-ink);
+  --panel-ok: var(--ok-ink);
+  --panel-wait: var(--wait-ink);
 }
 
 :root[data-theme='dark'] {
@@ -81,4 +88,7 @@
   --panel-ink-2: var(--muted-text-aa);
   --panel-line: rgb(255 255 255 / 0.1);
   --panel-accent-ink: var(--accent);
+  --panel-late: var(--late);
+  --panel-ok: var(--ok);
+  --panel-wait: var(--wait);
 }

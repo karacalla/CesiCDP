@@ -9,7 +9,7 @@ import { openApp } from './helpers'
 
 for (const theme of ['light', 'dark'] as const) {
   for (const width of [1280, 768]) {
-    test(`axe · coque · ${theme} @ ${width}px`, async ({ page }) => {
+    test(`axe · vue Données · ${theme} @ ${width}px`, async ({ page }) => {
       await openApp(page, theme, width)
       const result = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

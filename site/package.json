@@ -14,7 +14,8 @@
     "spikes": "playwright test e2e/spikes.spec.ts",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
     "preview": "vite preview",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "test:perf": "playwright test --config playwright.perf.config.ts e2e/import.spec.ts"
   },
   "dependencies": {
     "@deck.gl/core": "^9.4.1",

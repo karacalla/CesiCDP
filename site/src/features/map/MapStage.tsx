@@ -12,8 +12,10 @@ import { BASEMAP } from '@/config/basemap'
 import { INITIAL_VIEW, MAX_PITCH } from '@/config/app'
 import { fr } from '@/i18n/fr'
 import { tuneBasemap } from './basemapStyle'
+import { CustomersLayer } from './CustomersLayer'
+import { MAP_ID } from './mapId'
 
-export const MAP_ID = 'main'
+
 
 const TERRAIN = { source: 'cdp-dem', exaggeration: BASEMAP.exaggeration }
 const SKY = {
@@ -70,6 +72,7 @@ export function MapStage({ children }: { children?: ReactNode }) {
         onLoad={onLoad}
       >
         <AttributionControl position="bottom-left" compact />
+        {ready && <CustomersLayer />}
       </Map>
       {/* voile haut (lisibilité de l'en-tête) + vignette : décor, ignoré par les technologies d'assistance */}
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/35" />
