@@ -52,6 +52,8 @@ site/
 │  │                          useTours (données dérivées), useProjected (HTML positionné), useElevationProfile
 │  │                          gantt/ : Gantt, GanttRows (memo), GanttTooltip, useGanttZoom, ganttScale (+test)
 │  ├─ lib/cameraPadding.ts    marge de caméra = place de la bulle (TOUT flyTo/fitBounds/easeTo passe par visiblePadding)
+│  ├─ lib/share.ts            partage pur (Google découpé, Waze, GPX, GeoJSON, CSV, noms) ; lib/download.ts (Blob)
+│  ├─ features/share/         ShareDialog (Base UI Dialog), ShareNav (confirmation tiers), RouteSheet (impression), QrCode
 │  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
 │  ├─ store/scene.ts          phase de la carte globe → flying → routes, rotation, « passer », annonce
 │  ├─ features/globe/         GlobeDirector (caméra + boucle unique), GlobeLayer, GlobeControls, globeData, camera
@@ -131,6 +133,8 @@ site/
 - **Caméra et globe** : ne jamais lancer `fitBounds`/`flyTo` hors de la phase `routes` (GlobeDirector pilote la caméra) ; `cameraForBounds` est faux sur le globe → `features/globe/camera.ts` (Mercator) ; la boucle du globe cède la main si `map.isEasing()`.
 - **MapLibre redessine en continu** après un `setPaintProperty` et pendant un fondu de libellés : `fadeDuration={0}` ; mesurer les rendus avec `cdpMapForTests.on('render')` (dev seulement).
 - **e2e** : `openApp(page, thème, largeur, motion = 'none')` ; passer `'full'` pour tester le globe et le vol.
+- **Impression** : `.print-sheet` (portail dans <body>) est la seule chose imprimée (`@media print` dans index.css) ; tester avec `page.emulateMedia({ media: 'print' })`.
+- **Lien vers un service tiers** : toujours via la confirmation de `ShareNav` (coordonnées = données clients).
 - **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
 - **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

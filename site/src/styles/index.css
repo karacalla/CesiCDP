@@ -152,6 +152,75 @@
   bottom: 0;
 }
 
+/* Feuille de route (ADR-021) : invisible à l'écran ; à l'impression, elle seule est imprimée, en noir sur blanc */
+@media screen {
+  .print-sheet {
+    display: none;
+  }
+}
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000;
+  }
+  body > *:not(.print-sheet) {
+    display: none !important;
+  }
+  .print-sheet {
+    display: block;
+    font: 12px/1.4 var(--font-sans);
+    color: #000000;
+  }
+  .print-sheet h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .print-sheet .print-warning {
+    margin: 6px 0;
+    padding: 4px 8px;
+    border: 1px solid #000000;
+    font-weight: 600;
+  }
+  .print-sheet table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  .print-sheet th,
+  .print-sheet td {
+    border: 1px solid #475569;
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .print-sheet tr {
+    break-inside: avoid;
+  }
+  .print-sheet .print-check {
+    width: 36px;
+  }
+  .print-sheet .print-totals {
+    margin-top: 8px;
+    font-weight: 600;
+  }
+  .print-sheet .print-boxes {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .print-sheet .print-boxes > div {
+    border: 1px solid #000000;
+    min-height: 90px;
+    padding: 6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

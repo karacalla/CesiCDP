@@ -27,3 +27,9 @@ export function formatDuration(min: number): string {
   if (m < 60) return `${m} min`
   return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`
 }
+
+/** Date du jour (locale) au format AAAA-MM-JJ, pour les noms de fichiers et la feuille de route. */
+export function todayIso(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}

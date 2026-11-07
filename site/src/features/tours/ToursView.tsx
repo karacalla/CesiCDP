@@ -3,7 +3,9 @@
  *   en vitrine, les indicateurs, toutes les tournées, l'heure affichée et la liste des arrêts (équivalent texte de
  *   la carte). Parcours : ouvrir → « Calculer les tournées » → tournées affichées, sans autre clic.
  */
-import { AlertTriangle, CheckCircle2, Clock3, MapPin } from 'lucide-react'
+import { useState } from 'react'
+import { AlertTriangle, CheckCircle2, Clock3, MapPin, Share2 } from 'lucide-react'
+import { ShareDialog } from '@/features/share/ShareDialog'
 import { CO2_KG_PER_KM } from '@/config/app'
 import { fr } from '@/i18n/fr'
 import { formatDuration, formatHm } from '@/lib/time'
@@ -26,12 +28,21 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub?: string
   )
 }
 
+function ShareButton({ vehicleId, onClick }: { vehicleId: number; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={fr.share.buttonFor(vehicleId)} className="inline-flex h-9 items-center gap-2 rounded-full border border-panel-line bg-panel-surface px-4 text-sm font-semibold text-panel-ink hover:border-panel-ink-2">
+      <Share2 size={16} aria-hidden /> {fr.share.button}
+    </button>
+  )
+}
+
 export function ToursView() {
   const { instance, result, tours, selected, customers, kpis, stale } = useTours()
   const vehicleId = useSelection((s) => s.vehicleId)
   const stopId = useSelection((s) => s.stopId)
   const clock = useSelection((s) => s.clock)
   const { selectVehicle, selectStop, setClock } = useSelection()
+  const [shareOpen, setShareOpen] = useState(false)
   if (!instance) return null
 
   if (!result || !kpis) return <RunHero instance={instance} compact={false} />
@@ -51,6 +62,10 @@ export function ToursView() {
         <div className="relative mx-auto w-full max-w-[460px]">
           <TruckShowcase vehicleId={sel.route.vehicleId} className="relative z-10 -mb-12 ml-[2%] w-[96%]" />
           <JourneyCard route={sel.route} Q={instance.fleet.Q} selected onSelect={() => selectVehicle(sel.route.vehicleId)} className="pt-14" />
+          <div className="mt-3 flex justify-end">
+            <ShareButton vehicleId={sel.route.vehicleId} onClick={() => setShareOpen(true)} />
+          </div>
+          <ShareDialog vehicleId={sel.route.vehicleId} open={shareOpen} onOpenChange={setShareOpen} />
         </div>
       )}
 
@@ -96,7 +111,10 @@ export function ToursView() {
 
       {sel && (
         <section aria-labelledby="stops-list" className="flex flex-col gap-2">
-          <h2 id="stops-list" className="text-base font-semibold text-panel-ink">{fr.tours.stopsTitle(sel.route.vehicleId)}</h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="stops-list" className="text-base font-semibold text-panel-ink">{fr.tours.stopsTitle(sel.route.vehicleId)}</h2>
+            <ShareButton vehicleId={sel.route.vehicleId} onClick={() => setShareOpen(true)} />
+          </div>
           {indicative && <p className="text-xs text-panel-ink-2">{fr.tours.indicative}</p>}
           <ol className="flex flex-col gap-1">
             {sel.route.stops.map((s, i) => {

@@ -205,6 +205,8 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Options** : (a) bibliothèque PDF ; (b) page imprimable (`@media print` + `window.print()`) ; (c) liens « itinéraire » des services de navigation ; (d) fichiers GPX, GeoJSON, CSV générés dans le navigateur ; (e) QR code du lien.
 - **Choix** : (b) + (c) + (d) ; (e) sous réserve d'une bibliothèque locale sans dépendance (sinon retirée). Génération par `Blob` + `URL.createObjectURL` (révoqué), noms de fichiers assainis, XML échappé, coordonnées à 6 décimales. Avant d'ouvrir un service tiers : message « Les coordonnées des arrêts seront transmises à ce service » et confirmation. Google Maps : itinéraire découpé selon la limite documentée des points d'étape ; Waze : arrêt suivant seulement (limite du service, écrite dans l'interface) ; Apple Plans : renvoi au GPX faute de format multi-étapes documenté. Web Share (fichier GPX) quand `navigator.canShare` l'accepte, sinon téléchargement. Toute feuille porte « Résultat simulé » tant que le solveur n'est pas branché.
 - **Conséquence** : aucune bibliothèque PDF ; la mise en page d'impression est testée en e2e (`emulateMedia('print')`).
+- **Limites vérifiées dans la documentation officielle (07/11/2026)** : Google Maps URLs, action *Directions* : « up to three waypoints supported on mobile browsers, and a maximum of nine waypoints supported otherwise », séparateur `|` encodé `%7C`, virgule `%2C`, URL ≤ 2 048 caractères → **N = 9** étapes intermédiaires par partie (10 tronçons), **3** pour le QR code destiné au téléphone. Waze (*deep links*) : `https://www.waze.com/ul?ll=lat,lng&navigate=yes`, aucune étape documentée → arrêt suivant seulement.
+- **QR code (dépendance ajoutée)** : `uqr` 0.1.3 (unjs, MIT, **aucune dépendance**, 79 Ko décompressé) ; seule la fonction `encode` est utilisée, le dessin SVG est fait par nos soins (pas d'`innerHTML`). Écartée : `qrcode-generator` (556 Ko). Le QR code ne transmet rien : il contient le lien, qui n'est ouvert que par le chauffeur.
 
 ### ADR-022 — Camion du panneau : animation compositeur pilotée par une machine d'états (résultat S5)
 - **Contexte** : R5 : le camion du panneau roule, sort par le coin supérieur du panneau et revient selon des critères précis ; impressionner sans coûter.
@@ -278,6 +280,12 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 - **Écart mesuré** : la rotation avance par pas de 30/s, mais la carte se redessine ≈ 60 fois/s tant que les anneaux pulsent : chaque `setPaintProperty` relance MapLibre pour plusieurs images (essai : 37 rendus/s sans pulsation, 60 avec, même à 10 changements/s). Accepté : ≤ 60 s, arrêt à la première interaction, 0 ensuite. Le fondu des libellés (`fadeDuration`) a été mis à 0 : il forçait aussi un rendu par image pendant tout mouvement de caméra.
 - **Captures** : `captures/p4b-l2-globe-dark-{768,1280,1920}.png`, vol `p4b-l2-vol-{1,2,3}.png`, arrivée `p4b-l2-arrivee-dark-1280.png`, « Passer » `p4b-l2-passer-light-1280.png`, retour `p4b-l2-retour-light-1280.png`.
 
+### 6.1 quinquies Partage des tournées (P4b, lot 3, 07/11/2026)
+- **Accès** : bouton « Partager » sous la vitrine du camion sélectionné et en tête de « Arrêts du camion N » (nom accessible « Partager la tournée du camion N »).
+- **Dialogue** (`features/share/ShareDialog.tsx`, Dialog de Base UI) : feuille de route (impression), applications de navigation (`ShareNav.tsx` : 3 parties Google Maps pour 25 arrêts, Waze vers l'arrêt suivant à l'heure affichée, confirmation « Les coordonnées de N points seront transmises à … »), fichiers GPX / GeoJSON / CSV et « Partager le GPX… » (Web Share si le navigateur accepte les fichiers, sinon téléchargement), QR code de la première partie (3 étapes, téléphone).
+- **Bibliothèque** : `lib/share.ts` (fonctions pures : points, découpage, encodage, GPX 1.1 avec points d'étape + itinéraire + trace allégée à 15 m, GeoJSON, CSV « ; », échappement XML, noms de fichiers) ; `lib/download.ts` (Blob, URL révoquée après 1 s).
+- **Vérifié** : 10 tests unitaires (dont GPX analysé par `DOMParser`, échappement de `<3> & "Fils"`) ; `e2e/share.spec.ts` : focus piégé sur 20 tabulations, Échap et retour du focus, GPX téléchargé bien formé (27 points d'itinéraire), nom `cesicdp-camion-1-AAAA-MM-JJ.gpx`, aucun lien tiers sans confirmation, impression = feuille seule (25 lignes, « Résultat simulé ») ; axe 0 violation (2 thèmes × 2 largeurs). Captures `captures/p4b-l3-*.png`.
+
 ### 6.1 bis Analyse d'écart avec la maquette de référence (07/11/2026) et corrections
 
 | Élément | Maquette « Roam » | Avant | Après |
@@ -340,6 +348,7 @@ Cible WCAG 2.1 AA.
 - Aucune image hébergée chez un tiers (police auto-hébergée, pas d'avatar distant).
 - **Les requêtes de tuiles révèlent la zone consultée** : chaque tuile demandée (style OpenFreeMap, relief AWS, satellite EOX) contient ses coordonnées x/y/z. Un serveur de tuiles peut donc déduire la région affichée, jamais la liste des clients, qui sont dessinés localement. Parade possible : héberger les tuiles soi-même (PMTiles).
 - Données de démonstration exclusivement fictives.
+- **Partage d'une tournée** (ADR-021) : fichiers générés dans le navigateur ; un lien Google Maps ou Waze contient les coordonnées des arrêts : il n'est ouvert qu'après un avertissement nommant le service et le nombre de points ; le QR code ne transmet rien par lui-même.
 
 ## 9. Tests et qualité
 
@@ -448,4 +457,5 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 | lucide-react (icônes) | 1.66 | ISC |
 | shadcn/ui (`cn`, Base UI, class-variance-authority), motion | 4.23 / 1.9 / 0.7 / 14.10 | MIT |
 | Magic UI `BorderBeam` (copié) | — | MIT (ADR-015) |
+| uqr (encodage de QR code) | 0.1.3 | MIT, sans dépendance (ADR-021) |
 | OSRM (serveur de démonstration) | — | 5 requêtes uniques sur points fictifs (ADR-011) ; données routières © OpenStreetMap (ODbL) |
