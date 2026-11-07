@@ -13,7 +13,7 @@
 | P4 Résultats | ✅ terminé (07/11/2026) | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | `e2e/journey.spec.ts`, `captures/ux-*.png`, `p4-gantt-*.png`, `spikes/gantt.tsx` (survol p95 16,8 ms), axe 20/20 |
 | P4b Immersion · lot 0 essais | ✅ terminé (07/11/2026) | S4 globe, S5 camion mesurés ; ADR-018→022 | `docs/spikes/resultats.json` (S4-*, S5-*), `captures/s4-*.png` |
 | P4b · lot 1 plein écran + verre | ✅ terminé (07/11/2026) | 0 défilement à 768/1280/1920 ; contraste du verre testé sur blanc et noir | `e2e/layout.spec.ts` ×6, axe 30/30, `tokens.test.ts` (verre), `captures/p4b-l1-*.png` |
-| P4b · lot 2 globe + vol | à faire | ≥ 30 images/s ; CPU ≈ 0 à l'arrêt ; reduced-motion | |
+| P4b · lot 2 globe + vol | ✅ terminé (07/11/2026) | ≥ 30 images/s ; CPU ≈ 0 à l'arrêt ; reduced-motion | `e2e/globe.spec.ts` ×5 (60.3 img/s, 0 rendu/s en pause, 0 requête hors tuiles), `docs/perf/globe.json`, `captures/p4b-l2-*.png` |
 | P4b · lot 3 partage | à faire | GPX valide, impression, dialogue clavier | |
 | P4b · lot 4 camion du panneau | à faire | 0 tâche > 50 ms, CLS 0 ; machine d'états testée | |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
@@ -86,16 +86,16 @@ P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein
 - Carte d'info masquée sous 1024 px (la carte fait 52 % de la hauteur) : le panneau porte les mêmes informations.
 - Éditeur de trafic : après validation par Entrée, l'éditeur est recréé (clé) et le focus revient au début de la page ; validation par sortie de champ sans perte.
 - Courbe de convergence simulée en mode mock (seuls les coûts initial et final viennent du résultat simulé) ; étiquetée dans l'interface.
-- Table clients : défilement horizontal interne au panneau (9 colonnes dans 38 %).
-- Mesures S2–S5 faites sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
+- Rotation du globe : la carte se redessine ≈ 60 fois/s tant que les anneaux pulsent (37/s sans) ; ≤ 60 s, 0 ensuite.
+- < 1024 px : le bouton « Calculer les tournées » est sous le pli de la feuille du bas (défilement d'un écran).
+- Mesures S2–S5 et P4b sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
 
 ## Journal
 
+- 07/11/2026 — P4b lot 2 : globe d'ouverture (MapLibre globe, dépôts fictifs, arcs, anneaux, fond d'espace CSS), vol 4,5 s + « Passer l'animation »/Échap, retour au globe, réglage « Animations » ; `fadeDuration` 0 ; correctif : enfants du panneau qui se tassaient (feuille du bas).
 - 07/11/2026 — P4b lot 1 : plein écran (ADR-018), bulle de verre à deux couches (blanc 96 % / navy 88 %, testé sur blanc et noir), feuille du bas < 1024 px, `lib/cameraPadding`, CLAUDE.md §4 (Cadre, Panneau) et §3 bis (budget d'effets) mis à jour.
 - 07/11/2026 — P4b lot 0 : essais S4 (globe : 60 img/s rotation, 58–60 vol, relief + deck.gl compatibles, `cameraForBounds` faux sur globe) et S5 (WAAPI composé, `offset-path` non) ; ADR-018→022.
 - 07/11/2026 — Fin de P4 : Gantt SVG (fenêtres, attente hachurée, retard ▼, heure affichée, info-bulle, zoom Ctrl+molette/boutons/glisser par transform) ; mesure sur le composant réel 20×50. Dépendances : retrait de `@deck.gl/extensions` et `@loaders.gl/gltf` (inutilisées), `shadcn` (CLI) passé en dépendance de développement.
-- 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.
 - 07/11/2026 — Refonte UX/identité (analyse d'écart avec la maquette « Roam ») : parcours en 1 clic, vue Tournées, tracé à deux états, curseur à cône, pins verre, carte d'info à coin concave, vitrine du camion, cartes de tournées à onglet, navigation détachée, en-tête compact (recherche active, alertes), correction de la palette écrasée par shadcn ; 60 tests unitaires, e2e parcours ×4, axe 20/20.
-- 07/11/2026 — P3 : contraintes (interrupteurs, éditeur de tranches contiguës, courbe, alerte FIFO), vue Calcul (algorithmes + capacités, « non pris en compte », réglages du recuit, lancement/annulation, convergence en direct), API `solve` (mock + http) ; 56 tests unitaires, e2e P3, axe 0 violation sur 3 vues.
-- 07/11/2026 — P2 : contrat Zod, mock + http + adaptateurs, NANCY-60 (OSRM une fois) et GEN-1000, formulaires, table TanStack v9 virtualisée éditable, import Worker (4 formats), carte des clients ; 47 tests, axe 0 violation.
-- 07/11/2026 — P1 : coque (cadre, split 62/38, bord en S + poignée, îlot de navigation, en-tête équipe, thèmes, RGPD), carte drone (satellite, ombrage, relief, ciel/brouillard, voile), axe 0 violation, 24 tests. README racine réécrit, `TODO.md` supprimé (réalisé).
+
+- 07/11/2026 — P0 à P3 : socle TS et essais S1–S3 ; coque et identité ; contrat Zod, NANCY-60, GEN-1000, import Worker, table ; contraintes et calcul simulé (détails : dossier §4–§9).

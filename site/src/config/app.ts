@@ -17,6 +17,9 @@ export const INITIAL_VIEW: CameraView = { longitude: 6.42, latitude: 48.42, zoom
 /** Centre-ville de Nancy (dépôt fictif de la démonstration, précisé en P2). */
 export const DEPOT_FOCUS: CameraView = { longitude: 6.1844, latitude: 48.6921, zoom: 12.5, pitch: 20, bearing: 0 }
 
+/** Vue d'ouverture (globe, ADR-020) ; recalée par GlobeDirector selon la place visible. */
+export const GLOBE_VIEW: CameraView = { longitude: 9, latitude: 44, zoom: 1.6, pitch: 0, bearing: 0 }
+
 export const MAX_PITCH = 70
 
 /** Durée des mouvements de caméra (ms) ; 0 si l'utilisateur demande moins d'animations. */

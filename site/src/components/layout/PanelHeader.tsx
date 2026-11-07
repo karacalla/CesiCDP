@@ -7,6 +7,7 @@ import { fr } from '@/i18n/fr'
 import { useUi } from '@/store/ui'
 import { AlertsButton } from './AlertsButton'
 import { CustomerSearch } from './CustomerSearch'
+import { SettingsButton } from './SettingsButton'
 import { TeamHeader } from './TeamHeader'
 
 export function PanelHeader() {
@@ -19,6 +20,7 @@ export function PanelHeader() {
       <div className="flex items-center gap-2">
         <CustomerSearch />
         <AlertsButton />
+        <SettingsButton />
         <IconButton
           variant="panel"
           label={theme === 'light' ? fr.panel.themeToDark : fr.panel.themeToLight}

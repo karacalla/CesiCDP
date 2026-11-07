@@ -8,8 +8,20 @@ import { create } from 'zustand'
 import type { ViewId } from '@/app/views'
 
 export type Theme = 'light' | 'dark'
+/** Niveau d'animation choisi par l'utilisateur ; `null` = suivre la préférence système (prefers-reduced-motion). */
+export type MotionLevel = 'full' | 'reduced' | 'none'
 
 const THEME_KEY = 'cesicdp.theme'
+const MOTION_KEY = 'cesicdp.motion'
+
+function readMotion(): MotionLevel | null {
+  try {
+    const v = localStorage.getItem(MOTION_KEY)
+    return v === 'full' || v === 'reduced' || v === 'none' ? v : null
+  } catch {
+    return null
+  }
+}
 
 function readTheme(): Theme {
   try {
@@ -28,6 +40,8 @@ interface UiState {
   view: ViewId
   theme: Theme
   panelCollapsed: boolean
+  motionPref: MotionLevel | null
+  setMotionPref: (m: MotionLevel) => void
   setView: (v: ViewId) => void
   toggleTheme: () => void
   togglePanel: () => void
@@ -41,6 +55,15 @@ export const useUi = create<UiState>((set, get) => ({
     return t
   })(),
   panelCollapsed: false,
+  motionPref: readMotion(),
+  setMotionPref: (motionPref) => {
+    try {
+      localStorage.setItem(MOTION_KEY, motionPref)
+    } catch {
+      /* réglage non mémorisé : sans conséquence */
+    }
+    set({ motionPref })
+  },
   setView: (view) => set({ view }),
   toggleTheme: () => {
     const theme: Theme = get().theme === 'light' ? 'dark' : 'light'

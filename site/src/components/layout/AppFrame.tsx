@@ -38,7 +38,7 @@ export function AppFrame({ map, panel, collapsed, onTogglePanel }: Props) {
           id={PANEL_ID}
           aria-label={fr.panel.label}
           tabIndex={-1}
-          className="flex h-full flex-col gap-6 overflow-y-auto overscroll-contain rounded-[22px] bg-[var(--glass-bg)] px-5 py-6 text-panel-ink sm:px-6 lg:rounded-[30px]"
+          className="flex h-full flex-col gap-6 overflow-y-auto overscroll-contain rounded-[22px] [&>*]:shrink-0 bg-[var(--glass-bg)] px-5 py-6 text-panel-ink sm:px-6 lg:rounded-[30px]"
         >
           {panel}
         </main>

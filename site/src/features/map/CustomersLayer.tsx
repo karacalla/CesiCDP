@@ -1,6 +1,6 @@
 /**
  * Rôle : clients et dépôt de l'instance courante sur la carte, en couches natives MapLibre (GPU, drapées sur le
- *   relief, regroupement intégré au-delà d'un certain nombre) ; recadrage à chaque changement d'instance.
+ *   relief, regroupement intégré au-delà d'un certain nombre).
  * Choix retenu : ADR-004 (couche `circle` native) ; les pins « verre » arrivent en P4 pour l'actif et le survolé.
  */
 import { useEffect, useMemo } from 'react'
@@ -9,7 +9,8 @@ import type { FeatureCollection, Point } from 'geojson'
 import { CAMERA_MS, DRONE_PITCH } from '@/config/app'
 import { useRun } from '@/store/run'
 import { useSelection } from '@/store/selection'
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useMotionLevel } from '@/hooks/useMotionLevel'
+import { useScene } from '@/store/scene'
 import { useVrp } from '@/store/vrp'
 import { labelLayerId, MAP_ID } from './mapId'
 import { visiblePadding } from '@/lib/cameraPadding'
@@ -20,7 +21,7 @@ const CLUSTER_FROM = 300
 export function CustomersLayer() {
   const instance = useVrp((s) => s.instance)
   const map = useMap()[MAP_ID]
-  const reduced = usePrefersReducedMotion()
+  const reduced = useMotionLevel() !== 'full'
   const geo = instance?.meta.coordinates === 'geo'
   const result = useRun((s) => s.result)
   const vehicleId = useSelection((s) => s.vehicleId)
@@ -55,10 +56,11 @@ export function CustomersLayer() {
 
   const clustered = data.features.length > CLUSTER_FROM
 
-  // recadrage uniquement quand l'instance change (pas à chaque édition d'une cellule)
+  // recadrage quand l'instance change (pas à chaque édition d'une cellule), seulement dans la vue des tournées :
+  // sans tournée, la scène est le globe (GlobeDirector pilote la caméra)
   const instanceId = instance?.id
   useEffect(() => {
-    if (!map || !geo || !instance || instance.customers.length === 0) return
+    if (!map || !geo || !instance || instance.customers.length === 0 || useScene.getState().phase !== 'routes' || !useRun.getState().result) return
     let [w, s, e, n] = [instance.depot.lng, instance.depot.lat, instance.depot.lng, instance.depot.lat]
     for (const c of instance.customers) {
       w = Math.min(w, c.lng)

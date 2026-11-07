@@ -9,9 +9,10 @@ import { useEffect, useMemo } from 'react'
 import { Layer, Source, useMap } from 'react-map-gl/maplibre'
 import type { Feature, FeatureCollection, LineString } from 'geojson'
 import { CAMERA_MS, DRONE_PITCH } from '@/config/app'
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useMotionLevel } from '@/hooks/useMotionLevel'
 import { bearing, splitAt, type LngLat } from '@/lib/route'
 import { labelLayerId, MAP_ID } from '@/features/map/mapId'
+import { useScene } from '@/store/scene'
 import { useSelection } from '@/store/selection'
 import { useTours } from './useTours'
 import { visiblePadding } from '@/lib/cameraPadding'
@@ -24,7 +25,8 @@ export function RoutesLayer() {
   const { tours, selected, state, geo } = useTours()
   const map = useMap()[MAP_ID]
   const selectVehicle = useSelection((s) => s.selectVehicle)
-  const reduced = usePrefersReducedMotion()
+  const reduced = useMotionLevel() !== 'full'
+  const phase = useScene((s) => s.phase)
   const before = labelLayerId(map)
 
   const others = useMemo<FeatureCollection<LineString>>(
@@ -60,7 +62,7 @@ export function RoutesLayer() {
   const selectedId = selected?.route.vehicleId
   useEffect(() => {
     const coords = selected?.track?.coords
-    if (!map || !coords || coords.length < 2) return
+    if (!map || !coords || coords.length < 2 || phase !== 'routes') return // globe et vol : caméra pilotée par GlobeDirector
     const start = coords[0] as LngLat
     let far = start
     let w = start[0], e = start[0], s = start[1], n = start[1]
@@ -73,8 +75,8 @@ export function RoutesLayer() {
     const wide = el.clientWidth >= 1024
     const padding = visiblePadding(el, wide ? { top: 140, bottom: 80, left: 360, right: 48 } : { top: 120, bottom: 40, left: 40, right: 72 })
     map.fitBounds([[w, s], [e, n]], { bearing: bearing(start, far), pitch: DRONE_PITCH, padding, duration: reduced ? 0 : CAMERA_MS, maxZoom: 13 })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- recadrage au seul changement de camion
-  }, [map, selectedId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recadrage au changement de camion ou à l'arrivée du vol
+  }, [map, selectedId, phase])
 
   if (!geo) return null
   return (

@@ -53,6 +53,9 @@ site/
 │  │                          gantt/ : Gantt, GanttRows (memo), GanttTooltip, useGanttZoom, ganttScale (+test)
 │  ├─ lib/cameraPadding.ts    marge de caméra = place de la bulle (TOUT flyTo/fitBounds/easeTo passe par visiblePadding)
 │  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
+│  ├─ store/scene.ts          phase de la carte globe → flying → routes, rotation, « passer », annonce
+│  ├─ features/globe/         GlobeDirector (caméra + boucle unique), GlobeLayer, GlobeControls, globeData, camera
+│  ├─ config/globe.ts         réglages du globe et dépôts FICTIFS ; hooks/useMotionLevel (full/reduced/none)
 │  ├─ store/selection.ts      camion / arrêt sélectionnés, heure affichée (DEMO_CLOCK)
 │  ├─ components/shadcn/      composants shadcn (alias de components.json) ; components/fx/ : effets (BorderBeam)
 │  ├─ components/layout/      + CustomerSearch (combobox), AlertsButton
@@ -125,6 +128,9 @@ site/
 - **Carte d'info** : toujours blanche (posée sur la carte sombre) → couleurs brutes (`bg-card`, `bg-[var(--panel)]`, `text-ink`), jamais `panel-*` qui suit le thème.
 - **Superposition** : la bulle couvre la droite de la carte → éléments posés sur la carte à `right-[calc(var(--panel-w)_+_var(--panel-gap)_+_24px)]` (≥ 1024 px) ou au-dessus de `var(--sheet-h)` (< 1024 px) ; variante `panel-collapsed:` quand la bulle est repliée.
 - **Verre** : `--glass-map-*` = contrôles sombres sur la carte (`glass`) ; `--glass-*` = bulle du panneau (`glass-bubble`), opacité verrouillée par `tokens.test.ts` : ne pas la baisser sans relancer le test.
+- **Caméra et globe** : ne jamais lancer `fitBounds`/`flyTo` hors de la phase `routes` (GlobeDirector pilote la caméra) ; `cameraForBounds` est faux sur le globe → `features/globe/camera.ts` (Mercator) ; la boucle du globe cède la main si `map.isEasing()`.
+- **MapLibre redessine en continu** après un `setPaintProperty` et pendant un fondu de libellés : `fadeDuration={0}` ; mesurer les rendus avec `cdpMapForTests.on('render')` (dev seulement).
+- **e2e** : `openApp(page, thème, largeur, motion = 'none')` ; passer `'full'` pour tester le globe et le vol.
 - **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
 - **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

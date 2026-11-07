@@ -149,6 +149,8 @@ export const fr = {
     mapTitle: 'Tournées du jour',
     mapSub: (inst: string, n: number, k: number) => `${inst} · ${n} clients · ${k} camions`,
     ready: 'Prêt à calculer',
+    empty: 'Aucune tournée calculée',
+    loadDemo: 'Charger NANCY-60',
     cta: 'Calculer les tournées',
     recompute: 'Recalculer',
     advanced: 'Réglages avancés',
@@ -213,6 +215,18 @@ export const fr = {
     importIssues: (n: number) => `${n} ligne${n > 1 ? 's' : ''} écartée${n > 1 ? 's' : ''} au dernier import.`,
     searchEmpty: 'Aucun client trouvé.',
     team: (n: number) => `${n} membres`,
+  },
+  globe: {
+    legend: 'Réseau de dépôts simulé (démonstration)',
+    pause: 'Mettre en pause la rotation du globe',
+    play: 'Reprendre la rotation du globe',
+    skip: 'Passer l’animation',
+    arrived: (n: number) => `Tournées affichées : ${n} camion${n > 1 ? 's' : ''}.`,
+  },
+  settings: {
+    label: 'Réglages d’affichage',
+    animations: 'Animations',
+    levels: { full: 'Complètes', reduced: 'Réduites', none: 'Aucune' },
   },
   map: {
     label: 'Carte des tournées en relief',

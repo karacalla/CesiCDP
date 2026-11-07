@@ -7,8 +7,10 @@ import { NavIsland } from '@/components/layout/NavIsland'
 import { InfoCard } from '@/features/tours/InfoCard'
 import { MapMarkers } from '@/features/tours/MapMarkers'
 import { StatusPill } from '@/features/tours/StatusPill'
+import { GlobeControls } from '@/features/globe/GlobeControls'
 import { fr } from '@/i18n/fr'
 import { useUi } from '@/store/ui'
+import { useScene } from '@/store/scene'
 import { useVrp } from '@/store/vrp'
 import { MapToolbar } from './MapToolbar'
 
@@ -16,9 +18,11 @@ export function MapOverlay() {
   const view = useUi((s) => s.view)
   const setView = useUi((s) => s.setView)
   const instance = useVrp((s) => s.instance)
+  // pendant le globe et le vol, la carte n'affiche pas encore les tournées : ni pins, ni fiche, ni pastille
+  const routes = useScene((s) => s.phase) === 'routes'
   return (
     <>
-      <MapMarkers />
+      {routes && <MapMarkers />}
       <div className="pointer-events-none absolute inset-x-6 top-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-4 lg:right-[calc(var(--panel-w)_+_var(--panel-gap)_+_24px)] panel-collapsed:lg:right-6">
         <div className="text-on-dark">
           <p className="text-3xl font-light leading-tight tracking-tight sm:text-4xl">{fr.tours.mapTitle}</p>
@@ -28,8 +32,9 @@ export function MapOverlay() {
           <NavIsland active={view} onChange={setView} />
         </div>
       </div>
-      <InfoCard />
-      <StatusPill />
+      {routes && <InfoCard />}
+      {routes && <StatusPill />}
+      <GlobeControls />
       <MapToolbar className="absolute bottom-[calc(var(--sheet-h)_+_56px)] right-5 lg:bottom-16 lg:right-[calc(var(--panel-w)_+_var(--panel-gap)_+_20px)] panel-collapsed:bottom-16 panel-collapsed:lg:right-5" />
     </>
   )

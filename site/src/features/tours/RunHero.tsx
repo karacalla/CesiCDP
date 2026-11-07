@@ -5,14 +5,15 @@
  * Effet visuel unique de l'application : bordure lumineuse ambre pendant le calcul (Magic UI, ADR-015), absente si
  *   l'utilisateur demande moins d'animations.
  */
-import { AlertTriangle, Loader2, Play, Square } from 'lucide-react'
+import { AlertTriangle, Loader2, Play, RotateCcw, Square } from 'lucide-react'
 import { BorderBeam } from '@/components/fx/border-beam'
 import { ALGOS } from '@/config/solver'
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useMotionLevel } from '@/hooks/useMotionLevel'
 import { fr } from '@/i18n/fr'
 import { activeConstraints, ignoredBy } from '@/lib/constraints'
 import { useRun } from '@/store/run'
 import { useUi } from '@/store/ui'
+import { useVrp } from '@/store/vrp'
 import type { Instance } from '@/types/vrp'
 
 const fmt = (v: number): string => v.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
@@ -20,7 +21,8 @@ const fmt = (v: number): string => v.toLocaleString('fr-FR', { maximumFractionDi
 export function RunHero({ instance, compact }: { instance: Instance; compact: boolean }) {
   const { algo, params, status, elapsed, error, start, cancel } = useRun()
   const setView = useUi((s) => s.setView)
-  const reduced = usePrefersReducedMotion()
+  const reduced = useMotionLevel() !== 'full'
+  const load = useVrp((s) => s.load)
   const running = status === 'running'
   const active = activeConstraints(instance)
   const ignored = ignoredBy(algo, instance)
@@ -36,7 +38,7 @@ export function RunHero({ instance, compact }: { instance: Instance; compact: bo
       {running && !reduced && <BorderBeam size={90} duration={5} borderWidth={2} colorFrom="#f59e0b" colorTo="#fbbf24" />}
       {!compact && (
         <>
-          <p className="text-sm font-light text-panel-ink-2">{fr.tours.ready}</p>
+          <p className="text-sm font-light text-panel-ink-2">{fr.tours.empty} · {fr.tours.ready.toLowerCase()}</p>
           <h2 id="run-hero-title" className="text-xl font-semibold text-panel-ink">{instance.name}</h2>
           <p className="text-xs text-panel-ink-2">
             {fr.tours.activeConstraints} : {chips.length ? chips.join(' · ') : fr.tours.none}
@@ -58,6 +60,11 @@ export function RunHero({ instance, compact }: { instance: Instance; compact: bo
         ) : (
           <button type="button" onClick={() => start(instance)} className="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-5 text-sm font-semibold text-on-accent shadow-[0_10px_24px_-12px_rgb(245_158_11/0.9)] hover:bg-accent-hover">
             <Play size={16} aria-hidden className="fill-on-accent" /> {compact ? fr.tours.recompute : fr.tours.cta}
+          </button>
+        )}
+        {!compact && !running && (
+          <button type="button" onClick={() => void load('NANCY-60')} className="inline-flex h-11 items-center gap-2 rounded-full border border-panel-line px-4 text-sm font-semibold text-panel-ink hover:border-panel-ink-2">
+            <RotateCcw size={16} aria-hidden /> {fr.tours.loadDemo}
           </button>
         )}
         <button type="button" onClick={() => setView('run')} className="text-sm font-semibold text-panel-accent-ink underline-offset-4 hover:underline">

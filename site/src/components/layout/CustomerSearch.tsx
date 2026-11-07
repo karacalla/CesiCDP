@@ -7,7 +7,7 @@ import { Search } from 'lucide-react'
 import { useMap } from 'react-map-gl/maplibre'
 import { CAMERA_MS, DRONE_PITCH } from '@/config/app'
 import { MAP_ID } from '@/features/map/mapId'
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useMotionLevel } from '@/hooks/useMotionLevel'
 import { fr } from '@/i18n/fr'
 import { useRun } from '@/store/run'
 import { useSelection } from '@/store/selection'
@@ -28,7 +28,7 @@ export function CustomerSearch() {
   const result = useRun((s) => s.result)
   const selectStop = useSelection((s) => s.selectStop)
   const map = useMap()[MAP_ID]
-  const reduced = usePrefersReducedMotion()
+  const reduced = useMotionLevel() !== 'full'
 
   const matches = useMemo(() => {
     const n = norm(q.trim())

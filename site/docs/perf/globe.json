@@ -1,0 +1,34 @@
+{
+  "globe-1280-dark": {
+    "date": "2026-11-07T17:09:18.130Z",
+    "rotating": {
+      "mapRendersPerS": 60.3,
+      "browserFps": 60.3,
+      "longTasks": []
+    },
+    "paused": {
+      "mapRendersPerS": 0,
+      "browserFps": 61,
+      "longTasks": []
+    },
+    "flying": {
+      "mapRendersPerS": 50.5,
+      "browserFps": 50.5,
+      "longTasks": []
+    },
+    "settled": {
+      "mapRendersPerS": 0,
+      "browserFps": 61,
+      "longTasks": []
+    },
+    "foreignHosts": []
+  },
+  "globe-reduced-motion": {
+    "date": "2026-11-07T17:09:57.041Z",
+    "still": {
+      "mapRendersPerS": 0,
+      "browserFps": 61,
+      "longTasks": []
+    }
+  }
+}
