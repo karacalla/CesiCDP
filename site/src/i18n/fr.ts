@@ -6,11 +6,50 @@
  */
 export const fr = {
   app: {
+    brand: 'CesiCDP',
     title: 'CesiCDP · Dispatch des tournées',
-    tagline: 'Aide à la décision pour les tournées de livraison',
+    context: 'Dispatch logistique',
   },
-  p0: {
-    heading: 'Socle technique en place',
-    body: 'Vite, React, TypeScript strict, Tailwind et jetons de l’identité visuelle. La coque de l’application arrive en phase 1.',
+  views: {
+    data: 'Données',
+    constraints: 'Contraintes',
+    run: 'Calcul',
+    results: 'Résultats',
+    study: 'Étude',
+  },
+  viewIntro: {
+    data: 'Dépôt, flotte et clients de la journée.',
+    constraints: 'Fenêtres horaires et trafic par tranche.',
+    run: 'Algorithme, réglages et suivi du calcul.',
+    results: 'Tournées, indicateurs et planning.',
+    study: 'Passage à l’échelle sur les instances de référence.',
+  },
+  empty: 'Contenu disponible dans une prochaine phase.',
+  nav: { label: 'Vues de l’application' },
+  panel: {
+    label: 'Panneau de travail',
+    collapse: 'Replier le panneau',
+    expand: 'Déplier le panneau',
+    search: 'Rechercher un client',
+    searchPlaceholder: 'Rechercher un client…',
+    notifications: 'Notifications : aucune',
+    themeToLight: 'Passer au thème clair',
+    themeToDark: 'Passer au thème sombre',
+  },
+  team: {
+    label: 'Membres du groupe',
+    missing: (n: number) => `Membre ${n} — à compléter`,
+  },
+  privacy: {
+    title: 'Données locales',
+    body: 'Les fichiers importés sont traités dans votre navigateur ; aucune donnée client n’est envoyée. Les tuiles de carte révèlent seulement la zone affichée.',
+  },
+  map: {
+    label: 'Carte des tournées en relief',
+    reset: 'Réinitialiser la vue',
+    zoomIn: 'Zoomer',
+    zoomOut: 'Dézoomer',
+    locate: 'Centrer sur le dépôt',
+    tools: 'Outils de la carte',
   },
 } as const

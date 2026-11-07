@@ -105,6 +105,20 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : TypeScript 7.0 (compilateur natif, vérification en moins d'une seconde), oxlint conservé (avec les extensions `typescript`, `jsx-a11y` et `import`), Vitest 5 + Testing Library, Playwright pour les captures, l'audit axe et les mesures des essais. Chromium est lancé avec l'accélération GPU (ANGLE/D3D11) pour que les images/s mesurées aient un sens ; le moteur WebGL réellement utilisé est consigné avec chaque mesure.
 - **Conséquence** : `npm run check` enchaîne `typecheck && lint && test && build`.
 
+### ADR-007 — Imagerie satellite Sentinel-2 cloudless 2016 (EOX), désaturée
+- **Contexte** : l'identité demande une « vue de drone » sur satellite désaturé, sans clé ni compte.
+- **Options** : (a) Esri World Imagery ; (b) EOX Sentinel-2 cloudless, millésime récent ; (c) EOX Sentinel-2 cloudless **2016** ; (d) pas de satellite (style vectoriel seul).
+- **Critique** : (a) conditions d'usage liées à un compte ArcGIS, ambiguës hors usage personnel ; (b) licence CC BY-NC-SA (pas d'usage commercial, partage à l'identique) ; (c) CC BY 4.0, attribution seule, résolution 10 m suffisante pour une vue régionale ; (d) perd la lecture du terrain (forêts, vallées).
+- **Choix** : (c), affiché à −80 % de saturation et luminosité maximale 0,72, sous un ombrage du relief et le réseau routier vectoriel en blanc 16 %.
+- **Conséquence** : nouvelle source de tuiles, donc nouvelle requête révélant la zone affichée (§8) ; attribution ajoutée à la carte. Image de 2016 : pas de bâtiments récents (sans incidence pour le dispatch).
+
+### ADR-008 — Navigation par état, sans routeur
+- **Contexte** : 5 vues (Données, Contraintes, Calcul, Résultats, Étude) partagent la même carte.
+- **Options** : (a) react-router, une URL par vue ; (b) vue active dans le store Zustand.
+- **Critique** : (a) ajoute une dépendance et, mal utilisé, démonte la carte (rechargement des tuiles et du relief) ; l'historique du navigateur n'est pas un besoin du dispatcher. (b) garde la carte montée en permanence.
+- **Choix** : (b) ; îlot de navigation à 5 boutons, `aria-current="page"` sur la vue active.
+- **Conséquence** : pas de lien profond vers une vue ; ajoutable plus tard par l'ancre d'URL sans toucher aux vues.
+
 ## 5. Essais techniques S1–S3
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
@@ -136,6 +150,17 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 
 ## 6. Identité visuelle et jetons
 
+### 6.1 Gabarit (P1)
+- **Cadre** : application centrée, largeur max. 1536 px, rayon 36 px, bordure blanc 10 %, sur fond `--bg-darker`. Hauteur = fenêtre − 48 px (min. 640 px) à partir de 1024 px.
+- **Répartition** : la carte occupe 62 % à gauche et **passe sous le panneau** sur 40 px ; le panneau (38 %) a un bord gauche en S (SVG étiré : pleine largeur en haut, inflexion au milieu, affleurant en bas) avec ombre portée. La **poignée** au point d'inflexion est un vrai bouton (« Replier / Déplier le panneau », `aria-expanded`) qui rend toute la largeur à la carte.
+- **Sous 1024 px** : carte en haut (52 % de la hauteur, min. 380 px), panneau en dessous, arrondi en haut et remontant de 40 px sur la carte ; aucune largeur fixe, donc aucun défilement horizontal (vérifié à 768 px).
+- **Sur la carte** : marque « CesiCDP » (800) et contexte « Dispatch logistique » (300) sur voile ; îlot de navigation en verre (5 boutons ronds de 40 px, l'actif blanc plein avec son libellé) ; colonne d'outils en bas à droite (réinitialiser, +, −, centrer sur le dépôt) ; attribution en verre sombre, largeur bornée.
+- **Panneau** : recherche, cloche, bascule de thème ; en-tête d'équipe (E1) ; titre de contexte (300) puis titre de vue (700) ; corps de la vue ; mention RGPD toujours visible en pied.
+- **Carte « drone »** : style vectoriel sombre OpenFreeMap retouché à l'exécution (`features/map/basemapStyle.ts`) : satellite désaturé (ADR-007), ombrage du relief (ombres noires, lumières blanc 22 %), aplats d'occupation du sol masqués, routes en blanc 16 %, libellés `#9aa4b2` sur halo sombre ; relief Terrarium exagéré ×1,4 ; ciel et brouillard navy (`sky`) ; voile vertical noir 55 % → 0 → 35 % et vignette radiale. Vue initiale inclinée à 28° sur Nancy et les Vosges.
+- **Thèmes** : clair (défaut) et sombre ne changent que les variables `--panel-*` ; préférence mémorisée localement (`localStorage`, sans donnée personnelle).
+
+### 6.2 Jetons
+
 Principe : un seul accent (ambre), du noir/navy et du blanc ; la couleur porte un sens, jamais un décor. Source unique : `src/styles/tokens.css`, exposée à Tailwind par `@theme inline` (`src/styles/index.css`). Le thème ne change que les variables `--panel-*` ; la carte reste sombre.
 
 Ratios recalculés par `src/lib/contrast.ts` (formule WCAG 2.1) et vérifiés par `src/styles/tokens.test.ts` à chaque `npm test` :
@@ -163,13 +188,16 @@ Autres jetons : rayons (`--radius-frame` 36 px, `--radius-card` 24 px, `--radius
 
 ## 7. Accessibilité
 
-Cible WCAG 2.1 AA. Acquis en P0 : contrastes des jetons vérifiés automatiquement, focus toujours visible (anneau ambre doublé d'un liseré sombre), `prefers-reduced-motion` coupe animations et transitions, règles `jsx-a11y` dans le lint, aucune taille de texte < 12 px. À venir : audit axe par vue (P1+), alternative textuelle complète à la carte (liste des arrêts, P4).
+Cible WCAG 2.1 AA.
+- **P0** : contrastes des jetons vérifiés automatiquement, focus toujours visible (anneau ambre doublé d'un liseré sombre), `prefers-reduced-motion` coupe animations et transitions, règles `jsx-a11y` dans le lint, aucune taille de texte < 12 px.
+- **P1** : audit axe (règles WCAG 2.0/2.1 A et AA) de la coque : **0 violation** en thème clair et sombre, à 1280 et 768 px (`npm run test:a11y`). Le canevas WebGL est exclu de l'audit (axe ne peut pas lire ses pixels) : les textes posés dessus sont vérifiés sur capture (blanc et `#9aa4b2` sur voile noir). Lien d'évitement « Aller au panneau de travail » ; régions nommées (carte, navigation, panneau, outils) ; `aria-current` sur la vue active ; `aria-expanded` sur la poignée ; `aria-busy` sur la carte pendant le chargement ; boutons-icônes nommés (`aria-label` exigé par le typage de `IconButton`) ; textes internes de MapLibre traduits (`locale`), dont les raccourcis clavier de la carte ; caméra instantanée si `prefers-reduced-motion`.
+- **À venir** : alternative textuelle complète à la carte (liste des arrêts, P4).
 
 ## 8. Protection des données (RGPD)
 
 - Les fichiers importés sont traités **dans le navigateur** (Web Worker) ; aucun appel réseau ne contient de données clients.
 - Aucune image hébergée chez un tiers (police auto-hébergée, pas d'avatar distant).
-- **Les requêtes de tuiles révèlent la zone consultée** : chaque tuile demandée (style OpenFreeMap, relief AWS) contient ses coordonnées x/y/z. Un serveur de tuiles peut donc déduire la région affichée, jamais la liste des clients, qui sont dessinés localement. Parade possible : héberger les tuiles soi-même (PMTiles).
+- **Les requêtes de tuiles révèlent la zone consultée** : chaque tuile demandée (style OpenFreeMap, relief AWS, satellite EOX) contient ses coordonnées x/y/z. Un serveur de tuiles peut donc déduire la région affichée, jamais la liste des clients, qui sont dessinés localement. Parade possible : héberger les tuiles soi-même (PMTiles).
 - Données de démonstration exclusivement fictives.
 
 ## 9. Tests et qualité
@@ -178,7 +206,8 @@ Cible WCAG 2.1 AA. Acquis en P0 : contrastes des jetons vérifiés automatiqueme
 |---|---|
 | `npm run typecheck` | TypeScript strict, `noUncheckedIndexedAccess` |
 | `npm run lint` | oxlint : correctness en erreur, `no-explicit-any`, `ban-ts-comment`, jsx-a11y, `import/no-cycle` |
-| `npm test` | Vitest : contrastes des jetons, taille de texte minimale (19 tests en P0) |
+| `npm test` | Vitest : contrastes des jetons, taille de texte minimale, en-tête d'équipe, poignée du panneau, îlot de navigation (24 tests en P1) |
+| `npm run test:a11y` | axe sur la coque, 2 thèmes × 2 largeurs |
 | `npm run shots` | captures à 1280 et 768 px + contrôle de l'absence de défilement horizontal |
 | `npm run spikes` | essais S1–S3 |
 | `npm run build` | vérification de types puis build Vite |
@@ -193,6 +222,9 @@ Cible WCAG 2.1 AA. Acquis en P0 : contrastes des jetons vérifiés automatiqueme
 - Mesures de performance faites sur un seul poste ; à refaire sur le matériel de soutenance.
 - MapLibre épinglé en 5.24 tant que deck.gl n'est pas compatible avec la 6.x (ADR-002).
 - Facteur CO₂ de 0,29 kg/km repris du prototype : **source à fournir par l'équipe**.
+- Sous 1024 px, l'attribution de la carte est repliée derrière son bouton « i » (dépliée, elle masquerait un quart de la carte) ; elle est dépliée au-dessus.
+- Le profil Mapbox de `config/basemap.ts` n'est pas opérationnel avec MapLibre (URL `mapbox://`) : décision ouverte (SUIVI).
+- Imagerie satellite de 2016 (ADR-007).
 
 ## 12. Glossaire
 
@@ -214,6 +246,8 @@ Cible WCAG 2.1 AA. Acquis en P0 : contrastes des jetons vérifiés automatiqueme
 2. *Pourquoi une version ancienne de MapLibre ?* — deck.gl 9.4 plante avec MapLibre 6 quand le relief est actif ; constaté en essai, documenté (ADR-002).
 3. *Comment savez-vous que vos couleurs sont accessibles ?* — Chaque paire est recalculée par un test automatique (formule WCAG 2.1) ; la suite de tests échoue si une paire passe sous son seuil.
 4. *Vos images/s sont-elles crédibles ?* — Mesurées dans Chromium avec accélération GPU ; le nom du moteur WebGL est enregistré avec chaque mesure ; protocole et données brutes en §5.
+5. *Pourquoi la carte reste-t-elle sombre en thème clair ?* — Le tracé ambre et les statuts sont conçus pour un fond sombre (contrastes de 6,7 à 9,3:1) ; sur fond clair, l'ambre tomberait à 2,15:1.
+6. *Et au clavier, sur la carte ?* — Flèches, + et −, Maj + flèches pour incliner et tourner (MapLibre) ; un lien d'évitement mène directement au panneau ; toute l'information de la carte sera aussi dans la liste des arrêts (P4).
 
 *(Liste complétée jusqu'à 15 questions en phase 6.)*
 
@@ -232,3 +266,5 @@ Cible WCAG 2.1 AA. Acquis en P0 : contrastes des jetons vérifiés automatiqueme
 | Inter Variable | 5.3 (@fontsource) | SIL Open Font License 1.1 |
 | Style OpenFreeMap « dark » | — | données © OpenStreetMap (ODbL), schéma OpenMapTiles ; attribution affichée |
 | Relief Terrarium (AWS Open Data) | — | données libres, attribution « Mapzen Terrain Tiles » affichée |
+| Sentinel-2 cloudless 2016 (EOX IT Services) | — | CC BY 4.0 ; contient des données Copernicus Sentinel modifiées ; attribution affichée |
+| lucide-react (icônes) | 1.66 | ISC |

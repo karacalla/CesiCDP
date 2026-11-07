@@ -1,22 +1,45 @@
 /**
- * Captures d'écran des vues à deux largeurs (CLAUDE.md §10) et contrôle de l'absence de défilement horizontal.
- * Les captures sont écrites dans docs/captures/<phase>-<vue>-<largeur>.png. Lancer : npm run shots
+ * Captures d'écran à deux largeurs (CLAUDE.md §10), dans les deux thèmes, et contrôle de l'absence de défilement
+ * horizontal. Écrit docs/captures/<phase>-<vue>-<thème>-<largeur>.png. Lancer : SHOTS_PHASE=p1 npm run shots
  */
 import { expect, test } from '@playwright/test'
+import { openApp } from './helpers'
 
-const PHASE = process.env.SHOTS_PHASE ?? 'p0'
+const PHASE = process.env.SHOTS_PHASE ?? 'p1'
 const WIDTHS = [1280, 768] as const
-const VIEWS: Array<{ name: string; path: string }> = [{ name: 'accueil', path: '/' }]
+const THEMES = ['light', 'dark'] as const
+/** Vue → libellé du bouton de l'îlot de navigation. */
+const VIEWS: Array<{ name: string; nav: string | null }> = [{ name: 'coque', nav: null }]
+
 
 for (const v of VIEWS) {
-  for (const w of WIDTHS) {
-    test(`${v.name} @ ${w}px`, async ({ page }) => {
-      await page.setViewportSize({ width: w, height: 860 })
-      await page.goto(v.path)
-      await page.waitForLoadState('networkidle')
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
-      expect(overflow, 'défilement horizontal').toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `docs/captures/${PHASE}-${v.name}-${w}.png` })
-    })
+  for (const theme of THEMES) {
+    for (const w of WIDTHS) {
+      test(`${v.name} · ${theme} @ ${w}px`, async ({ page }) => {
+        await openApp(page, theme, w)
+        if (v.nav) await page.getByRole('button', { name: v.nav }).click()
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+        expect(overflow, 'défilement horizontal').toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `docs/captures/${PHASE}-${v.name}-${theme}-${w}.png` })
+      })
+    }
   }
 }
+
+test('relief · vue inclinée @ 1280px', async ({ page }) => {
+  await openApp(page, 'dark', 1280)
+  const canvas = page.locator('canvas.maplibregl-canvas')
+  await canvas.focus()
+  // chaque touche lance une animation de 300 ms : on attend entre deux appuis
+  const press = async (key: string, n: number): Promise<void> => {
+    for (let i = 0; i < n; i++) {
+      await page.keyboard.press(key)
+      await page.waitForTimeout(450)
+    }
+  }
+  await press('Equal', 2)
+  await press('Shift+ArrowUp', 4)
+  await press('Shift+ArrowLeft', 3)
+  await page.waitForTimeout(6000)
+  await page.screenshot({ path: `docs/captures/${PHASE}-relief-dark-1280.png` })
+})

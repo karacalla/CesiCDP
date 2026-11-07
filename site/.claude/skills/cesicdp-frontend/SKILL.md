@@ -15,23 +15,33 @@ site/
 ├─ vite.config.ts             Vite + Vitest + alias @/ → src/
 ├─ playwright.config.ts       Chromium avec GPU (ANGLE D3D11), serveur Vite sur :5199
 ├─ src/
-│  ├─ main.tsx / App.tsx      montage React ; App = coque (P1)
+│  ├─ main.tsx / App.tsx      montage React ; App = MapProvider + AppFrame(carte, panneau)
+│  ├─ app/views.ts            5 vues (id, libellé, icône) de l'îlot de navigation
 │  ├─ styles/tokens.css       SOURCE UNIQUE des couleurs, rayons, gabarits ; thème = variables --panel-*
 │  ├─ styles/index.css        Tailwind + @theme inline (expose les jetons : bg-accent, text-panel-ink…)
 │  ├─ styles/tokens.test.ts   contrastes WCAG des paires + interdiction des textes < 12 px
 │  ├─ config/basemap.ts       style de carte, relief, exagération (MapLibre par défaut / Mapbox)
 │  ├─ config/team.ts          membres du groupe (noms null = à compléter par l'équipe, ne jamais inventer)
+│  ├─ config/app.ts           vue initiale, vue dépôt, inclinaison max, durée caméra
 │  ├─ i18n/fr.ts              tous les textes d'interface
 │  ├─ lib/contrast.ts         ratio WCAG 2.1
 │  ├─ lib/random.ts           mulberry32 (graine) : seul générateur autorisé pour les données
+│  ├─ lib/team.ts             initiales et libellés des membres (« Membre n — à compléter »)
+│  ├─ store/ui.ts             Zustand : vue active, thème (localStorage), panneau replié
+│  ├─ hooks/                  useThemeAttribute (data-theme sur <html>), usePrefersReducedMotion
 │  ├─ types/vrp.ts            (P2) contrat de données aligné sur le solveur
 │  ├─ services/               (P2) api.ts (façade), mockApi.ts, httpApi.ts, adapters.ts (noms Python → TS)
-│  ├─ components/layout/      (P1) cadre, split, îlot de navigation, TeamHeader, mention RGPD
-│  ├─ features/<vue>/         (P1+) map, data, constraints, run, results, simulation, study
-│  ├─ hooks/  store/  workers/
+│  ├─ components/ui/          IconButton (aria-label obligatoire ; variantes glass / panel / solid)
+│  ├─ components/layout/      AppFrame (cadre + split 62/38), SEdge (bord en S + poignée), NavIsland,
+│  │                          PanelHeader, TeamHeader (E1), PrivacyNotice (RGPD)
+│  ├─ features/map/           MapStage (carte, relief, ciel, voile), basemapStyle (retouche « drone »),
+│  │                          MapOverlay (marque + îlot + outils), MapToolbar
+│  ├─ features/panel/         PanelContent (en-tête, titre de vue, corps, RGPD)
+│  ├─ features/<vue>/         (P2+) data, constraints, run, results, simulation, study
+│  ├─ workers/
 │  └─ test/setup.ts           jest-dom pour Vitest
 ├─ spikes/                    essais S1–S3 (jetables, servis en dev seulement)
-├─ e2e/                       Playwright : screenshots.spec.ts, spikes.spec.ts, a11y.spec.ts (P1)
+├─ e2e/                       Playwright : helpers.ts (openApp), screenshots.spec.ts, a11y.spec.ts, spikes.spec.ts
 └─ docs/                      SUIVI.md, DOSSIER_CONCEPTION.md, captures/, spikes/resultats.json
 ```
 
@@ -69,3 +79,9 @@ site/
 - **Git Bash convertit `/chemin` en `C:/Program Files/Git/chemin`** dans les arguments : préfixer par `MSYS_NO_PATHCONV=1`.
 - Ambre `--accent` **jamais en texte sur fond clair** (2,15:1) : utiliser `--accent-ink` / `text-panel-accent-ink`.
 - Pas de `Math.random()` dans les données : `mulberry32(graine)`.
+- **Jeton non exposé = classe silencieusement ignorée** : `text-ink` n'existe que si `--color-ink` est dans `@theme inline` (index.css).
+- **Tailwind, `calc` en valeur arbitraire** : espaces en `_` (`right-[calc(38%_-_var(--s-curve))]`).
+- **Surcharger le CSS de MapLibre** : préfixer par `.maplibregl-map` (sa feuille est importée après la nôtre, à spécificité égale elle gagne).
+- **Attendre la carte en test** : `section[aria-busy="false"]` (posé au premier `idle`), pas `networkidle` (les tuiles n'arrêtent jamais).
+- **Clavier de la carte en test** : chaque touche lance une animation de 300 ms ; attendre ~450 ms entre deux appuis.
+- Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.
