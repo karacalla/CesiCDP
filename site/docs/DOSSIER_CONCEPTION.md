@@ -286,6 +286,14 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 - **Bibliothèque** : `lib/share.ts` (fonctions pures : points, découpage, encodage, GPX 1.1 avec points d'étape + itinéraire + trace allégée à 15 m, GeoJSON, CSV « ; », échappement XML, noms de fichiers) ; `lib/download.ts` (Blob, URL révoquée après 1 s).
 - **Vérifié** : 10 tests unitaires (dont GPX analysé par `DOMParser`, échappement de `<3> & "Fils"`) ; `e2e/share.spec.ts` : focus piégé sur 20 tabulations, Échap et retour du focus, GPX téléchargé bien formé (27 points d'itinéraire), nom `cesicdp-camion-1-AAAA-MM-JJ.gpx`, aucun lien tiers sans confirmation, impression = feuille seule (25 lignes, « Résultat simulé ») ; axe 0 violation (2 thèmes × 2 largeurs). Captures `captures/p4b-l3-*.png`.
 
+### 6.1 sexies Camion du panneau (P4b, lot 4, 07/11/2026)
+- **Rôle** : le camion de la vitrine est le camion **sélectionné, au dépôt**. Parti, sa baie montre un contour en pointillés et « Camion N · en tournée, retour prévu HH:MM » (heure de retour du résultat). Au dépôt, « Camion N au dépôt. » reste lisible par les lecteurs d'écran.
+- **Code** : `config/cameo.ts` (toutes les durées et seuils), `features/cameo/cameoMachine.ts` (machine pure : états `home / leaving / away / entering`, file d'étapes), `useCameo.ts` (déclencheurs, lecteur WAAPI), `flight.ts` (trajet en courbe vers le coin supérieur droit du panneau puis hors écran ; images clés `transform` échantillonnées par `getPointAtLength`, rotation selon la tangente, réduction à 72 %, disparition en fin de course), `PanelTruck.tsx` (baie + couche animée en portail, `aria-hidden`, sans pointeur), `bus.ts` (`notifySimulation(true|false)` pour P5, « Rejouer »).
+- **Déclencheurs** : T1 changement de camion (sortie puis entrée ; clics rapides fusionnés) ; T2 / T3 début / fin de simulation (évènements prêts et testés, **câblage en P5**) ; T4 première apparition des tournées (entrée une seule fois par résultat) ; T5 après 120 s sans interaction, jamais pendant un calcul ni une simulation, au plus un par 10 min, absence de 20 s ; « Rejouer l'animation du camion » dans les réglages (roue crantée). Entrée : le camion **recule** dans sa baie (cabine vers l'extérieur, comme à quai), freinage final et tassement de 260 ms. Lueur des phares ambre, traînée en pointillés qui s'efface.
+- **Niveaux** : complètes = trajet ; réduites = fondu de 200 ms sur place, pas de T5 ; aucune = changement d'état sans mouvement. Onglet caché : aucune animation.
+- **Vérifié** : 6 tests de la machine avec horloge simulée (T1–T5, file, délais, rejouer) ; `e2e/cameo.spec.ts` à 1280 et 768 px : **0 tâche longue, décalage de mise en page 0** pendant la sortie et l'entrée (`docs/perf/cameo-*.json`), un clic sous le trajet aboutit pendant l'animation ; captures `captures/p4b-l4-*.png`.
+- **Limite** : un changement de camion pendant une simulation (P5) fera rentrer le nouveau camion ; à trancher au câblage de T2/T3.
+
 ### 6.1 bis Analyse d'écart avec la maquette de référence (07/11/2026) et corrections
 
 | Élément | Maquette « Roam » | Avant | Après |
@@ -419,7 +427,15 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 
 ## 13. Script de démonstration
 
-*Phase 6.*
+*Version P4b (complétée en phase 6).* Durée ≈ 4 min ; réglage « Animations : complètes » ; écran ≥ 1280 px.
+
+1. **Globe** (0:00) : l'application s'ouvre sur le globe qui tourne. « Voici un réseau de dépôts **simulé** — c'est écrit à l'écran. » Montrer le bouton pause (accessibilité : tout mouvement automatique a une pause).
+2. **Calcul** (0:30) : un clic sur « Calculer les tournées ». Montrer la ligne « fenêtres et trafic non pris en compte par cet algorithme » : l'interface ne ment pas sur le solveur.
+3. **Zoom** (0:50) : vol de 4,5 s du globe aux tournées ; à l'arrivée, inclinaison « drone », tracé ambre parcouru / blanc à venir, fiche du camion. Mentionner « Passer l'animation » et Échap.
+4. **Lecture** (1:30) : cartes de tournées, indicateurs, planning (Gantt : fenêtres, attente hachurée, retard ▼), curseur d'heure.
+5. **Partage** (2:30) : « Partager » → feuille de route (aperçu d'impression), GPX ; cliquer Google Maps pour montrer l'avertissement RGPD, puis Annuler ; QR code pour le téléphone du chauffeur.
+6. **Camion** (3:15) : choisir un autre camion : l'ancien quitte le panneau par le coin, le nouveau recule dans sa baie. En secours : réglages → « Rejouer l'animation du camion ».
+7. **Conclusion** (3:45) : thème sombre, largeur tablette (feuille du bas), « tout ce que montre la carte est aussi dans la liste des arrêts ».
 
 ## 14. Questions probables du jury
 
@@ -436,7 +452,14 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 8. *Comment prouvez-vous que l'import ne bloque pas l'interface ?* — Test automatisé sur le build de production : un `PerformanceObserver` compte les tâches longues pendant l'import de 1000 lignes ; résultat 0 (§9).
 6. *Et au clavier, sur la carte ?* — Flèches, + et −, Maj + flèches pour incliner et tourner (MapLibre) ; un lien d'évitement mène directement au panneau ; toute l'information de la carte sera aussi dans la liste des arrêts (P4).
 
-*(Liste complétée jusqu'à 15 questions en phase 6.)*
+13. *Pourquoi un globe à l'ouverture ?* — Il dit en une image que l'outil passe de l'échelle d'un réseau à celle d'une tournée ; il est natif (MapLibre, aucune bibliothèque 3D), étiqueté « démonstration », s'arrête à la première interaction ou après 60 s, et disparaît si l'on demande moins d'animations.
+14. *Le partage envoie-t-il les données des clients à Google ?* — Non par défaut : les fichiers sont produits dans le navigateur ; un lien Google Maps ou Waze n'est ouvert qu'après un avertissement qui nomme le service et le nombre de points transmis.
+15. *Combien coûte l'animation du camion ?* — Rien sur le fil principal : images clés `transform`/`opacity` jouées par le compositeur (S5 : l'alternative `offset-path` n'est pas composée) ; mesuré : 0 tâche longue, décalage de mise en page 0 ; aucune boucle en continu, rien quand l'onglet est caché.
+16. *Pourquoi Google Maps en plusieurs parties ?* — La documentation limite un lien à 9 étapes intermédiaires (3 sur navigateur mobile) ; au-delà, l'itinéraire est tronqué. Waze ne prend qu'une destination : on propose l'arrêt suivant ; Apple Plans n'a pas de format multi-étapes documenté : on fournit le GPX.
+17. *Un panneau transparent reste-t-il lisible ?* — L'opacité est la plus faible qui garde 4,5:1 pour chaque texte, calculée en composant le verre sur blanc pur et sur noir pur (test automatique) ; si le système demande moins de transparence, le panneau devient opaque.
+18. *Que devient le globe pendant l'usage quotidien ?* — Il n'apparaît que sans tournée ; un recalcul ne repasse pas par le globe ; la rotation est arrêtée par la première interaction ; mesuré : 0 rendu de carte par seconde une fois arrêté.
+
+*(Liste complétée en phase 6.)*
 
 ## Annexe A. Versions et licences
 

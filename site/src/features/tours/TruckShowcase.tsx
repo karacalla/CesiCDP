@@ -5,9 +5,10 @@
  */
 import { fr } from '@/i18n/fr'
 
-export function TruckShowcase({ vehicleId, className = '' }: { vehicleId: number; className?: string }) {
+export function TruckShowcase({ vehicleId, className = '', decorative = false }: { vehicleId: number; className?: string; decorative?: boolean }) {
+  const a11y = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': fr.tours.showcaseAlt(vehicleId) }
   return (
-    <svg viewBox="0 0 420 132" role="img" aria-label={fr.tours.showcaseAlt(vehicleId)} className={`drop-shadow-2xl ${className}`}>
+    <svg viewBox="0 0 420 132" {...a11y} className={`drop-shadow-2xl ${className}`}>
       <defs>
         <linearGradient id="truck-box" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#f8fafc" />

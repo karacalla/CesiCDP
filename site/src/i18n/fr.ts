@@ -246,6 +246,12 @@ export const fr = {
     signature: 'Signature du chauffeur',
     remarks: 'Remarques',
   },
+  cameo: {
+    home: (n: number) => `Camion ${n} au dépôt.`,
+    away: (n: number) => `Camion ${n} · en tournée`,
+    back: (t: string) => `retour prévu ${t}`,
+    replay: 'Rejouer l’animation du camion',
+  },
   globe: {
     legend: 'Réseau de dépôts simulé (démonstration)',
     pause: 'Mettre en pause la rotation du globe',

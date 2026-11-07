@@ -1,7 +1,8 @@
 /**
  * Rôle : en-tête compact du panneau : recherche de client, alertes, thème ; membres du groupe (E1) sur une ligne.
  */
-import { Moon, Sun } from 'lucide-react'
+import { Moon, RotateCcw, Sun } from 'lucide-react'
+import { emitCameo } from '@/features/cameo/bus'
 import { IconButton } from '@/components/ui/IconButton'
 import { fr } from '@/i18n/fr'
 import { useUi } from '@/store/ui'
@@ -20,7 +21,13 @@ export function PanelHeader() {
       <div className="flex items-center gap-2">
         <CustomerSearch />
         <AlertsButton />
-        <SettingsButton />
+        <SettingsButton
+          extra={
+            <button type="button" onClick={() => emitCameo('replay')} className="inline-flex h-9 items-center gap-2 self-start rounded-full border border-panel-line px-3 text-sm font-semibold text-panel-ink hover:border-panel-ink-2">
+              <RotateCcw size={16} aria-hidden /> {fr.cameo.replay}
+            </button>
+          }
+        />
         <IconButton
           variant="panel"
           label={theme === 'light' ? fr.panel.themeToDark : fr.panel.themeToLight}

@@ -54,6 +54,8 @@ site/
 │  ├─ lib/cameraPadding.ts    marge de caméra = place de la bulle (TOUT flyTo/fitBounds/easeTo passe par visiblePadding)
 │  ├─ lib/share.ts            partage pur (Google découpé, Waze, GPX, GeoJSON, CSV, noms) ; lib/download.ts (Blob)
 │  ├─ features/share/         ShareDialog (Base UI Dialog), ShareNav (confirmation tiers), RouteSheet (impression), QrCode
+│  ├─ features/cameo/         camion du panneau : cameoMachine (pure, testée), useCameo (WAAPI), flight, PanelTruck, bus
+│  ├─ config/cameo.ts         durées et seuils du camion (T5 : 120 s, 10 min, 20 s)
 │  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
 │  ├─ store/scene.ts          phase de la carte globe → flying → routes, rotation, « passer », annonce
 │  ├─ features/globe/         GlobeDirector (caméra + boucle unique), GlobeLayer, GlobeControls, globeData, camera
@@ -135,6 +137,7 @@ site/
 - **e2e** : `openApp(page, thème, largeur, motion = 'none')` ; passer `'full'` pour tester le globe et le vol.
 - **Impression** : `.print-sheet` (portail dans <body>) est la seule chose imprimée (`@media print` dans index.css) ; tester avec `page.emulateMedia({ media: 'print' })`.
 - **Lien vers un service tiers** : toujours via la confirmation de `ShareNav` (coordonnées = données clients).
+- **Camion du panneau** : effet n° 3 = budget épuisé (§3 bis) ; animer en `transform`/`opacity` WAAPI uniquement (S5 : `offset-path` n'est pas composé) ; en P5, appeler `notifySimulation()` de `features/cameo/bus.ts`.
 - **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
 - **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

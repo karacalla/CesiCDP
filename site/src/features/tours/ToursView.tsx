@@ -13,7 +13,7 @@ import { useSelection } from '@/store/selection'
 import { Gantt } from './gantt/Gantt'
 import { JourneyCard } from './JourneyCard'
 import { RunHero } from './RunHero'
-import { TruckShowcase } from './TruckShowcase'
+import { PanelTruck } from '@/features/cameo/PanelTruck'
 import { stopStatus, useTours } from './useTours'
 
 const num = (v: number, d = 0): string => v.toLocaleString('fr-FR', { maximumFractionDigits: d })
@@ -60,7 +60,7 @@ export function ToursView() {
 
       {sel && (
         <div className="relative mx-auto w-full max-w-[460px]">
-          <TruckShowcase vehicleId={sel.route.vehicleId} className="relative z-10 -mb-12 ml-[2%] w-[96%]" />
+          <PanelTruck vehicleId={sel.route.vehicleId} returnAt={sel.route.end} className="z-10 -mb-12 ml-[2%] w-[96%]" />
           <JourneyCard route={sel.route} Q={instance.fleet.Q} selected onSelect={() => selectVehicle(sel.route.vehicleId)} className="pt-14" />
           <div className="mt-3 flex justify-end">
             <ShareButton vehicleId={sel.route.vehicleId} onClick={() => setShareOpen(true)} />

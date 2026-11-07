@@ -15,13 +15,13 @@
 | P4b · lot 1 plein écran + verre | ✅ terminé (07/11/2026) | 0 défilement à 768/1280/1920 ; contraste du verre testé sur blanc et noir | `e2e/layout.spec.ts` ×6, axe 30/30, `tokens.test.ts` (verre), `captures/p4b-l1-*.png` |
 | P4b · lot 2 globe + vol | ✅ terminé (07/11/2026) | ≥ 30 images/s ; CPU ≈ 0 à l'arrêt ; reduced-motion | `e2e/globe.spec.ts` ×5 (60.3 img/s, 0 rendu/s en pause, 0 requête hors tuiles), `docs/perf/globe.json`, `captures/p4b-l2-*.png` |
 | P4b · lot 3 partage | ✅ terminé (07/11/2026) | GPX valide, impression, dialogue clavier | `src/lib/share.test.ts` (10), `e2e/share.spec.ts` ×5 (axe 4/4), `captures/p4b-l3-*.png` |
-| P4b · lot 4 camion du panneau | à faire | 0 tâche > 50 ms, CLS 0 ; machine d'états testée | |
+| P4b · lot 4 camion du panneau | ✅ terminé (07/11/2026) | 0 tâche > 50 ms, CLS 0 ; machine d'états testée | `cameoMachine.test.ts` (6), `e2e/cameo.spec.ts` ×2 (0 tâche longue, CLS 0), `docs/perf/cameo-*.json`, `captures/p4b-l4-*.png` |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
 | P6 Étude et finition | à faire | dossier autosuffisant | |
 
 ## Prochaine action
 
-P4b lot 4 : camion du panneau (WAAPI, machine d'états `config/cameo.ts`, déclencheurs T1–T5, réglage « Rejouer l'animation ») ; puis P5 (câbler T2/T3 sur la simulation).
+P5 (simulation) : animer l'heure affichée, vue inclinée, camion glTF ; **appeler `notifySimulation(true/false)`** (T2/T3 du camion du panneau) ; décider du T1 pendant une simulation.
 
 ## Matrice d'écart (existant → cible)
 
@@ -92,7 +92,7 @@ P4b lot 4 : camion du panneau (WAAPI, machine d'états `config/cameo.ts`, décle
 
 ## Journal
 
-- 07/11/2026 — P4b lot 3 : partage (feuille de route imprimable, Google Maps découpé N = 9, Waze arrêt suivant, GPX/GeoJSON/CSV, Web Share, QR code via `uqr`, confirmation avant tout service tiers).
+- 07/11/2026 — P4b lot 4 : camion du panneau (machine d'états + WAAPI, T1/T4/T5 actifs, T2/T3 prêts pour P5, « Rejouer l'animation »), script de démonstration et questions 13–18 au dossier Lot 3 : partage (feuille de route imprimable, Google Maps découpé N = 9, Waze arrêt suivant, GPX/GeoJSON/CSV, Web Share, QR code via `uqr`, confirmation avant tout service tiers).
 - 07/11/2026 — P4b lot 2 : globe d'ouverture (MapLibre globe, dépôts fictifs, arcs, anneaux, fond d'espace CSS), vol 4,5 s + « Passer l'animation »/Échap, retour au globe, réglage « Animations » ; `fadeDuration` 0 ; correctif : enfants du panneau qui se tassaient (feuille du bas).
 - 07/11/2026 — P4b lot 1 : plein écran (ADR-018), bulle de verre à deux couches (blanc 96 % / navy 88 %, testé sur blanc et noir), feuille du bas < 1024 px, `lib/cameraPadding`, CLAUDE.md §4 (Cadre, Panneau) et §3 bis (budget d'effets) mis à jour.
 - 07/11/2026 — Fin de P4 : Gantt SVG (fenêtres, attente hachurée, retard ▼, heure affichée, info-bulle, zoom Ctrl+molette/boutons/glisser par transform) ; mesure sur le composant réel 20×50. Dépendances : retrait de `@deck.gl/extensions` et `@loaders.gl/gltf` (inutilisées), `shadcn` (CLI) passé en dépendance de développement. Puis P4b lot 0 : essais S4 (globe) et S5 (camion du panneau), ADR-018→022.
