@@ -22,6 +22,9 @@ const CASES = [
   { key: 'S2-overlay-1', url: '/spikes/s2.html?n=1&mode=overlay', shot: null },
   { key: 'S2-overlay-40', url: '/spikes/s2.html?n=40&mode=overlay', shot: null },
   { key: 'S3', url: '/spikes/s3.html', shot: 's3-gantt.png' },
+  { key: 'S4-globe-shot', url: '/spikes/s4.html?terrain=globe&stop=globe', shot: 's4-globe.png' },
+  { key: 'S4-globe-terrain', url: '/spikes/s4.html?terrain=globe', shot: 's4-globe-terrain.png' },
+  { key: 'S4-globe-terrain-end', url: '/spikes/s4.html?terrain=end', shot: 's4-globe-terrain-end.png' },
   { key: 'P4-gantt-20x50', url: '/spikes/gantt.html', shot: 'p4-gantt-20x50.png' },
 ]
 

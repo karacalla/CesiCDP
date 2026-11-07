@@ -11,6 +11,11 @@
 | P2 Données | ✅ terminé (07/11/2026) | import 1000 clients sans tâche > 100 ms ; erreurs ligne à ligne | `e2e/import.spec.ts` (build prod : 0 tâche > 50 ms), `docs/perf/import-1000.json`, `captures/p2-*.png` |
 | P3 Contraintes et lancement | ✅ terminé (07/11/2026) | « non pris en compte » si contrainte non gérée | `e2e/run.spec.ts`, `src/services/mockRun.test.ts`, `captures/p3-*.png`, axe 12/12 |
 | P4 Résultats | ✅ terminé (07/11/2026) | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | `e2e/journey.spec.ts`, `captures/ux-*.png`, `p4-gantt-*.png`, `spikes/gantt.tsx` (survol p95 16,8 ms), axe 20/20 |
+| P4b Immersion · lot 0 essais | ✅ terminé (07/11/2026) | S4 globe, S5 camion mesurés ; ADR-018→022 | `docs/spikes/resultats.json` (S4-*, S5-*), `captures/s4-*.png` |
+| P4b · lot 1 plein écran + verre | à faire | 0 défilement à 768/1280/1920 ; contraste du verre testé sur blanc et noir | |
+| P4b · lot 2 globe + vol | à faire | ≥ 30 images/s ; CPU ≈ 0 à l'arrêt ; reduced-motion | |
+| P4b · lot 3 partage | à faire | GPX valide, impression, dialogue clavier | |
+| P4b · lot 4 camion du panneau | à faire | 0 tâche > 50 ms, CLS 0 ; machine d'états testée | |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
 | P6 Étude et finition | à faire | dossier autosuffisant | |
 
@@ -54,6 +59,7 @@ P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein
 - ADR-015 Un seul effet visuel (Magic UI `BorderBeam`) : bordure ambre pendant le calcul, absente si `prefers-reduced-motion`.
 - ADR-016 Parcours en 1 clic : vue d'accueil « Tournées » ; « Calculer les tournées » → bascule automatique sur les tournées, camion 1 sélectionné ; réglages fins dans « Calcul ».
 - ADR-017 shadcn/ui : pont de variables vers nos jetons ; `--accent`, `--card`, `--chart-*` jamais redéfinis ; composants dans `components/shadcn/`, effets dans `components/fx/`.
+- ADR-018 Plein écran (remplace le cadre de CLAUDE.md §4) ; ADR-019 panneau en verre, opacité minimale garantissant 4,5:1 sur blanc ET noir ; ADR-020 globe natif MapLibre (S4 : 57–60 img/s ; cadrage en Mercator car `cameraForBounds` faux sur le globe ; Mercator explicite à l'arrivée) ; ADR-021 partage local (impression, liens, GPX/GeoJSON/CSV) ; ADR-022 camion du panneau en WAAPI `transform` (S5 : `offset-path` non composé).
 - ADR-011 NANCY-60 : clients fictifs + 5 requêtes OSRM uniques (1 matrice, 4 tracés) ; résultat **simulé** commité, marqué comme tel.
 
 ## Décisions ouvertes (à trancher par l'équipe)
@@ -71,7 +77,6 @@ P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein
 ## Écarts connus
 
 - `tournees.json` et le prototype JSX retirés du site (restent dans l'historique git et dans `algorithme/gen_carte.py`).
-- Attribution de la carte repliée (bouton « i ») sous 1024 px pour ne pas masquer la carte ; dépliée au-dessus.
 - Le relief de la vue initiale (plateau lorrain, inclinaison 28°) reste discret ; il se révèle à l'inclinaison (`captures/p1-relief-dark-1280.png`) et en P5.
 - NANCY-60 : fenêtres tirées APRÈS la construction des tournées simulées (pour montrer attente et retard) → le résultat simulé déclare `ignoredConstraints: ['timeWindows']`.
 - Perf d'import mesurée sur le **build de production** (`npm run test:perf`) ; en dev, le recadrage de la carte sur le relief produit une image de ≈ 120 ms (MapLibre), sans lien avec l'import.
@@ -82,10 +87,11 @@ P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein
 - Éditeur de trafic : après validation par Entrée, l'éditeur est recréé (clé) et le focus revient au début de la page ; validation par sortie de champ sans perte.
 - Courbe de convergence simulée en mode mock (seuls les coûts initial et final viennent du résultat simulé) ; étiquetée dans l'interface.
 - Table clients : défilement horizontal interne au panneau (9 colonnes dans 38 %).
-- Mesures S2/S3 faites sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
+- Mesures S2–S5 faites sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
 
 ## Journal
 
+- 07/11/2026 — P4b lot 0 : essais S4 (globe : 60 img/s rotation, 58–60 vol, relief + deck.gl compatibles, `cameraForBounds` faux sur globe) et S5 (WAAPI composé, `offset-path` non) ; ADR-018→022.
 - 07/11/2026 — Fin de P4 : Gantt SVG (fenêtres, attente hachurée, retard ▼, heure affichée, info-bulle, zoom Ctrl+molette/boutons/glisser par transform) ; mesure sur le composant réel 20×50. Dépendances : retrait de `@deck.gl/extensions` et `@loaders.gl/gltf` (inutilisées), `shadcn` (CLI) passé en dépendance de développement.
 - 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.
 - 07/11/2026 — Refonte UX/identité (analyse d'écart avec la maquette « Roam ») : parcours en 1 clic, vue Tournées, tracé à deux états, curseur à cône, pins verre, carte d'info à coin concave, vitrine du camion, cartes de tournées à onglet, navigation détachée, en-tête compact (recherche active, alertes), correction de la palette écrasée par shadcn ; 60 tests unitaires, e2e parcours ×4, axe 20/20.

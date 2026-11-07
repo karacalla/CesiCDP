@@ -9,7 +9,7 @@
 2. Besoin et utilisateurs
 3. Existant et matrice d'écart
 4. Décisions d'architecture (ADR)
-5. Essais techniques S1–S3
+5. Essais techniques S1–S5
 6. Identité visuelle et jetons
 7. Accessibilité
 8. Protection des données (RGPD)
@@ -179,7 +179,41 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : suppression de ces blocs et **pont** de variables shadcn vers nos jetons (`--primary` = ambre, `--muted-foreground` = `--panel-ink-2`, `--border` = `--panel-line`, etc.) ; `--accent`, `--card` et `--chart-*` ne sont jamais redéfinis ; variante `dark:` = notre `data-theme`. Composants shadcn dans `components/shadcn/` (alias de `components.json`), effets dans `components/fx/` (CLAUDE.md §3 bis).
 - **Conséquence** : un composant shadcn ajouté hérite de l'identité ; ceux qui emploient `accent` pour un survol neutre seront ajustés au cas par cas.
 
-## 5. Essais techniques S1–S3
+### ADR-018 — Plein écran : la carte occupe toute la fenêtre (remplace le « cadre » de CLAUDE.md §4)
+- **Contexte** : demande du propriétaire (R1, 07/11/2026) : plus de cadre ni de bords. Le cadre encapsulé (`max-w-[1536px]`, rayon 36 px, marges) réduisait la carte de 48 px en hauteur et de 15 à 25 % en largeur sur les grands écrans.
+- **Options** : (a) garder le cadre ; (b) carte plein écran (`100dvh`), panneau posé dessus ; (c) plein écran avec panneau latéral opaque collé au bord.
+- **Critique** : (a) refusé par le propriétaire ; (c) rend 38 % de la largeur à un panneau opaque : la carte redevient une « moitié d'écran ».
+- **Choix** : (b). Carte `absolute inset-0`, hauteur `100dvh`, aucun défilement de page ; l'identité « Roam » (rayon 36 px, bord clair, ombre) passe du cadre au panneau flottant (ADR-019). Toute animation de caméra passe par `lib/cameraPadding.ts`, qui décale le cadrage de la largeur du panneau.
+- **Conséquence** : la colonne d'outils et l'attribution se placent dans la zone visible (à gauche du panneau ; au-dessus de la feuille sous 1024 px) ; le bord en S n'a plus de raison d'être (le panneau ne touche plus de bord).
+
+### ADR-019 — Panneau en bulle de verre, opacité fixée par le calcul
+- **Contexte** : R4 (bulle semi-transparente flottante). Le verre fait passer le texte sur un fond variable : le contraste ne se vérifie plus « en théorie ».
+- **Options** : (a) opacité choisie à l'œil ; (b) opacité **minimale** telle que chaque texte du panneau garde ≥ 4,5:1 dans le pire cas, c'est-à-dire fond translucide composé sur **blanc pur** et sur **noir pur** ; (c) panneau opaque.
+- **Critique** : (a) invérifiable ; (c) ne répond pas à R4.
+- **Choix** : (b). Jetons `--glass-bg`, `--glass-border`, `--glass-blur` (≤ 24 px), `--glass-shadow` par thème dans `tokens.css` ; `tokens.test.ts` compose le fond sur blanc et sur noir et échoue si `--ink`, `--ink-2`, les encres d'état ou le texte du thème sombre passent sous 4,5:1. Repli opaque pour `prefers-reduced-transparency: reduce` et `@supports not (backdrop-filter)`. Le verre est un **style**, pas un effet (il ne compte pas dans le budget de CLAUDE.md §3 bis).
+- **Conséquence** : la transparence réelle reste faible, le flou porte l'essentiel de l'impression de verre ; c'est le prix d'un contraste garanti sur n'importe quelle carte.
+
+### ADR-020 — Globe d'ouverture natif MapLibre, puis vol vers les tournées (résultat S4)
+- **Contexte** : R2 : tant qu'aucune tournée n'existe, un globe esthétique tourne avec des dépôts simulés ; à l'apparition des tournées, zoom jusqu'à elles.
+- **Options** : (a) projection `globe` de MapLibre 5.24 (déjà présent) ; (b) globe Three.js ou deck.gl `GlobeView` séparé puis bascule vers la carte ; (c) vidéo ou image animée.
+- **Critique** : (b) second contexte WebGL, nouvelle dépendance, raccord visible entre deux moteurs ; (c) lourd, non interactif, sans lien avec les données. (a) mesuré en S4 : globe, atmosphère, relief et deck.gl fonctionnent ensemble, 57–60 images/s, aucune tâche longue pendant le vol.
+- **Choix** : (a). Scène dérivée du store (`globe` → `flying` → `routes`), sans nouvel état global. Rotation ≈ 3,5°/s dans **un seul** `requestAnimationFrame` plafonné à 30 images/s, arrêtée à la première interaction, après 60 s, hors de la scène `globe` et si l'onglet est caché ; bouton pause/lecture. Dépôts fictifs (étiquetés « démonstration ») en couche `circle` native, anneaux ambre animés par la même boucle ; arcs de grand cercle calculés une fois. Vol de 4,5 s (ease-in-out) vers l'emprise des tournées ; **cadrage calculé en Mercator** (`@math.gl/web-mercator`, déjà présent comme dépendance de deck.gl) car `cameraForBounds` sur le globe donne un zoom faux (7,7 au lieu de 10,7, S4) ; projection Mercator explicite à l'arrivée (deck.gl choisirait sinon `GlobeView` pour le camion de P5). Fond d'espace en CSS statique (étoiles, halo solaire, liseré), jamais animé. `prefers-reduced-motion` ou réglage « réduites / aucune » : globe fixe, saut direct avec fondu ≤ 150 ms.
+- **Conséquence** : effet n° 2 du budget (§3 bis) ; aucune requête hors tuiles ; les tuiles du globe (zooms 3 à 6) révèlent seulement « Europe » (RGPD §8).
+
+### ADR-021 — Partage des tournées généré localement
+- **Contexte** : R3 : feuille de route ou parcours pour les applications de navigation. Contrainte RGPD : aucune donnée client vers un tiers sans action explicite.
+- **Options** : (a) bibliothèque PDF ; (b) page imprimable (`@media print` + `window.print()`) ; (c) liens « itinéraire » des services de navigation ; (d) fichiers GPX, GeoJSON, CSV générés dans le navigateur ; (e) QR code du lien.
+- **Choix** : (b) + (c) + (d) ; (e) sous réserve d'une bibliothèque locale sans dépendance (sinon retirée). Génération par `Blob` + `URL.createObjectURL` (révoqué), noms de fichiers assainis, XML échappé, coordonnées à 6 décimales. Avant d'ouvrir un service tiers : message « Les coordonnées des arrêts seront transmises à ce service » et confirmation. Google Maps : itinéraire découpé selon la limite documentée des points d'étape ; Waze : arrêt suivant seulement (limite du service, écrite dans l'interface) ; Apple Plans : renvoi au GPX faute de format multi-étapes documenté. Web Share (fichier GPX) quand `navigator.canShare` l'accepte, sinon téléchargement. Toute feuille porte « Résultat simulé » tant que le solveur n'est pas branché.
+- **Conséquence** : aucune bibliothèque PDF ; la mise en page d'impression est testée en e2e (`emulateMedia('print')`).
+
+### ADR-022 — Camion du panneau : animation compositeur pilotée par une machine d'états (résultat S5)
+- **Contexte** : R5 : le camion du panneau roule, sort par le coin supérieur du panneau et revient selon des critères précis ; impressionner sans coûter.
+- **Options** : (a) `offset-path` CSS ; (b) images clés `transform` précalculées depuis `SVGPathElement.getPointAtLength`, jouées par WAAPI ; (c) boucle `requestAnimationFrame`.
+- **Critique** : S5 : (a) et (b) donnent 0 tâche longue et un décalage de mise en page nul, mais la trace Chromium indique pour (a) `compositeFailed` (`offset-distance` non composable) : l'animation tourne sur le fil principal. (b) est composée (aucun échec signalé), précalcul 3,7 ms pour 49 images clés. (c) occupe le fil principal à chaque image.
+- **Choix** : (b). Déclencheurs dans `config/cameo.ts` : T1 changement de camion, T2/T3 début/fin de simulation (évènements prêts, câblés en P5), T4 première apparition des tournées, T5 passage de démonstration après 120 s d'inactivité, au plus 1 par 10 min, jamais pendant un calcul. Machine d'états pure, testée avec une horloge simulée ; file d'attente (jamais deux animations) ; `will-change` seulement pendant l'animation ; rien si l'onglet est caché. Réglage « Animations : complètes / réduites / aucune ».
+- **Conséquence** : effet n° 3 du budget (§3 bis : BorderBeam, globe, camion). L'information « Camion N · en tournée » reste dans le DOM en permanence ; la couche animée est `aria-hidden`.
+
+## 5. Essais techniques S1–S5
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
 
@@ -207,6 +241,16 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 - **Protocole** : Gantt SVG (fenêtres, attentes hachurées, service), 3453 éléments SVG ; 300 survols successifs, 20 pas de zoom par re-rendu React puis 20 par transformation SVG. Durées React mesurées par `<Profiler>`, durées d'image par `requestAnimationFrame`, tâches longues par `PerformanceObserver`.
 - **Résultat** : premier rendu 116 ms ; survol p95 **1,5 ms** (max 3,5 ms) ; zoom par re-rendu p95 **167 ms par image** (React 85 ms) ; zoom par transformation p95 **16,8 ms**.
 - **Conclusion** : critère atteint avec la stratégie de l'ADR-005 ; le re-rendu complet pendant un geste est à proscrire. Capture : `captures/s3-gantt.png`.
+
+### S4 — Globe MapLibre 5.24 (projection, atmosphère, relief, vol, deck.gl)
+- **Protocole** (`spikes/s4.ts`, `npm run spikes`) : style de l'application + satellite EOX + projection `globe` + atmosphère (`atmosphere-blend` 1 jusqu'au zoom 5, 0 au zoom 7) ; panneau simulé de 540 px (marge droite de la caméra) ; couche deck.gl `ScatterplotLayer` entrelacée ; rotation 5 s à 3,5°/s ; vol `flyTo` de 4,5 s vers NANCY-60 ; deux variantes : relief actif dès le globe, ou seulement à l'arrivée.
+- **Résultats** : aucune erreur ; rotation **60,2 images/s** (p95 16,7 ms) ; vol **57,6 / 60,2 images/s**, **aucune tâche longue pendant le vol** (une tâche de 520–620 ms au chargement du style, préexistante) ; imagerie EOX servie aux zooms 3 à 12 sans échec ; deck.gl répond au survol sur le globe, après le vol et en Mercator ; `cameraForBounds` sur le globe rend un zoom de **7,7** au lieu de **10,66** (calcul Mercator : centre exact dans la zone visible, x = 370 px pour 370 attendus) ; à l'arrivée (zoom 10,7) la projection est encore entièrement « globe » (transition = 1).
+- **Conclusion** : critère atteint ; relief compatible (gardé actif, pas d'écart d'images/s) ; cadrage par calcul Mercator, Mercator explicite à l'arrivée (ADR-020). Captures : `captures/s4-globe.png`, `s4-globe-terrain.png`.
+
+### S5 — Animation du camion du panneau : `offset-path` ou WAAPI ?
+- **Protocole** (`spikes/s5.ts`, `e2e/s5.spec.ts`) : même trajet (courbe du panneau vers le coin supérieur droit puis hors écran), 2,8 s ; mesures : tâches longues, `layout-shift`, intervalle entre images ; trace Chromium `blink.animations` pour savoir si l'animation est composée. Tentative écartée : deux captures pendant un blocage du fil principal (une capture attend le fil principal : résultat inexploitable).
+- **Résultats** : (a) `offset-path` : 0 tâche longue, CLS 0, p95 16,7 ms, mais trace `compositeFailed`, propriété non composable `offset-distance` ; (b) WAAPI `transform` : 0 tâche longue, CLS 0, p95 16,8 ms, aucun échec de composition, précalcul 3,7 ms.
+- **Conclusion** : (b) retenu (ADR-022) : l'animation continue même si le fil principal est occupé (calcul, import).
 
 ## 6. Identité visuelle et jetons
 

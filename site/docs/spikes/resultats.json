@@ -143,5 +143,247 @@
     },
     "longTasksOver50ms": 4,
     "longestTaskMs": 126
+  },
+  "S4-globe-shot": {
+    "spike": "S4-shot",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "errors": []
+  },
+  "S4-globe-terrain": {
+    "spike": "S4",
+    "terrainMode": "globe",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "eoxZooms": [
+      3
+    ],
+    "eoxRequests": 205,
+    "eoxFailed": 0,
+    "deckPickGlobe": true,
+    "deckPickAfterFlyGlobe": true,
+    "deckPickAfterMercator": true,
+    "transitionAtArrival": 1,
+    "rotateEveryFrame": {
+      "fps": 60.2,
+      "p95FrameMs": 16.7
+    },
+    "rotateCapped30": {
+      "fps": 60.2,
+      "p95FrameMs": 16.8
+    },
+    "idleFps": {
+      "fps": 60.5,
+      "p95FrameMs": 16.8
+    },
+    "fly": {
+      "fps": 57.6,
+      "p95FrameMs": 16.8
+    },
+    "flyLongTasks": [],
+    "samples": [
+      {
+        "t": 17,
+        "zoom": 1.6,
+        "transition": 1
+      },
+      {
+        "t": 517,
+        "zoom": 1.8,
+        "transition": 1
+      },
+      {
+        "t": 1017,
+        "zoom": 2.4,
+        "transition": 1
+      },
+      {
+        "t": 1517,
+        "zoom": 3.5,
+        "transition": 1
+      },
+      {
+        "t": 2017,
+        "zoom": 5.2,
+        "transition": 1
+      },
+      {
+        "t": 2517,
+        "zoom": 7.1,
+        "transition": 1
+      },
+      {
+        "t": 3017,
+        "zoom": 8.7,
+        "transition": 1
+      },
+      {
+        "t": 3517,
+        "zoom": 9.8,
+        "transition": 1
+      },
+      {
+        "t": 4017,
+        "zoom": 10.5,
+        "transition": 1
+      },
+      {
+        "t": 4517,
+        "zoom": 10.7,
+        "transition": 1
+      }
+    ],
+    "arrival": {
+      "zoom": 10.66,
+      "transition": 1,
+      "ms": 6590
+    },
+    "centerPx": {
+      "x": 370,
+      "y": 397,
+      "expectedX": 370
+    },
+    "cameraForBoundsGlobeZoom": 7.7,
+    "fitZoom": 10.66,
+    "errors": [],
+    "longestTaskMs": 572
+  },
+  "S4-globe-terrain-end": {
+    "spike": "S4",
+    "terrainMode": "end",
+    "eoxZoomsAll": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "eoxZooms": [
+      3
+    ],
+    "eoxSample": [
+      "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/3/2/4.jpg",
+      "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/3/3/4.jpg"
+    ],
+    "eoxRequests": 262,
+    "eoxFailed": 0,
+    "deckPickGlobe": true,
+    "deckPickAfterFlyGlobe": true,
+    "deckPickAfterMercator": true,
+    "transitionAtArrival": 1,
+    "rotateEveryFrame": {
+      "fps": 60.2,
+      "p95FrameMs": 16.8
+    },
+    "rotateCapped30": {
+      "fps": 60.2,
+      "p95FrameMs": 16.8
+    },
+    "idleFps": {
+      "fps": 60,
+      "p95FrameMs": 16.7
+    },
+    "fly": {
+      "fps": 60.2,
+      "p95FrameMs": 16.7
+    },
+    "flyLongTasks": [],
+    "samples": [
+      {
+        "t": 17,
+        "zoom": 1.6,
+        "transition": 1
+      },
+      {
+        "t": 517,
+        "zoom": 1.8,
+        "transition": 1
+      },
+      {
+        "t": 1017,
+        "zoom": 2.4,
+        "transition": 1
+      },
+      {
+        "t": 1517,
+        "zoom": 3.5,
+        "transition": 1
+      },
+      {
+        "t": 2017,
+        "zoom": 5.1,
+        "transition": 1
+      },
+      {
+        "t": 2517,
+        "zoom": 7.1,
+        "transition": 1
+      },
+      {
+        "t": 3017,
+        "zoom": 8.7,
+        "transition": 1
+      },
+      {
+        "t": 3517,
+        "zoom": 9.8,
+        "transition": 1
+      },
+      {
+        "t": 4016,
+        "zoom": 10.5,
+        "transition": 1
+      },
+      {
+        "t": 4516,
+        "zoom": 10.7,
+        "transition": 1
+      }
+    ],
+    "arrival": {
+      "zoom": 10.66,
+      "transition": 1,
+      "ms": 7805
+    },
+    "centerPx": {
+      "x": 370,
+      "y": 397,
+      "expectedX": 370
+    },
+    "cameraForBoundsGlobeZoom": 7.7,
+    "fitZoom": 10.66,
+    "errors": [],
+    "longestTaskMs": 620
+  },
+  "S5-offset": {
+    "spike": "S5",
+    "mode": "offset",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "prepMs": 0,
+    "p95FrameMs": 16.8,
+    "longTasks": [],
+    "cls": 0,
+    "compositor": [
+      {
+        "compositeFailed": 8320,
+        "unsupportedProperties": [
+          "offset-distance"
+        ]
+      }
+    ]
+  },
+  "S5-waapi": {
+    "spike": "S5",
+    "mode": "waapi",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "prepMs": 5,
+    "p95FrameMs": 16.7,
+    "longTasks": [],
+    "cls": 0,
+    "compositor": "aucun évènement de composition dans la trace"
   }
 }
