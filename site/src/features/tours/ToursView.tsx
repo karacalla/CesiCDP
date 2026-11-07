@@ -8,6 +8,7 @@ import { CO2_KG_PER_KM } from '@/config/app'
 import { fr } from '@/i18n/fr'
 import { formatDuration, formatHm } from '@/lib/time'
 import { useSelection } from '@/store/selection'
+import { Gantt } from './gantt/Gantt'
 import { JourneyCard } from './JourneyCard'
 import { RunHero } from './RunHero'
 import { TruckShowcase } from './TruckShowcase'
@@ -86,6 +87,11 @@ export function ToursView() {
             className={i === 1 ? '-mt-3' : ''}
           />
         ))}
+      </section>
+
+      <section aria-labelledby="gantt-title" className="flex flex-col gap-2">
+        <h2 id="gantt-title" className="text-base font-semibold text-panel-ink">{fr.tours.gantt.title}</h2>
+        <Gantt routes={result.routes} customers={customers} />
       </section>
 
       {sel && (

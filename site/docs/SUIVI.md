@@ -10,13 +10,13 @@
 | P1 Coque et identité | ✅ terminé (07/11/2026) | 1280/768 sans défilement horizontal ; axe sur la coque | `e2e/a11y.spec.ts` (0 violation × 4), `captures/p1-*.png` |
 | P2 Données | ✅ terminé (07/11/2026) | import 1000 clients sans tâche > 100 ms ; erreurs ligne à ligne | `e2e/import.spec.ts` (build prod : 0 tâche > 50 ms), `docs/perf/import-1000.json`, `captures/p2-*.png` |
 | P3 Contraintes et lancement | ✅ terminé (07/11/2026) | « non pris en compte » si contrainte non gérée | `e2e/run.spec.ts`, `src/services/mockRun.test.ts`, `captures/p3-*.png`, axe 12/12 |
-| P4 Résultats | 🟡 en cours (07/11/2026) : carte, pins, curseur, carte d'info, KPI, cartes de tournées, vitrine, liste des arrêts faits ; **Gantt à faire** | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | `e2e/journey.spec.ts`, `captures/ux-*.png`, axe 20/20 |
+| P4 Résultats | ✅ terminé (07/11/2026) | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | `e2e/journey.spec.ts`, `captures/ux-*.png`, `p4-gantt-*.png`, `spikes/gantt.tsx` (survol p95 16,8 ms), axe 20/20 |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
 | P6 Étude et finition | à faire | dossier autosuffisant | |
 
 ## Prochaine action
 
-Fin de P4 : Gantt SVG (ADR-005 : zoom par transform), info-bulle, fenêtres, attente hachurée, retard avec icône ; puis P5 (simulation : animer l'heure affichée, vue inclinée).
+P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein écran + bulle de verre, globe d'ouverture, partage, camion du panneau) ; puis P5.
 
 ## Matrice d'écart (existant → cible)
 
@@ -86,6 +86,7 @@ Fin de P4 : Gantt SVG (ADR-005 : zoom par transform), info-bulle, fenêtres, att
 
 ## Journal
 
+- 07/11/2026 — Fin de P4 : Gantt SVG (fenêtres, attente hachurée, retard ▼, heure affichée, info-bulle, zoom Ctrl+molette/boutons/glisser par transform) ; mesure sur le composant réel 20×50. Dépendances : retrait de `@deck.gl/extensions` et `@loaders.gl/gltf` (inutilisées), `shadcn` (CLI) passé en dépendance de développement.
 - 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.
 - 07/11/2026 — Refonte UX/identité (analyse d'écart avec la maquette « Roam ») : parcours en 1 clic, vue Tournées, tracé à deux états, curseur à cône, pins verre, carte d'info à coin concave, vitrine du camion, cartes de tournées à onglet, navigation détachée, en-tête compact (recherche active, alertes), correction de la palette écrasée par shadcn ; 60 tests unitaires, e2e parcours ×4, axe 20/20.
 - 07/11/2026 — P3 : contraintes (interrupteurs, éditeur de tranches contiguës, courbe, alerte FIFO), vue Calcul (algorithmes + capacités, « non pris en compte », réglages du recuit, lancement/annulation, convergence en direct), API `solve` (mock + http) ; 56 tests unitaires, e2e P3, axe 0 violation sur 3 vues.

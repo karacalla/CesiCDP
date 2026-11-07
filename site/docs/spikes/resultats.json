@@ -120,5 +120,28 @@
     "n": 40,
     "fps": 58,
     "p95FrameMs": 16.8
+  },
+  "P4-gantt-20x50": {
+    "spike": "P4-gantt",
+    "renderer": "ANGLE (AMD, AMD Radeon (TM) Graphics (0x000015E7) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "svgElements": 3493,
+    "mountMs": 97,
+    "hover": {
+      "worstAt": 1,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 316.7
+    },
+    "wheelPreview": {
+      "worstAt": 15,
+      "p95FrameMs": 33.4,
+      "maxFrameMs": 33.4
+    },
+    "buttonZoom": {
+      "worstAt": 8,
+      "p95FrameMs": 16.7,
+      "maxFrameMs": 16.7
+    },
+    "longTasksOver50ms": 4,
+    "longestTaskMs": 126
   }
 }

@@ -99,6 +99,8 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Critique** : (a) mesuré à 167 ms par image (p95) : saccadé. (b) mesuré à 16,8 ms (une image à 60 Hz). (c) perd l'accessibilité et les info-bulles natives ; inutile puisque (b) suffit.
 - **Choix** : SVG + d3-scale, lignes mémorisées (`React.memo`), survol par délégation d'événements (p95 = 1,5 ms par mise à jour), zoom et défilement selon (b), traits en `vector-effect: non-scaling-stroke`.
 - **Conséquence** : pendant le geste, les étiquettes de l'axe sont étirées ; elles sont redessinées au relâchement.
+- **Réalisation (P4, 07/11/2026)** : `features/tours/gantt/` : `ganttScale.ts` (emprise, zoom borné à 30 min, graduations, transformation équivalente, testés), `useGanttZoom.ts` (Ctrl/⌘ + molette, boutons, glisser ; validation 160 ms après le dernier évènement), `GanttRows.tsx` (ligne mémorisée), `GanttTooltip.tsx`. Statut jamais porté par la couleur seule : triangle pour le retard, hachures pour l'attente, contour pointillé pour la fenêtre, et la liste des arrêts en texte. La molette seule fait défiler le panneau (pas de piège de défilement). Couleurs : jetons `--panel-ok/late/wait` (variantes lisibles sur clair), heure affichée en `--panel-accent-ink`.
+- **Mesure sur le composant réel** (`spikes/gantt.tsx`, 20 × 50, 3493 éléments, serveur de dev) : premier rendu 97–113 ms ; survol p95 **16,8 ms** (une image), mais **≈ 320 ms au tout premier survol** (montage de l'info-bulle et première graisse de police, une seule fois) ; aperçu Ctrl + molette p95 **33,4 ms** (≈ 30 images/s, repeinture des 3500 éléments) ; zoom par bouton p95 16,7 ms. Données : `docs/spikes/resultats.json` (`P4-gantt-20x50`), capture `captures/p4-gantt-20x50.png`.
 
 ### ADR-006 — Outillage : TypeScript 7, oxlint, Vitest, Playwright
 - **Contexte** : le prototype utilisait oxlint ; `CLAUDE.md` impose `typecheck`, `lint`, `test`, `test:a11y`, `build`.
@@ -332,7 +334,7 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 - Instances à coordonnées planes (VRPLIB, Solomon) : pas d'affichage cartographique.
 - Table clients : 9 colonnes dans le panneau (38 %) → défilement horizontal interne.
 - Modèle de trafic illustré (temps × coefficient de la tranche de départ) non confirmé par l'équipe solveur (ADR-012).
-- Gantt pas encore réalisé (fin de P4).
+- Gantt : le premier survol coûte ≈ 320 ms (une fois) ; pendant un geste de zoom, l'axe et les étiquettes ne suivent qu'au relâchement ; les barres ne sont pas atteignables au clavier une à une (la liste des arrêts l'est).
 - Carte tournée à la sélection d'un camion : le nord n'est plus en haut (choix de la maquette) ; « Réinitialiser la vue » le rétablit.
 - Position du camion entre deux arrêts interpolée à vitesse constante le long du tracé (affichage seulement, ADR-003 / `lib/route.ts`).
 - Courbe de convergence simulée en mode mock ; capacités des algorithmes déclarées en dur (`config/solver.ts`) tant que l'API ne les fournit pas.

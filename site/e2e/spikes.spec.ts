@@ -22,6 +22,7 @@ const CASES = [
   { key: 'S2-overlay-1', url: '/spikes/s2.html?n=1&mode=overlay', shot: null },
   { key: 'S2-overlay-40', url: '/spikes/s2.html?n=40&mode=overlay', shot: null },
   { key: 'S3', url: '/spikes/s3.html', shot: 's3-gantt.png' },
+  { key: 'P4-gantt-20x50', url: '/spikes/gantt.html', shot: 'p4-gantt-20x50.png' },
 ]
 
 test.describe.configure({ mode: 'serial' })

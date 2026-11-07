@@ -28,6 +28,17 @@ for (const theme of ['light', 'dark'] as const) {
         await page.locator('main').evaluate((m) => m.scrollTo(0, 0))
         await page.locator('main').screenshot({ path: `docs/captures/ux-panneau-${theme}-${width}.png` })
       }
+      // Gantt : survol → info-bulle ; zoom → bouton « toute la journée » actif ; clic sur une barre → arrêt sélectionné
+      const gantt = page.getByRole('img', { name: /^Planning de 4 camions/ })
+      await gantt.scrollIntoViewIfNeeded()
+      const bar = gantt.locator('[data-stop] rect').nth(6)
+      await bar.hover({ force: true })
+      await expect(page.getByRole('tooltip')).toContainText('Camion')
+      await page.locator('section[aria-labelledby="gantt-title"]').screenshot({ path: `docs/captures/p4-gantt-${theme}-${width}.png` })
+      await page.getByRole('button', { name: 'Zoomer sur le planning' }).click()
+      await expect(page.getByRole('button', { name: 'Afficher toute la journée' })).toBeEnabled()
+      await page.waitForTimeout(300)
+      await page.locator('section[aria-labelledby="gantt-title"]').screenshot({ path: `docs/captures/p4-gantt-zoom-${theme}-${width}.png` })
     })
   }
 }

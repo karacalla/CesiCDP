@@ -50,6 +50,7 @@ site/
 │  ├─ features/tours/         VUE D'ACCUEIL : ToursView, RunHero (1 clic), JourneyCard, TruckShowcase,
 │  │                          RoutesLayer (2 états), MapMarkers (pins verre + curseur), InfoCard, StatusPill,
 │  │                          useTours (données dérivées), useProjected (HTML positionné), useElevationProfile
+│  │                          gantt/ : Gantt, GanttRows (memo), GanttTooltip, useGanttZoom, ganttScale (+test)
 │  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
 │  ├─ store/selection.ts      camion / arrêt sélectionnés, heure affichée (DEMO_CLOCK)
 │  ├─ components/shadcn/      composants shadcn (alias de components.json) ; components/fx/ : effets (BorderBeam)
@@ -65,7 +66,7 @@ site/
 │  ├─ workers/
 │  └─ test/setup.ts           jest-dom pour Vitest
 ├─ scripts/make-nancy60.ts    génération unique de NANCY-60 (OSRM, points fictifs) : NE PAS relancer sans raison
-├─ spikes/                    essais S1–S3 (jetables, servis en dev seulement)
+├─ spikes/                    essais S1–S3, mesure du Gantt réel (gantt.tsx) ; servis en dev seulement
 ├─ e2e/                       Playwright : helpers.ts (openApp), screenshots.spec.ts, a11y.spec.ts, spikes.spec.ts
 └─ docs/                      SUIVI.md, DOSSIER_CONCEPTION.md, captures/, spikes/resultats.json
 ```
@@ -97,7 +98,8 @@ site/
 - **MapLibre 6 + deck.gl 9.4 + relief = plantage** (`reading 'elevation'`). MapLibre reste en `~5.24.0` (ADR-002). Ne pas mettre à jour sans relancer `npm run spikes`.
 - **deck.gl ne suit pas le relief** : à z = 0 les couches passent sous le terrain. Tracés et pins en couches natives ; pour le camion, `z = map.queryTerrainElevation(p)` (valeur déjà multipliée par l'exagération).
 - **Ne jamais utiliser `maplibregl.Marker` ni `<Marker>` de react-map-gl** avec le relief : 40 marqueurs = 10 images/s. Positionner soi-même les éléments HTML (`map.project` dans l'événement `render`).
-- **Gantt** : pas de re-rendu React pendant un zoom ou un défilement ; `transform` SVG puis re-rendu au relâchement (ADR-005).
+- **Gantt** : pas de re-rendu React pendant un zoom ou un défilement ; `transform` SVG puis re-rendu au relâchement (ADR-005). La molette seule doit faire défiler le panneau : zoom = Ctrl/⌘ + molette (écouteur non passif).
+- **Captures Playwright sous Windows** : `UNKNOWN: unknown error, open …png` = fichier verrouillé (aperçu ouvert) ; relancer le test.
 - **`map.once('idle')` ne revient pas** si la carte est déjà inactive et que rien ne déclenche de rendu : appeler `map.triggerRepaint()` après avoir posé l'écouteur.
 - **Import de MapLibre** : `import * as maplibregl from 'maplibre-gl'` (pas d'export par défaut dans les types).
 - **Vite garde l'ancienne version d'une dépendance en cache** après un changement de version : arrêter le serveur sur :5199 et relancer avec `--force`.
