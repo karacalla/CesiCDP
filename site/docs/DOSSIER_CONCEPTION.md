@@ -314,7 +314,7 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 | Titre | grand et léger, ligne de détail à 60 % | marque en gras | « Tournées du jour » (300) + « NANCY-60 · 60 clients · 4 camions » à 60 % |
 | Carte d'info | blanche, rayon 28, coin concave, ✕ accroché, profil | absente | identique (masque radial), profil d'altitude lu dans le relief |
 | Panneau | véhicule détouré qui déborde sur la carte du dessous | formulaires seulement | camion dessiné en SVG qui chevauche la carte de tournée sélectionnée |
-| Cartes de trajets | noires, texture de rues, onglet découpé, ligne dorée fine | absentes | identiques ; les deux premières se chevauchent |
+| Cartes de trajets | noires, texture de rues, onglet découpé, ligne dorée fine | absentes | identiques, sans onglet ni chevauchement (07/11 : le masque de l'onglet coupait le contour de sélection et mordait la carte voisine) |
 | Accrocs corrigés | — | en-tête d'équipe sur 25 % du panneau ; recherche et cloche sans effet ; capacités qui passaient à la ligne de façon inégale ; attribution blanche massive | en-tête sur une ligne ; recherche de client (combobox) ; alertes ; capacités alignées en grille ; attribution repliée |
 
 La typographie reste **Inter** (CLAUDE.md §4 l'autorise ; une police plus arrondie demanderait une nouvelle dépendance et un ADR). La hiérarchie repose sur trois graisses : 300 pour les titres de contexte, 600 pour les titres de contenu, 800 pour les chiffres clés.

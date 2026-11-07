@@ -25,15 +25,7 @@ export function TruckShowcase({ vehicleId, className = '', decorative = false }:
           <stop offset="1" stopColor="#475569" />
         </linearGradient>
       </defs>
-      {/* roues : vues de dessus, elles ne dépassent que d'un liseré sous la carrosserie (pas de « pattes » noires) */}
-      {[52, 92, 236].map((x) => (
-        <g key={x} fill="#1e293b">
-          <rect x={x} y={16} width={26} height={6} rx={3} />
-          <rect x={x} y={110} width={26} height={6} rx={3} />
-        </g>
-      ))}
-      <rect x={330} y={21} width={24} height={6} rx={3} fill="#1e293b" />
-      <rect x={330} y={105} width={24} height={6} rx={3} fill="#1e293b" />
+      {/* vue de dessus : les roues sont cachées sous la carrosserie (dessinées, elles ressemblaient à des pattes noires) */}
       {/* caisse : longue et étroite, toit nervuré */}
       <rect x={12} y={18} width={290} height={96} rx={10} fill="url(#truck-box)" stroke="#cbd5e1" />
       <rect x={20} y={26} width={274} height={80} rx={6} fill="none" stroke="#e2e8f0" />
@@ -46,9 +38,6 @@ export function TruckShowcase({ vehicleId, className = '', decorative = false }:
       <path d="M312 32 H352 V100 H312 Z" fill="#ffffff" opacity={0.05} />
       <path d="M372 32 Q396 36 397 66 Q396 96 372 100 Z" fill="url(#truck-glass)" />
       <path d="M380 42 Q389 48 390 60" stroke="#ffffff" strokeOpacity={0.3} strokeWidth={2} fill="none" strokeLinecap="round" />
-      {/* rétroviseurs */}
-      <rect x={364} y={18} width={6} height={8} rx={2} fill="#334155" />
-      <rect x={364} y={106} width={6} height={8} rx={2} fill="#334155" />
       {/* feux de gabarit : le seul détail rose (camion actif) */}
       <rect x={318} y={26} width={22} height={3} rx={1.5} fill="#f471b5" />
       <rect x={318} y={103} width={22} height={3} rx={1.5} fill="#f471b5" />

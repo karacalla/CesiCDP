@@ -92,14 +92,13 @@ export function ToursView() {
 
       <section aria-labelledby="tours-list" className="flex flex-col gap-2">
         <h2 id="tours-list" className="text-base font-semibold text-panel-ink">{fr.tours.list}</h2>
-        {tours.map((t, i) => (
+        {tours.map((t) => (
           <JourneyCard
             key={t.route.vehicleId}
             route={t.route}
             Q={instance.fleet.Q}
             selected={t.route.vehicleId === vehicleId}
             onSelect={() => selectVehicle(t.route.vehicleId)}
-            className={i === 1 ? '-mt-3' : ''}
           />
         ))}
       </section>
