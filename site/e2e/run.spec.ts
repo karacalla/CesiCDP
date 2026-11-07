@@ -7,7 +7,7 @@ import { openApp } from './helpers'
 
 test('calcul simulé : non pris en compte, convergence en direct, annulation, PLNE refusé', async ({ page }) => {
   await openApp(page, 'light', 1280)
-  await page.getByRole('button', { name: 'Calcul' }).click()
+  await page.getByRole('button', { name: 'Calcul', exact: true }).click()
   // le recuit ne traite ni fenêtres ni trafic, tous deux actifs sur NANCY-60
   await expect(page.getByText('Contraintes activées non prises en compte')).toBeVisible()
   await expect(page.getByText(/Fenêtres : non pris en compte ; Trafic : non pris en compte/)).toBeVisible()
@@ -18,7 +18,10 @@ test('calcul simulé : non pris en compte, convergence en direct, annulation, PL
   await page.waitForTimeout(2500)
   const convergence = page.locator('section', { has: page.getByRole('heading', { name: 'Convergence' }) })
   await convergence.screenshot({ path: 'docs/captures/p3-convergence-en-cours-1280.png' })
-  await expect(page.getByText('Calcul terminé.')).toBeVisible({ timeout: 15_000 })
+  // fin du calcul : l'application bascule d'elle-même sur les tournées (aucun clic de plus)
+  await expect(page.getByRole('heading', { name: 'Toutes les tournées' })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText('Statuts indicatifs : fenêtres non prises en compte par l’algorithme.')).toBeVisible()
+  await page.getByRole('button', { name: 'Calcul', exact: true }).click()
   await expect(page.getByText(/Contraintes activées non prises en compte : Fenêtres, Trafic\./)).toBeVisible()
   await convergence.screenshot({ path: 'docs/captures/p3-calcul-termine-1280.png' })
 

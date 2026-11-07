@@ -1,7 +1,6 @@
 /**
- * Rôle : îlot de navigation en verre (5 vues) posé sur la carte ; le bouton actif est blanc plein et porte son libellé.
- * Accessibilité : <nav> nommée, `aria-current="page"` sur la vue active, libellé de chaque bouton toujours présent
- *   (visible pour l'actif, info-bulle + nom accessible pour les autres).
+ * Rôle : navigation entre les 5 vues : boutons ronds en verre, DÉTACHÉS les uns des autres (identité de la
+ *   maquette) ; l'actif est blanc plein. Libellé en info-bulle et en nom accessible ; `aria-current="page"`.
  */
 import { VIEWS, type ViewId } from '@/app/views'
 import { fr } from '@/i18n/fr'
@@ -13,25 +12,26 @@ interface Props {
 
 export function NavIsland({ active, onChange }: Props) {
   return (
-    <nav aria-label={fr.nav.label} className="glass inline-flex items-center gap-1 rounded-full p-1">
-      {VIEWS.map(({ id, label, icon: Icon }) => {
-        const isActive = id === active
-        return (
-          <button
-            key={id}
-            type="button"
-            title={label}
-            aria-current={isActive ? 'page' : undefined}
-            onClick={() => onChange(id)}
-            className={`inline-flex h-10 items-center gap-2 rounded-full transition-colors ${
-              isActive ? 'bg-white px-4 text-ink' : 'w-10 justify-center text-on-dark hover:bg-white/10'
-            }`}
-          >
-            <Icon size={18} aria-hidden />
-            <span className={isActive ? 'text-sm font-semibold' : 'sr-only'}>{label}</span>
-          </button>
-        )
-      })}
+    <nav aria-label={fr.nav.label}>
+      <ul className="flex items-center gap-2">
+        {VIEWS.map(({ id, label, icon: Icon }) => {
+          const isActive = id === active
+          return (
+            <li key={id}>
+              <button
+                type="button"
+                title={label}
+                aria-label={label}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => onChange(id)}
+                className={`grid size-10 place-items-center rounded-full transition-colors ${isActive ? 'bg-white text-ink shadow-lg' : 'glass text-on-dark hover:bg-black/60'}`}
+              >
+                <Icon size={18} aria-hidden />
+              </button>
+            </li>
+          )
+        })}
+      </ul>
     </nav>
   )
 }

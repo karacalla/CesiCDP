@@ -14,6 +14,9 @@ const HS_SOURCE = 'cdp-dem-hillshade'
 
 /** Aplats masqués : ils recouvriraient l'imagerie satellite. */
 const HIDDEN_FILLS = ['landcover_ice_shelf', 'landcover_glacier', 'landuse_residential', 'landcover_wood', 'landuse_park', 'aeroway-area']
+/** Lignes noires du style sombre, illisibles sur le satellite (pistes d'aéroport, pointillés ferroviaires). */
+const HIDDEN_LINES = ['aeroway-taxiway', 'aeroway-runway-casing', 'aeroway-runway', 'railway_transit_dashline', 'railway_minor_dashline', 'railway_dashline']
+const RAIL_LINES = ['railway_transit', 'railway_minor', 'railway']
 const ROAD_LINES = ['highway_minor', 'highway_major_inner', 'highway_motorway_inner', 'highway_major_subtle', 'highway_motorway_subtle']
 
 function firstLayerAfterBackground(map: MlMap): string | undefined {
@@ -61,7 +64,8 @@ export function tuneBasemap(map: MlMap): void {
     )
   }
 
-  for (const id of HIDDEN_FILLS) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
+  for (const id of [...HIDDEN_FILLS, ...HIDDEN_LINES]) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
+  for (const id of RAIL_LINES) if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', 'rgba(255,255,255,0.10)')
   if (map.getLayer('water')) map.setPaintProperty('water', 'fill-opacity', 0.65)
   for (const id of ROAD_LINES) if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', 'rgba(255,255,255,0.16)')
 

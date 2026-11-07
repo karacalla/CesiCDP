@@ -72,6 +72,15 @@
         "react/only-export-components": "off",
         "no-console": "off"
       }
+    },
+    {
+      "files": [
+        "src/components/shadcn/**",
+        "src/components/fx/**"
+      ],
+      "rules": {
+        "react/only-export-components": "off"
+      }
     }
   ]
 }

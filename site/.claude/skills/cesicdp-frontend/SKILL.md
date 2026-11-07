@@ -47,6 +47,13 @@ site/
 │  ├─ hooks/useChartColors.ts couleurs de graphique lues dans les jetons (--chart-1/2, --panel-*)
 │  ├─ features/constraints/   ConstraintsView, TrafficEditor (clé = tranches), TravelTimeChart
 │  ├─ features/run/           RunView, AlgoPicker, SaParams, ConvergenceCharts
+│  ├─ features/tours/         VUE D'ACCUEIL : ToursView, RunHero (1 clic), JourneyCard, TruckShowcase,
+│  │                          RoutesLayer (2 états), MapMarkers (pins verre + curseur), InfoCard, StatusPill,
+│  │                          useTours (données dérivées), useProjected (HTML positionné), useElevationProfile
+│  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
+│  ├─ store/selection.ts      camion / arrêt sélectionnés, heure affichée (DEMO_CLOCK)
+│  ├─ components/shadcn/      composants shadcn (alias de components.json) ; components/fx/ : effets (BorderBeam)
+│  ├─ components/layout/      + CustomerSearch (combobox), AlertsButton
 │  ├─ features/map/CustomersLayer.tsx  clients + dépôt (couches natives, regroupement > 300)
 │  ├─ components/ui/          IconButton (aria-label obligatoire ; variantes glass / panel / solid)
 │  ├─ components/layout/      AppFrame (cadre + split 62/38), SEdge (bord en S + poignée), NavIsland,
@@ -110,4 +117,10 @@ site/
 - **Graphiques** : jamais deux axes Y ; couleurs = `useChartColors()` (Recharts veut des couleurs résolues) ; toute nouvelle couleur de série passe par `validate_palette.js` (skill dataviz) en clair ET en sombre.
 - **Thème** : appliqué de façon synchrone par `store/ui.ts` (sinon les couleurs lues au rendu sont celles du thème précédent).
 - **Mock de calcul** : ne JAMAIS lui faire renvoyer un résultat qui ne correspond pas à la demande (ADR-013).
+- **Zustand** : un sélecteur ne doit JAMAIS fabriquer un nouvel objet/tableau (`s.x ?? []`) → boucle infinie (« getSnapshot should be cached »). Sélectionner la valeur stable puis `useMemo`.
+- **shadcn** : ne jamais laisser `init`/`add` redéfinir `--accent`, `--card`, `--chart-*` ni le fond de `body` (ADR-017) ; vérifier `git diff src/styles/index.css` après chaque commande shadcn.
+- **Carte d'info** : toujours blanche (posée sur la carte sombre) → couleurs brutes (`bg-card`, `bg-[var(--panel)]`, `text-ink`), jamais `panel-*` qui suit le thème.
+- **Superposition** : la carte passe 8 px sous le panneau ; en haut le bord en S masque 40 px → marges droites ≥ 64 px pour les éléments posés en haut à droite.
+- **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
+- **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

@@ -42,6 +42,13 @@ Avant de dire « terminé » : `typecheck && lint && test && build` doivent pass
 
 Points à valider par un essai court (« spike ») en phase 0, résultat noté dans le dossier : (S1) les couches deck.gl suivent-elles le relief MapLibre/Mapbox ? sinon : tracés en couches natives de la carte (elles épousent le relief) et altitude du camion via `map.queryTerrainElevation`. (S2) 1000 clients en couche GPU ≥ 45 images/s. (S3) Gantt 20 camions × 50 arrêts fluide.
 
+### 3 bis. Bibliothèques d'interface (ajoutées le 07/11/2026)
+
+- **shadcn/ui + Radix** : le code des composants vit dans `src/components/shadcn/` (valeur `aliases.ui` de `components.json`). **Jamais dans `src/components/ui/`** : ce dossier existe déjà et, sous Windows, `switch.tsx` écraserait `Switch.tsx` (système de fichiers insensible à la casse). Après chaque `add`, remplacer les couleurs shadcn par nos jetons (`tokens.css`) ; `init` ne doit jamais écraser `tokens.css`.
+- **motion** (`import { motion } from 'motion/react'`) : l'application est enveloppée dans `<MotionConfig reducedMotion="user">`. Pas de `framer-motion` (ancien nom du même paquet).
+- **lucide-react** : seule bibliothèque d'icônes.
+- **Magic UI / Aceternity UI** : composants copiés dans `src/components/fx/`. Maximum **3 effets** dans toute l'application, au service de l'identité « Roam » (un accent, sobriété), par exemple une bordure lumineuse ambre sur la carte d'info. Interdits sur le Gantt, les tables et la couche carte (performance). Avant d'en utiliser un : entrée ADR avec la licence, puis relecture du code copié : texte ≥ 12 px, contrastes des jetons, `prefers-reduced-motion`, aucun appel réseau, CDN ou image tiers, pas de canvas ni de WebGL supplémentaire.
+
 ## 4. Identité visuelle (inspirée de la maquette « Roam », sans copier son code)
 
 Principe : **un seul accent (ambre), du noir/navy et du blanc**. La couleur signifie quelque chose, jamais de décor.

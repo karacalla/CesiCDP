@@ -12,6 +12,7 @@ import { BASEMAP } from '@/config/basemap'
 import { INITIAL_VIEW, MAX_PITCH } from '@/config/app'
 import { fr } from '@/i18n/fr'
 import { tuneBasemap } from './basemapStyle'
+import { RoutesLayer } from '@/features/tours/RoutesLayer'
 import { CustomersLayer } from './CustomersLayer'
 import { MAP_ID } from './mapId'
 
@@ -48,10 +49,8 @@ export function MapStage({ children }: { children?: ReactNode }) {
     }
     tuneBasemap(map)
     map.setTerrain(TERRAIN)
-    // en disposition empilée, l'attribution reste repliée derrière son bouton « i » pour ne pas masquer la carte
-    if (window.innerWidth < 1024) {
-      map.getContainer().querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
-    }
+    // attribution repliée derrière son bouton « i » (sources complètes au clic) ; mention courte toujours visible
+    map.getContainer().querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
   }, [])
   // aria-busy : la carte annonce qu'elle charge ; sert aussi de signal aux captures automatiques
   const [ready, setReady] = useState(false)
@@ -71,12 +70,14 @@ export function MapStage({ children }: { children?: ReactNode }) {
         attributionControl={false}
         onLoad={onLoad}
       >
-        <AttributionControl position="bottom-left" compact />
+        <AttributionControl position="bottom-right" compact customAttribution="© OpenStreetMap" />
+        {ready && <RoutesLayer />}
         {ready && <CustomersLayer />}
       </Map>
-      {/* voile haut (lisibilité de l'en-tête) + vignette : décor, ignoré par les technologies d'assistance */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/35" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_45%_45%,transparent_55%,rgb(2_6_23/0.65)_100%)]" />
+      {/* décor (ignoré par les technologies d'assistance) : nappes de nuages aux bords, voile haut, vignette forte */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(40%_28%_at_0%_8%,rgb(226_232_240/0.16),transparent_70%),radial-gradient(34%_24%_at_100%_96%,rgb(226_232_240/0.12),transparent_70%),radial-gradient(28%_20%_at_92%_0%,rgb(226_232_240/0.10),transparent_70%)] [filter:blur(18px)]" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-transparent via-35% to-black/40" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_50%_55%,transparent_45%,rgb(2_6_23/0.75)_100%)]" />
       {children}
     </section>
   )

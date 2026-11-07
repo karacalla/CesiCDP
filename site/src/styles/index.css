@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 @import './tokens.css';
+
+/* Variante `dark:` de Tailwind/shadcn = notre thème sombre (attribut data-theme, pas de classe .dark) */
+@custom-variant dark (&:is([data-theme='dark'] *));
 
 /* Expose les jetons à Tailwind (bg-accent, text-panel-ink…) ; `inline` garde la référence à la variable,
    donc le changement de thème se propage sans régénérer les classes. */
@@ -31,12 +36,41 @@
   --color-panel-ink-2: var(--panel-ink-2);
   --color-panel-line: var(--panel-line);
   --color-panel-accent-ink: var(--panel-accent-ink);
+  --color-late-ink: var(--late-ink);
+  --color-ok-ink: var(--ok-ink);
+  --color-wait-ink: var(--wait-ink);
   --color-panel-late: var(--panel-late);
   --color-panel-ok: var(--panel-ok);
   --color-panel-wait: var(--panel-wait);
   --radius-frame: var(--radius-frame);
   --radius-card: var(--radius-card);
   --radius-journey: var(--radius-journey);
+  --font-heading: var(--font-sans);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @utility glass {
@@ -63,6 +97,9 @@
     outline-offset: 2px;
     box-shadow: 0 0 0 4px var(--bg);
   }
+  * {
+    @apply border-border;
+  }
 }
 
 /* Légendes des graphiques : le texte porte l'encre du panneau, jamais la couleur de la série */
@@ -87,9 +124,14 @@
   filter: invert(1);
 }
 
-/* Attribution de la carte : au-dessus du recouvrement du panneau en disposition empilée (< 1024 px) */
+/* Attribution en bas à droite : décalée du recouvrement du panneau (40 px, ≥ 1024 px) ou de sa remontée (< 1024 px) */
+@media (width >= 64rem) {
+  .maplibregl-ctrl-bottom-right {
+    right: 48px;
+  }
+}
 @media (width < 64rem) {
-  .maplibregl-ctrl-bottom-left {
+  .maplibregl-ctrl-bottom-right {
     bottom: 40px;
   }
 }
@@ -102,4 +144,33 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+
+/* Pont shadcn/ui → nos jetons (CLAUDE.md §3 bis). On ne redéfinit JAMAIS --accent, --card ni --chart-* :
+   ce sont nos jetons (ambre, blanc des cartes, séries validées). Les composants shadcn qui utilisent `accent`
+   sont corrigés au cas par cas après chaque `add`. */
+:root {
+  --background: var(--panel-bg);
+  --foreground: var(--panel-ink);
+  --card-foreground: var(--panel-ink);
+  --popover: var(--panel-surface);
+  --popover-foreground: var(--panel-ink);
+  --primary: var(--accent);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--panel-bg);
+  --secondary-foreground: var(--panel-ink);
+  --muted: var(--panel-bg);
+  --muted-foreground: var(--panel-ink-2);
+  --accent-foreground: var(--on-accent);
+  --destructive: var(--panel-late);
+  --border: var(--panel-line);
+  --input: var(--panel-line);
+  --ring: var(--accent);
+  --radius: 0.75rem;
+}
+
+/* Icônes à trait fin (≈ 1,5 px), comme la maquette de référence */
+svg.lucide {
+  stroke-width: 1.5px;
 }

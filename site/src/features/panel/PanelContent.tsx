@@ -6,6 +6,7 @@ import { Inbox } from 'lucide-react'
 import { ConstraintsView } from '@/features/constraints/ConstraintsView'
 import { DataView } from '@/features/data/DataView'
 import { RunView } from '@/features/run/RunView'
+import { ToursView } from '@/features/tours/ToursView'
 import { PanelHeader } from '@/components/layout/PanelHeader'
 import { PrivacyNotice } from '@/components/layout/PrivacyNotice'
 import { fr } from '@/i18n/fr'
@@ -17,11 +18,12 @@ export function PanelContent() {
     <>
       <PanelHeader />
       <div>
-        <p className="text-sm font-light text-panel-ink-2">{fr.app.context}</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-panel-ink">{fr.views[view]}</h1>
-        <p className="mt-2 text-sm text-panel-ink-2">{fr.viewIntro[view]}</p>
+        <p className="text-sm font-light text-panel-ink-2">{fr.viewIntro[view]}</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-panel-ink">{fr.views[view]}</h1>
       </div>
-      {view === 'data' ? (
+      {view === 'tours' ? (
+        <ToursView />
+      ) : view === 'data' ? (
         <DataView />
       ) : view === 'constraints' ? (
         <ConstraintsView />

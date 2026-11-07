@@ -5,7 +5,7 @@
 import { expect, test } from '@playwright/test'
 import { openApp } from './helpers'
 
-const PHASE = process.env.SHOTS_PHASE ?? 'p3'
+const PHASE = process.env.SHOTS_PHASE ?? 'ux'
 const WIDTHS = [1280, 768] as const
 const THEMES = ['light', 'dark'] as const
 /** Vue → libellé du bouton de l'îlot de navigation. */
@@ -13,6 +13,7 @@ const VIEWS: Array<{ name: string; nav: string | null }> = [
   { name: 'donnees', nav: null },
   { name: 'contraintes', nav: 'Contraintes' },
   { name: 'calcul', nav: 'Calcul' },
+  { name: 'tournees-accueil', nav: 'Tournées' },
 ]
 
 
@@ -21,7 +22,7 @@ for (const v of VIEWS) {
     for (const w of WIDTHS) {
       test(`${v.name} · ${theme} @ ${w}px`, async ({ page }) => {
         await openApp(page, theme, w)
-        if (v.nav) await page.getByRole('button', { name: v.nav }).click()
+        if (v.nav) await page.getByRole('button', { name: v.nav, exact: true }).click()
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
         expect(overflow, 'défilement horizontal').toBeLessThanOrEqual(0)
         await page.screenshot({ path: `docs/captures/${PHASE}-${v.name}-${theme}-${w}.png` })

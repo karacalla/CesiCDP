@@ -1,7 +1,9 @@
 {
-  "date": "2026-11-07T00:28:36.223Z",
+  "date": "2026-11-07T14:10:38.950Z",
   "rows": 1000,
-  "elapsedMs": 331,
-  "longTasksMs": [],
-  "maxLongTaskMs": 0
+  "elapsedMs": 490,
+  "longTasksMs": [
+    110
+  ],
+  "maxLongTaskMs": 110
 }

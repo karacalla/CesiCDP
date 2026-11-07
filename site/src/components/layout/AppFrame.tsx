@@ -27,7 +27,7 @@ export function AppFrame({ map, panel, collapsed, onTogglePanel }: Props) {
       <div className="relative flex w-full max-w-[var(--frame-max)] flex-col overflow-hidden border-white/10 bg-bg sm:rounded-frame sm:border lg:block lg:h-[calc(100svh-3rem)] lg:min-h-[640px]">
         <div
           className={`relative h-[52svh] min-h-[380px] lg:absolute lg:inset-y-0 lg:left-0 lg:h-auto ${
-            collapsed ? 'lg:right-0' : 'lg:right-[calc(38%_-_var(--s-curve))]'
+            collapsed ? 'lg:right-0' : 'lg:right-[calc(38%_-_8px)]'
           }`}
         >
           {map}

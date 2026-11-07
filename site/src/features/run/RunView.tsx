@@ -55,7 +55,7 @@ export function RunView() {
             {result.ignoredConstraints.length > 0 && (
               <p className="text-xs"><span aria-hidden className="mr-1 font-bold text-panel-late">!</span>{fr.run.ignoredTitle} : {result.ignoredConstraints.map((c) => fr.run.caps[c]).join(', ')}.</p>
             )}
-            <button type="button" onClick={() => setView('results')} className="self-start text-sm font-semibold text-panel-accent-ink underline underline-offset-4">{fr.run.seeResults}</button>
+            <button type="button" onClick={() => setView('tours')} className="self-start text-sm font-semibold text-panel-accent-ink underline underline-offset-4">{fr.run.seeResults}</button>
           </div>
         )}
       </Section>

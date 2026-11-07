@@ -34,7 +34,7 @@ interface UiState {
 }
 
 export const useUi = create<UiState>((set, get) => ({
-  view: 'data',
+  view: 'tours',
   theme: (() => {
     const t = readTheme()
     applyTheme(t)

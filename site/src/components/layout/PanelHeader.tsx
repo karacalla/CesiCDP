@@ -1,10 +1,12 @@
 /**
- * Rôle : en-tête du panneau : recherche, notifications, thème, membres du groupe (E1).
+ * Rôle : en-tête compact du panneau : recherche de client, alertes, thème ; membres du groupe (E1) sur une ligne.
  */
-import { Bell, Moon, Search, Sun } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import { IconButton } from '@/components/ui/IconButton'
 import { fr } from '@/i18n/fr'
 import { useUi } from '@/store/ui'
+import { AlertsButton } from './AlertsButton'
+import { CustomerSearch } from './CustomerSearch'
 import { TeamHeader } from './TeamHeader'
 
 export function PanelHeader() {
@@ -13,18 +15,10 @@ export function PanelHeader() {
   const icon = { size: 18, 'aria-hidden': true } as const
 
   return (
-    <header className="flex flex-col gap-5">
+    <header className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <label className="relative min-w-0 flex-1">
-          <span className="sr-only">{fr.panel.search}</span>
-          <Search size={16} aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-panel-ink-2" />
-          <input
-            type="search"
-            placeholder={fr.panel.searchPlaceholder}
-            className="h-10 w-full rounded-full border border-panel-line bg-panel-surface pl-10 pr-4 text-sm text-panel-ink placeholder:text-panel-ink-2"
-          />
-        </label>
-        <IconButton variant="panel" label={fr.panel.notifications} icon={<Bell {...icon} />} />
+        <CustomerSearch />
+        <AlertsButton />
         <IconButton
           variant="panel"
           label={theme === 'light' ? fr.panel.themeToDark : fr.panel.themeToLight}

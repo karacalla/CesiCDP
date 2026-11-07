@@ -10,13 +10,13 @@
 | P1 Coque et identité | ✅ terminé (07/11/2026) | 1280/768 sans défilement horizontal ; axe sur la coque | `e2e/a11y.spec.ts` (0 violation × 4), `captures/p1-*.png` |
 | P2 Données | ✅ terminé (07/11/2026) | import 1000 clients sans tâche > 100 ms ; erreurs ligne à ligne | `e2e/import.spec.ts` (build prod : 0 tâche > 50 ms), `docs/perf/import-1000.json`, `captures/p2-*.png` |
 | P3 Contraintes et lancement | ✅ terminé (07/11/2026) | « non pris en compte » si contrainte non gérée | `e2e/run.spec.ts`, `src/services/mockRun.test.ts`, `captures/p3-*.png`, axe 12/12 |
-| P4 Résultats | à faire | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | |
+| P4 Résultats | 🟡 en cours (07/11/2026) : carte, pins, curseur, carte d'info, KPI, cartes de tournées, vitrine, liste des arrêts faits ; **Gantt à faire** | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | `e2e/journey.spec.ts`, `captures/ux-*.png`, axe 20/20 |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
 | P6 Étude et finition | à faire | dossier autosuffisant | |
 
 ## Prochaine action
 
-P4 : tracés sur la carte (parcouru/à venir, sélection ambre, autres 45 %), pins (masse native, verre ≤ 40 positionnés par le code), carte d'info + profil d'altitude + ETA, KPI (dont CO₂ vs `comparison`), cartes « Dernières tournées », showcase du camion, Gantt SVG (ADR-005) + liste des arrêts accessible.
+Fin de P4 : Gantt SVG (ADR-005 : zoom par transform), info-bulle, fenêtres, attente hachurée, retard avec icône ; puis P5 (simulation : animer l'heure affichée, vue inclinée).
 
 ## Matrice d'écart (existant → cible)
 
@@ -51,6 +51,9 @@ P4 : tracés sur la carte (parcouru/à venir, sélection ambre, autres 45 %), pi
 - ADR-012 Trafic : l'éditeur ILLUSTRE le modèle « temps × coefficient de la tranche de départ » ; toute baisse de coefficient viole FIFO → alerte chiffrée (NANCY-60 en contient une à 09:30, volontairement visible).
 - ADR-013 Calcul simulé : seul le recuit sur NANCY-60 non modifiée produit un résultat ; PLNE, Clarke-Wright, autre instance ou instance modifiée → refus explicite (aucun faux résultat).
 - ADR-014 Graphiques Recharts : deux graphiques (coût, température) sur un même axe des temps, jamais deux échelles ; couleurs `--chart-1/2` validées par le script dataviz dans chaque thème.
+- ADR-015 Un seul effet visuel (Magic UI `BorderBeam`) : bordure ambre pendant le calcul, absente si `prefers-reduced-motion`.
+- ADR-016 Parcours en 1 clic : vue d'accueil « Tournées » ; « Calculer les tournées » → bascule automatique sur les tournées, camion 1 sélectionné ; réglages fins dans « Calcul ».
+- ADR-017 shadcn/ui : pont de variables vers nos jetons ; `--accent`, `--card`, `--chart-*` jamais redéfinis ; composants dans `components/shadcn/`, effets dans `components/fx/`.
 - ADR-011 NANCY-60 : clients fictifs + 5 requêtes OSRM uniques (1 matrice, 4 tracés) ; résultat **simulé** commité, marqué comme tel.
 
 ## Décisions ouvertes (à trancher par l'équipe)
@@ -72,6 +75,10 @@ P4 : tracés sur la carte (parcouru/à venir, sélection ambre, autres 45 %), pi
 - Le relief de la vue initiale (plateau lorrain, inclinaison 28°) reste discret ; il se révèle à l'inclinaison (`captures/p1-relief-dark-1280.png`) et en P5.
 - NANCY-60 : fenêtres tirées APRÈS la construction des tournées simulées (pour montrer attente et retard) → le résultat simulé déclare `ignoredConstraints: ['timeWindows']`.
 - Perf d'import mesurée sur le **build de production** (`npm run test:perf`) ; en dev, le recadrage de la carte sur le relief produit une image de ≈ 120 ms (MapLibre), sans lien avec l'import.
+- **Palette** : l'initialisation shadcn (07/11) avait redéfini `--accent` (ambre → gris), `--chart-1/2` et le fond de page ; corrigé par le pont ADR-017, palette inchangée.
+- Carte tournée à la sélection d'un camion (le trajet « monte ») : le nord n'est plus en haut ; « Réinitialiser la vue » le rétablit.
+- Attribution de la carte repliée derrière « i » à toutes les largeurs (sources complètes au clic).
+- Carte d'info masquée sous 1024 px (la carte fait 52 % de la hauteur) : le panneau porte les mêmes informations.
 - Éditeur de trafic : après validation par Entrée, l'éditeur est recréé (clé) et le focus revient au début de la page ; validation par sortie de champ sans perte.
 - Courbe de convergence simulée en mode mock (seuls les coûts initial et final viennent du résultat simulé) ; étiquetée dans l'interface.
 - Table clients : défilement horizontal interne au panneau (9 colonnes dans 38 %).
@@ -80,6 +87,7 @@ P4 : tracés sur la carte (parcouru/à venir, sélection ambre, autres 45 %), pi
 ## Journal
 
 - 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.
+- 07/11/2026 — Refonte UX/identité (analyse d'écart avec la maquette « Roam ») : parcours en 1 clic, vue Tournées, tracé à deux états, curseur à cône, pins verre, carte d'info à coin concave, vitrine du camion, cartes de tournées à onglet, navigation détachée, en-tête compact (recherche active, alertes), correction de la palette écrasée par shadcn ; 60 tests unitaires, e2e parcours ×4, axe 20/20.
 - 07/11/2026 — P3 : contraintes (interrupteurs, éditeur de tranches contiguës, courbe, alerte FIFO), vue Calcul (algorithmes + capacités, « non pris en compte », réglages du recuit, lancement/annulation, convergence en direct), API `solve` (mock + http) ; 56 tests unitaires, e2e P3, axe 0 violation sur 3 vues.
 - 07/11/2026 — P2 : contrat Zod, mock + http + adaptateurs, NANCY-60 (OSRM une fois) et GEN-1000, formulaires, table TanStack v9 virtualisée éditable, import Worker (4 formats), carte des clients ; 47 tests, axe 0 violation.
 - 07/11/2026 — P1 : coque (cadre, split 62/38, bord en S + poignée, îlot de navigation, en-tête équipe, thèmes, RGPD), carte drone (satellite, ombrage, relief, ciel/brouillard, voile), axe 0 violation, 24 tests. README racine réécrit, `TODO.md` supprimé (réalisé).

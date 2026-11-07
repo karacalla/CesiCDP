@@ -25,7 +25,7 @@ export function AlgoPicker({ instance, disabled }: { instance: Instance; disable
             <span className="flex min-w-0 flex-col gap-1">
               <span className="text-sm font-semibold text-panel-ink">{a.label}</span>
               <span className="text-xs text-panel-ink-2">{a.description}</span>
-              <span className="flex flex-wrap gap-3 text-xs">
+              <span className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
                 {(['timeWindows', 'traffic'] as const).map((k) => (
                   <span key={k} className={`inline-flex items-center gap-1 ${a.capabilities[k] ? 'text-panel-ok' : 'text-panel-ink-2'}`}>
                     {a.capabilities[k] ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}

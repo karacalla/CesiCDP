@@ -30,8 +30,8 @@ describe('coque', () => {
   it('l’îlot de navigation marque la vue active (aria-current)', async () => {
     render(<NavHarness />)
     expect(screen.getByRole('button', { name: 'Données' })).toHaveAttribute('aria-current', 'page')
-    await userEvent.click(screen.getByRole('button', { name: 'Résultats' }))
-    expect(screen.getByRole('button', { name: 'Résultats' })).toHaveAttribute('aria-current', 'page')
+    await userEvent.click(screen.getByRole('button', { name: 'Tournées' }))
+    expect(screen.getByRole('button', { name: 'Tournées' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('button', { name: 'Données' })).not.toHaveAttribute('aria-current')
   })
 

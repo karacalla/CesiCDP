@@ -6,6 +6,7 @@
  */
 import { create } from 'zustand'
 import { api } from '@/services/api'
+import { useRun } from '@/store/run'
 import type { ImportIssue, ImportResult } from '@/lib/parsers'
 import { validateCustomer, type FieldError } from '@/lib/validation'
 import { CustomerSchema, DepotSchema, FleetSchema, InstanceSchema, OptionsSchema, TrafficSchema, type Customer, type Depot, type Fleet, type Instance, type Options, type TrafficSlot } from '@/types/vrp'
@@ -47,6 +48,7 @@ export const useVrp = create<VrpState>((set, get) => ({
     try {
       const instance = await api.getInstance(id)
       set({ instance, status: 'ready', importReport: null })
+      useRun.getState().reset()
     } catch (e) {
       set({ status: 'error', error: e instanceof Error ? e.message : String(e) })
     }

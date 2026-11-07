@@ -160,6 +160,23 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : (b). Couleurs `--chart-1` (indigo) et `--chart-2` (ambre), une paire par thème, validées par le script de la méthode dataviz (`validate_palette.js` : bande de luminosité, chroma, séparation pour les daltonismes ΔE ≥ 31, contraste ≥ 3:1) sur `#ffffff`, `#0f172a` et `#1e293b`. Légende dont le texte reste à l'encre du panneau ; info-bulle à réticule ; tableau des valeurs repliable ; ≤ 500 points ; pas d'animation.
 - **Conséquence** : nouvelle paire de jetons dépendant du thème ; les couleurs sont lues dans les variables CSS au rendu (le thème est appliqué de façon synchrone par le store).
 
+### ADR-015 — Effets visuels : un seul, au service du sens
+- **Contexte** : CLAUDE.md §3 bis autorise jusqu'à 3 effets Magic UI / Aceternity, sous conditions (licence, texte ≥ 12 px, contrastes, `prefers-reduced-motion`, aucun réseau).
+- **Choix** : un seul effet, `BorderBeam` (Magic UI, licence MIT, code copié dans `components/fx/` et relu : aucun texte, aucun appel réseau), en ambre, **uniquement pendant le calcul** : il signifie « en cours », pas un décor. Non rendu si l'utilisateur demande moins d'animations (`MotionConfig reducedMotion="user"` ne neutralise que les transformations, pas `offset-distance`).
+- **Conséquence** : aucun effet sur la carte, le Gantt ou les tables (performance) ; deux effets restent disponibles.
+
+### ADR-016 — Parcours principal en un clic
+- **Contexte** : la tâche principale du dispatcher est d'obtenir les tournées. Avant : vue Données à l'ouverture → îlot « Calcul » → défilement sous les réglages → « Lancer » → « Voir les résultats » (vue vide) : 4 clics et un défilement.
+- **Options** : (a) assistant pas à pas ; (b) vue d'accueil « Tournées » avec l'action principale et ses prérequis visibles, réglages fins à part.
+- **Critique** : (a) ralentit l'usage quotidien, où les données sont déjà prêtes.
+- **Choix** : (b). À l'ouverture : instance, contraintes actives, ce que l'algorithme ne traite pas, et le bouton « Calculer les tournées ». En fin de calcul, bascule automatique sur les tournées, camion 1 sélectionné et recadré. « Réglages avancés » mène à la vue Calcul (algorithme, recuit, convergence).
+- **Conséquence** : **1 clic** de l'ouverture aux tournées (`e2e/journey.spec.ts`) ; un résultat devenu obsolète (données modifiées après le calcul) est signalé ; changer d'instance efface le résultat.
+
+### ADR-017 — Intégration de shadcn/ui sans toucher à la palette
+- **Contexte** : l'initialisation de shadcn (07/11/2026) a ajouté ses propres variables en fin de feuille : `--accent` (gris clair, au lieu de notre ambre), `--chart-1…5` (gris), fond de page blanc.
+- **Choix** : suppression de ces blocs et **pont** de variables shadcn vers nos jetons (`--primary` = ambre, `--muted-foreground` = `--panel-ink-2`, `--border` = `--panel-line`, etc.) ; `--accent`, `--card` et `--chart-*` ne sont jamais redéfinis ; variante `dark:` = notre `data-theme`. Composants shadcn dans `components/shadcn/` (alias de `components.json`), effets dans `components/fx/` (CLAUDE.md §3 bis).
+- **Conséquence** : un composant shadcn ajouté hérite de l'identité ; ceux qui emploient `accent` pour un survol neutre seront ajustés au cas par cas.
+
 ## 5. Essais techniques S1–S3
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
@@ -200,6 +217,25 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 - **Carte « drone »** : style vectoriel sombre OpenFreeMap retouché à l'exécution (`features/map/basemapStyle.ts`) : satellite désaturé (ADR-007), ombrage du relief (ombres noires, lumières blanc 22 %), aplats d'occupation du sol masqués, routes en blanc 16 %, libellés `#9aa4b2` sur halo sombre ; relief Terrarium exagéré ×1,4 ; ciel et brouillard navy (`sky`) ; voile vertical noir 55 % → 0 → 35 % et vignette radiale. Vue initiale inclinée à 28° sur Nancy et les Vosges.
 - **Thèmes** : clair (défaut) et sombre ne changent que les variables `--panel-*` ; préférence mémorisée localement (`localStorage`, sans donnée personnelle).
 
+### 6.1 bis Analyse d'écart avec la maquette de référence (07/11/2026) et corrections
+
+| Élément | Maquette « Roam » | Avant | Après |
+|---|---|---|---|
+| Accent | une couleur vive, état actif et parcouru seulement | ambre, mais redéfini en gris par shadcn | ambre (palette inchangée), réservé à la sélection, au parcouru, aux badges et au curseur ; le dépôt n'est plus ambre |
+| Caméra | quasi verticale (0–25°), trajet qui monte | 28°, nord en haut | 20° ; à la sélection, carte tournée pour que le trajet monte |
+| Traitement | satellite sombre, nuages aux bords, vignette forte | vignette légère | nappes nuageuses aux bords, voile haut renforcé, vignette forte ; pistes d'aéroport et pointillés ferroviaires noirs masqués |
+| Trajet | parcouru jaune plein / à venir blanc pointillé sur contour | aucun tracé | deux états, coupés à l'heure affichée ; autres camions blanc 45 % |
+| Curseur | flèche dans un halo de verre, cône de visée | absent | flèche ambre, halo de verre, cône orienté selon le cap du trajet |
+| Pins | verre sombre 36 px, icône blanche, petit badge ; actif blanc | points natifs | pins de verre 36 px, badge 18 px (ordre de passage), actif blanc plein ; points natifs sous les libellés |
+| Contrôles | 5 ronds détachés, l'actif blanc ; outils en colonne | capsule avec libellé | ronds détachés de 40 px ; outils 36 px ; marges de 24 px ; icônes à trait 1,5 px |
+| Titre | grand et léger, ligne de détail à 60 % | marque en gras | « Tournées du jour » (300) + « NANCY-60 · 60 clients · 4 camions » à 60 % |
+| Carte d'info | blanche, rayon 28, coin concave, ✕ accroché, profil | absente | identique (masque radial), profil d'altitude lu dans le relief |
+| Panneau | véhicule détouré qui déborde sur la carte du dessous | formulaires seulement | camion dessiné en SVG qui chevauche la carte de tournée sélectionnée |
+| Cartes de trajets | noires, texture de rues, onglet découpé, ligne dorée fine | absentes | identiques ; les deux premières se chevauchent |
+| Accrocs corrigés | — | en-tête d'équipe sur 25 % du panneau ; recherche et cloche sans effet ; capacités qui passaient à la ligne de façon inégale ; attribution blanche massive | en-tête sur une ligne ; recherche de client (combobox) ; alertes ; capacités alignées en grille ; attribution repliée |
+
+La typographie reste **Inter** (CLAUDE.md §4 l'autorise ; une police plus arrondie demanderait une nouvelle dépendance et un ADR). La hiérarchie repose sur trois graisses : 300 pour les titres de contexte, 600 pour les titres de contenu, 800 pour les chiffres clés.
+
 ### 6.2 Jetons
 
 Principe : un seul accent (ambre), du noir/navy et du blanc ; la couleur porte un sens, jamais un décor. Source unique : `src/styles/tokens.css`, exposée à Tailwind par `@theme inline` (`src/styles/index.css`). Le thème ne change que les variables `--panel-*` ; la carte reste sombre.
@@ -231,6 +267,7 @@ Autres jetons : rayons (`--radius-frame` 36 px, `--radius-card` 24 px, `--radius
 
 Cible WCAG 2.1 AA.
 - **P0** : contrastes des jetons vérifiés automatiquement, focus toujours visible (anneau ambre doublé d'un liseré sombre), `prefers-reduced-motion` coupe animations et transitions, règles `jsx-a11y` dans le lint, aucune taille de texte < 12 px.
+- **Refonte UX** : pins = vrais boutons nommés (« Arrêt 3 : Client 12 — Gérardmer, arrivée 10:42, à l'heure ») ; cartes de tournées dont le nom accessible contient le texte visible (WCAG 2.5.3, détecté par axe) ; recherche de client en combobox ARIA (flèches, Entrée, Échap) ; cloche avec nombre d'alertes et panneau refermable par Échap ; liste des arrêts = équivalent texte de la carte ; axe : 0 violation sur 5 états (accueil, Données, Contraintes, Calcul, tournées calculées) × 2 thèmes × 2 largeurs.
 - **P3** : interrupteurs natifs `role="switch"` reliés à leur libellé et à leur description ; choix d'algorithme en groupe de boutons radio (`fieldset`) ; capacités « pris en compte / non pris en compte » en icône + texte ; alerte FIFO et contraintes ignorées annoncées (`role="alert"` / `role="status"`) ; barre de progression `role="progressbar"` ; état du calcul dans une région `aria-live` ; graphiques décrits par un libellé textuel (dernière valeur) et doublés d'un tableau. axe : 0 violation sur les vues Données, Contraintes et Calcul (2 thèmes × 2 largeurs).
 - **P2** : formulaires étiquetés (`label` relié), erreurs reliées par `aria-describedby` et `aria-invalid` ; table : vrai `<table>`, `aria-rowcount` / `aria-rowindex` malgré la virtualisation, tri par boutons dans les en-têtes avec `aria-sort`, chaque cellule éditable nommée (« Demande — Client 12 »), erreur de cellule annoncée (`role="alert"`) ; statut de fenêtre en icône + libellé ; rapport d'import dans une région `aria-live`. axe : 0 violation sur la vue Données (2 thèmes × 2 largeurs). Nouveaux jetons `--late-ink`, `--ok-ink`, `--wait-ink` pour les états sur fond clair (`--late` sur blanc n'atteint pas 3:1).
 - **P1** : audit axe (règles WCAG 2.0/2.1 A et AA) de la coque : **0 violation** en thème clair et sombre, à 1280 et 768 px (`npm run test:a11y`). Le canevas WebGL est exclu de l'audit (axe ne peut pas lire ses pixels) : les textes posés dessus sont vérifiés sur capture (blanc et `#9aa4b2` sur voile noir). Lien d'évitement « Aller au panneau de travail » ; régions nommées (carte, navigation, panneau, outils) ; `aria-current` sur la vue active ; `aria-expanded` sur la poignée ; `aria-busy` sur la carte pendant le chargement ; boutons-icônes nommés (`aria-label` exigé par le typage de `IconButton`) ; textes internes de MapLibre traduits (`locale`), dont les raccourcis clavier de la carte ; caméra instantanée si `prefers-reduced-motion`.
@@ -251,6 +288,7 @@ Cible WCAG 2.1 AA.
 | `npm run lint` | oxlint : correctness en erreur, `no-explicit-any`, `ban-ts-comment`, jsx-a11y, `import/no-cycle` |
 | `npm test` | Vitest : contrastes des jetons, taille de texte minimale, en-tête d'équipe, poignée du panneau, îlot de navigation (24 tests en P1) |
 | `npm run test:a11y` | axe sur la vue Données (coque comprise), 2 thèmes × 2 largeurs |
+| `e2e/journey.spec.ts` | parcours principal : 1 clic de l'ouverture aux tournées affichées (tracé, pins, carte d'info), sans défilement horizontal, 2 thèmes × 2 largeurs |
 | `e2e/run.spec.ts` | critère P3 : « non pris en compte » avant et après calcul, convergence en direct, annulation sans résultat, PLNE refusé en mode simulé ; éditeur de trafic : l'alerte FIFO disparaît quand les coefficients ne baissent plus |
 | `npm run test:perf` | build de production : import CSV de 1000 lignes (3 erreurs), tâches longues du fil principal (`docs/perf/import-1000.json`) |
 
@@ -294,6 +332,9 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 - Instances à coordonnées planes (VRPLIB, Solomon) : pas d'affichage cartographique.
 - Table clients : 9 colonnes dans le panneau (38 %) → défilement horizontal interne.
 - Modèle de trafic illustré (temps × coefficient de la tranche de départ) non confirmé par l'équipe solveur (ADR-012).
+- Gantt pas encore réalisé (fin de P4).
+- Carte tournée à la sélection d'un camion : le nord n'est plus en haut (choix de la maquette) ; « Réinitialiser la vue » le rétablit.
+- Position du camion entre deux arrêts interpolée à vitesse constante le long du tracé (affichage seulement, ADR-003 / `lib/route.ts`).
 - Courbe de convergence simulée en mode mock ; capacités des algorithmes déclarées en dur (`config/solver.ts`) tant que l'API ne les fournit pas.
 
 ## 12. Glossaire
@@ -317,6 +358,8 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 3. *Comment savez-vous que vos couleurs sont accessibles ?* — Chaque paire est recalculée par un test automatique (formule WCAG 2.1) ; la suite de tests échoue si une paire passe sous son seuil.
 4. *Vos images/s sont-elles crédibles ?* — Mesurées dans Chromium avec accélération GPU ; le nom du moteur WebGL est enregistré avec chaque mesure ; protocole et données brutes en §5.
 5. *Pourquoi la carte reste-t-elle sombre en thème clair ?* — Le tracé ambre et les statuts sont conçus pour un fond sombre (contrastes de 6,7 à 9,3:1) ; sur fond clair, l'ambre tomberait à 2,15:1.
+11. *Combien de clics pour obtenir les tournées ?* — Un : « Calculer les tournées » sur l'écran d'accueil ; l'application montre ensuite les tournées sans autre action (test automatisé).
+12. *Le camion affiché sur la carte, d'où vient sa position ?* — Des horaires du solveur (départ, arrivées, départs) ; entre deux arrêts, on l'interpole le long du tracé. Sans horaire, aucun curseur n'est affiché.
 9. *Votre recuit gère-t-il les fenêtres de temps ?* — Pas encore : l'interface l'affiche (« Fenêtres : non pris en compte ») avant le lancement et sur le résultat ; seul le PLNE les traite aujourd'hui.
 10. *Qu'est-ce que la propriété FIFO et pourquoi l'alerte ?* — Partir plus tard ne doit jamais faire arriver plus tôt. Avec un coefficient appliqué à tout le trajet selon l'heure de départ, une baisse de coefficient la viole ; l'éditeur le détecte et chiffre l'exemple.
 7. *Pourquoi ne pas appeler OSRM depuis l'interface ?* — Chaque requête contiendrait les coordonnées des clients (donnée potentiellement personnelle) ; les tracés viennent du solveur, et en démonstration ils ont été calculés une fois, sur des points fictifs.
@@ -342,4 +385,6 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 | Relief Terrarium (AWS Open Data) | — | données libres, attribution « Mapzen Terrain Tiles » affichée |
 | Sentinel-2 cloudless 2016 (EOX IT Services) | — | CC BY 4.0 ; contient des données Copernicus Sentinel modifiées ; attribution affichée |
 | lucide-react (icônes) | 1.66 | ISC |
+| shadcn/ui (`cn`, Base UI, class-variance-authority), motion | 4.23 / 1.9 / 0.7 / 14.10 | MIT |
+| Magic UI `BorderBeam` (copié) | — | MIT (ADR-015) |
 | OSRM (serveur de démonstration) | — | 5 requêtes uniques sur points fictifs (ADR-011) ; données routières © OpenStreetMap (ODbL) |

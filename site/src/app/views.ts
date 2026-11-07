@@ -5,10 +5,10 @@
  * Question probable du jury : « et le bouton Précédent du navigateur ? » → non géré volontairement (outil métier
  *   monopage) ; ajoutable par l'ancre d'URL sans changer les vues.
  */
-import { BarChart3, Database, Play, Route, SlidersHorizontal, type LucideIcon } from 'lucide-react'
+import { BarChart3, Cpu, Database, Route, SlidersHorizontal, type LucideIcon } from 'lucide-react'
 import { fr } from '@/i18n/fr'
 
-export type ViewId = 'data' | 'constraints' | 'run' | 'results' | 'study'
+export type ViewId = 'tours' | 'data' | 'constraints' | 'run' | 'study'
 
 export interface ViewDef {
   id: ViewId
@@ -17,9 +17,9 @@ export interface ViewDef {
 }
 
 export const VIEWS: readonly ViewDef[] = [
+  { id: 'tours', label: fr.views.tours, icon: Route },
   { id: 'data', label: fr.views.data, icon: Database },
   { id: 'constraints', label: fr.views.constraints, icon: SlidersHorizontal },
-  { id: 'run', label: fr.views.run, icon: Play },
-  { id: 'results', label: fr.views.results, icon: Route },
+  { id: 'run', label: fr.views.run, icon: Cpu },
   { id: 'study', label: fr.views.study, icon: BarChart3 },
 ]

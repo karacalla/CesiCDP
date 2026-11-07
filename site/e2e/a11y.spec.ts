@@ -7,13 +7,17 @@ import { AxeBuilder } from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import { openApp } from './helpers'
 
-const VIEWS = [null, 'Contraintes', 'Calcul'] as const
+const VIEWS = [null, 'Données', 'Contraintes', 'Calcul', 'Tournées calculées'] as const
 
 for (const view of VIEWS) for (const theme of ['light', 'dark'] as const) {
   for (const width of [1280, 768]) {
-    test(`axe · ${view ?? 'Données'} · ${theme} @ ${width}px`, async ({ page }) => {
+    test(`axe · ${view ?? 'Tournées (accueil)'} · ${theme} @ ${width}px`, async ({ page }) => {
       await openApp(page, theme, width)
-      if (view) await page.getByRole('button', { name: view }).click()
+      if (view === 'Tournées calculées') {
+        await page.getByRole('button', { name: 'Calculer les tournées' }).click()
+        await page.getByRole('heading', { name: 'Toutes les tournées' }).waitFor({ timeout: 30_000 })
+        await page.waitForTimeout(1500)
+      } else if (view) await page.getByRole('button', { name: view, exact: true }).click()
       const result = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .exclude('.maplibregl-canvas')

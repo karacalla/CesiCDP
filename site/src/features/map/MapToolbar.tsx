@@ -22,10 +22,10 @@ export function MapToolbar({ className = '' }: { className?: string }) {
 
   return (
     <div role="toolbar" aria-label={fr.map.tools} aria-orientation="vertical" className={`flex flex-col gap-2 ${className}`}>
-      <IconButton label={fr.map.reset} icon={<RotateCw {...icon} />} onClick={() => map?.flyTo({ ...toCamera(INITIAL_VIEW), duration })} />
-      <IconButton label={fr.map.zoomIn} icon={<Plus {...icon} />} onClick={() => map?.zoomIn({ duration: reduced ? 0 : 300 })} />
-      <IconButton label={fr.map.zoomOut} icon={<Minus {...icon} />} onClick={() => map?.zoomOut({ duration: reduced ? 0 : 300 })} />
-      <IconButton label={fr.map.locate} icon={<LocateFixed {...icon} />} onClick={() => map?.flyTo({ ...toCamera(DEPOT_FOCUS), duration })} />
+      <IconButton size={36} label={fr.map.reset} icon={<RotateCw {...icon} />} onClick={() => map?.flyTo({ ...toCamera(INITIAL_VIEW), duration })} />
+      <IconButton size={36} label={fr.map.zoomIn} icon={<Plus {...icon} />} onClick={() => map?.zoomIn({ duration: reduced ? 0 : 300 })} />
+      <IconButton size={36} label={fr.map.zoomOut} icon={<Minus {...icon} />} onClick={() => map?.zoomOut({ duration: reduced ? 0 : 300 })} />
+      <IconButton size={36} label={fr.map.locate} icon={<LocateFixed {...icon} />} onClick={() => map?.flyTo({ ...toCamera(DEPOT_FOCUS), duration })} />
     </div>
   )
 }
