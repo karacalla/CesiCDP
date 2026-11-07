@@ -87,6 +87,10 @@
     radial-gradient(1px 1px at 48% 46%, rgb(255 255 255 / 0.3), transparent 100%),
     radial-gradient(1px 1px at 74% 6%, rgb(255 255 255 / 0.4), transparent 100%);
 
+  /* — Camion 3D du panneau : roues lisibles sur le panneau clair comme sombre (palette) — */
+  --truck-tire: #1e293b;
+  --truck-rim: #6d7580;
+
   /* — Barre de défilement : discrète au repos, couleur de marque au survol — */
   --scrollbar-thumb: rgb(71 85 105 / 0.45);
   --scrollbar-thumb-hover: var(--accent-ink);
@@ -111,6 +115,8 @@
 }
 
 :root[data-theme='dark'] {
+  --truck-tire: #6d7580;
+  --truck-rim: #cbd5e1;
   --scrollbar-thumb: rgb(154 164 178 / 0.35);
   --scrollbar-thumb-hover: var(--accent);
   --glass-bg: rgb(15 23 42 / 0.88);

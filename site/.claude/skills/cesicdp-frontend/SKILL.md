@@ -138,6 +138,7 @@ site/
 - **e2e** : `openApp(page, thème, largeur, motion = 'none')` ; passer `'full'` pour tester le globe et le vol.
 - **Impression** : `.print-sheet` (portail dans <body>) est la seule chose imprimée (`@media print` dans index.css) ; tester avec `page.emulateMedia({ media: 'print' })`.
 - **Lien vers un service tiers** : toujours via la confirmation de `ShareNav` (coordonnées = données clients).
+- **Camion 3D** (`features/tours/Truck3D.tsx`) : faces CSS en `preserve-3d`, unités `--u` = 100cqw/420 ; ajouter une face = un plan tourné (toit `translateZ`, flanc `rotateX(90deg)` origine haut, avant `rotateY(-90deg)` origine gauche). Jamais de WebGL dans le panneau.
 - **Camion du panneau** : effet n° 3 = budget épuisé (§3 bis) ; animer en `transform`/`opacity` WAAPI uniquement (S5 : `offset-path` n'est pas composé) ; en P5, appeler `notifySimulation()` de `features/cameo/bus.ts`.
 - **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
 - **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).

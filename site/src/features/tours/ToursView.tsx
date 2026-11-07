@@ -60,7 +60,7 @@ export function ToursView() {
 
       {sel && (
         <div className="relative mx-auto w-full max-w-[460px]">
-          <PanelTruck vehicleId={sel.route.vehicleId} returnAt={sel.route.end} className="z-10 -mb-12 ml-[2%] w-[96%]" />
+          <PanelTruck vehicleId={sel.route.vehicleId} returnAt={sel.route.end} className="z-20 -mb-16 ml-[2%] w-[96%]" />
           <JourneyCard route={sel.route} Q={instance.fleet.Q} selected onSelect={() => selectVehicle(sel.route.vehicleId)} className="pt-14" />
           <div className="mt-3 flex justify-end">
             <ShareButton vehicleId={sel.route.vehicleId} onClick={() => setShareOpen(true)} />

@@ -1,7 +1,7 @@
 /**
  * Rôle : relie la machine d'états du camion du panneau à l'application (ADR-022) : déclencheurs T1–T5, réglage
  *   « Animations », lecteur WAAPI (sortie / entrée le long du trajet), annulation propre.
- * Légèreté : aucune boucle d'animation ; une vérification d'inactivité toutes les 5 s (animations complètes
+ * Légèreté : rien si le camion n'est pas visible à l'écran (IntersectionObserver, ≥ 50 %) ; aucune boucle d'animation ; une vérification d'inactivité toutes les 5 s (animations complètes
  *   seulement) ; `will-change` posé le temps de l'animation ; rien si l'onglet est caché ; une seule animation à la
  *   fois (file de la machine) ; un redimensionnement termine l'animation en cours (trajet recalculé au suivant).
  */
@@ -33,6 +33,8 @@ export function useCameo(vehicleId: number | null, refs: CameoRefs): CameoSnapsh
   const levelRef = useRef(level)
   const simulating = useRef(false)
   const running = useRef<Animation | null>(null)
+  /** Baie visible à au moins 50 % : sinon l'animation est inutile (personne ne la voit) et n'est pas jouée. */
+  const visible = useRef(true)
 
   useEffect(() => {
     levelRef.current = level
@@ -41,7 +43,7 @@ export function useCameo(vehicleId: number | null, refs: CameoRefs): CameoSnapsh
   useEffect(() => {
     const play = (kind: 'exit' | 'enter', _v: number, done: () => void): (() => void) => {
       const { bay, truck, layer, mover, path } = { bay: refs.bay.current, truck: refs.truck.current, layer: refs.layer.current, mover: refs.mover.current, path: refs.path.current }
-      if (levelRef.current === 'none' || document.hidden || !bay || !truck || !layer || !mover || !path) {
+      if (levelRef.current === 'none' || document.hidden || !visible.current || !bay || !truck || !layer || !mover || !path) {
         const id = window.setTimeout(done, 0)
         return () => window.clearTimeout(id)
       }
@@ -119,10 +121,19 @@ export function useCameo(vehicleId: number | null, refs: CameoRefs): CameoSnapsh
     for (const ev of ['pointerdown', 'keydown', 'wheel'] as const) window.addEventListener(ev, act, { passive: true })
     const ro = new ResizeObserver(() => running.current?.finish())
     ro.observe(document.documentElement)
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible.current = (e?.intersectionRatio ?? 0) >= 0.5
+        if (!visible.current) running.current?.finish() // sortie de l'écran pendant l'animation : on termine
+      },
+      { threshold: [0, 0.5, 1] },
+    )
+    if (refs.bay.current) io.observe(refs.bay.current)
     return () => {
       offs.forEach((off) => off())
       for (const ev of ['pointerdown', 'keydown', 'wheel'] as const) window.removeEventListener(ev, act)
       ro.disconnect()
+      io.disconnect()
       m.dispose()
       machine.current = null
     }
@@ -138,7 +149,7 @@ export function useCameo(vehicleId: number | null, refs: CameoRefs): CameoSnapsh
   useEffect(() => {
     if (level !== 'full') return
     const id = window.setInterval(() => {
-      machine.current?.checkIdle({ busy: useRun.getState().status === 'running' || simulating.current, hidden: document.hidden, full: levelRef.current === 'full' })
+      machine.current?.checkIdle({ busy: useRun.getState().status === 'running' || simulating.current, hidden: document.hidden || !visible.current, full: levelRef.current === 'full' })
     }, CAMEO.idleCheckMs)
     return () => window.clearInterval(id)
   }, [level])

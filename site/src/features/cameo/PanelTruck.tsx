@@ -10,7 +10,7 @@ import { createPortal } from 'react-dom'
 import { useMotionLevel } from '@/hooks/useMotionLevel'
 import { fr } from '@/i18n/fr'
 import { formatHm } from '@/lib/time'
-import { TruckShowcase } from '@/features/tours/TruckShowcase'
+import { Truck3D } from '@/features/tours/Truck3D'
 import { useCameo } from './useCameo'
 
 export function PanelTruck({ vehicleId, returnAt, className = '' }: { vehicleId: number; returnAt: number | null; className?: string }) {
@@ -28,12 +28,12 @@ export function PanelTruck({ vehicleId, returnAt, className = '' }: { vehicleId:
   const hidden = state === 'away' || (level === 'full' && !home)
 
   return (
-    <div ref={bay} className={`relative aspect-[420/132] ${className}`}>
+    <div ref={bay} className={`relative ${className}`}>
       <div ref={truck} className={hidden ? 'invisible' : ''}>
-        <TruckShowcase vehicleId={id} />
+        <Truck3D vehicleId={id} />
       </div>
       {!home && (
-        <div className="absolute inset-x-[4%] inset-y-[8%] flex items-start justify-center rounded-2xl border-2 border-dashed border-panel-ink-2/60 pt-[7%]">
+        <div className="absolute inset-x-[4%] bottom-[16%] top-[10%] flex items-start justify-center rounded-2xl border-2 border-dashed border-panel-ink-2/60 pt-[6%]">
           <p className="text-center text-sm font-semibold text-panel-ink">
             {fr.cameo.away(id)}
             {returnAt !== null && <span className="block text-xs font-normal text-panel-ink-2">{fr.cameo.back(formatHm(returnAt))}</span>}
@@ -49,7 +49,7 @@ export function PanelTruck({ vehicleId, returnAt, className = '' }: { vehicleId:
           <div ref={mover} className="absolute left-0 top-0 origin-center">
             {/* lueur des phares (avant du camion, à droite du dessin) */}
             <span className="absolute right-[-14%] top-1/2 h-[70%] w-[30%] -translate-y-1/2 rounded-full [background:radial-gradient(closest-side,rgb(249_168_212/0.55),transparent)]" />
-            <TruckShowcase vehicleId={id} decorative />
+            <Truck3D vehicleId={id} decorative />
           </div>
         </div>,
         document.body,

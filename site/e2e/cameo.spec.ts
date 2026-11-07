@@ -58,6 +58,12 @@ for (const width of [1280, 768]) {
     await page.waitForTimeout(1800)
     await expect(page.getByText('Camion 1 au dépôt.')).toBeAttached()
 
+    // hors de l'écran (bas du panneau) : aucune animation, l'état change sans mouvement
+    await page.getByRole('heading', { name: /^Arrêts du camion/ }).scrollIntoViewIfNeeded()
+    await page.getByRole('button', { name: /Afficher le Camion 2 / }).last().click()
+    const flying = await page.locator('body > div[aria-hidden]:not([hidden]) svg path').count()
+    expect(flying).toBe(0)
+
     mkdirSync('docs/perf', { recursive: true })
     writeFileSync(`docs/perf/cameo-${width}.json`, JSON.stringify({ date: new Date().toISOString(), width, exit, enter }, null, 2) + '\n')
     expect(Math.max(0, ...exit.long, ...enter.long)).toBeLessThanOrEqual(50)
