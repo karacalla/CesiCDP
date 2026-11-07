@@ -12,6 +12,7 @@ import { fr } from '@/i18n/fr'
 import { useRun } from '@/store/run'
 import { useSelection } from '@/store/selection'
 import { useVrp } from '@/store/vrp'
+import { visiblePadding } from '@/lib/cameraPadding'
 
 const norm = (s: string): string => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 
@@ -39,7 +40,7 @@ export function CustomerSearch() {
     if (!c) return
     const owner = result?.routes.find((r) => r.stops.some((s) => s.customerId === c.id))?.vehicleId ?? null
     selectStop(c.id, owner)
-    if (geo) map?.flyTo({ center: [c.lng, c.lat], zoom: 13, pitch: DRONE_PITCH, duration: reduced ? 0 : CAMERA_MS })
+    if (geo && map) map.flyTo({ center: [c.lng, c.lat], zoom: 13, pitch: DRONE_PITCH, padding: visiblePadding(map.getContainer()), duration: reduced ? 0 : CAMERA_MS })
     setQ(c.name)
     setOpen(false)
   }

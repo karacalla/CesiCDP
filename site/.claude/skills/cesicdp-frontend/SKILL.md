@@ -51,13 +51,14 @@ site/
 │  │                          RoutesLayer (2 états), MapMarkers (pins verre + curseur), InfoCard, StatusPill,
 │  │                          useTours (données dérivées), useProjected (HTML positionné), useElevationProfile
 │  │                          gantt/ : Gantt, GanttRows (memo), GanttTooltip, useGanttZoom, ganttScale (+test)
+│  ├─ lib/cameraPadding.ts    marge de caméra = place de la bulle (TOUT flyTo/fitBounds/easeTo passe par visiblePadding)
 │  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
 │  ├─ store/selection.ts      camion / arrêt sélectionnés, heure affichée (DEMO_CLOCK)
 │  ├─ components/shadcn/      composants shadcn (alias de components.json) ; components/fx/ : effets (BorderBeam)
 │  ├─ components/layout/      + CustomerSearch (combobox), AlertsButton
 │  ├─ features/map/CustomersLayer.tsx  clients + dépôt (couches natives, regroupement > 300)
 │  ├─ components/ui/          IconButton (aria-label obligatoire ; variantes glass / panel / solid)
-│  ├─ components/layout/      AppFrame (cadre + split 62/38), SEdge (bord en S + poignée), NavIsland,
+│  ├─ components/layout/      AppFrame (plein écran + bulle de verre / feuille du bas + poignée), NavIsland,
 │  │                          PanelHeader, TeamHeader (E1), PrivacyNotice (RGPD)
 │  ├─ features/map/           MapStage (carte, relief, ciel, voile), basemapStyle (retouche « drone »),
 │  │                          MapOverlay (marque + îlot + outils), MapToolbar
@@ -122,7 +123,8 @@ site/
 - **Zustand** : un sélecteur ne doit JAMAIS fabriquer un nouvel objet/tableau (`s.x ?? []`) → boucle infinie (« getSnapshot should be cached »). Sélectionner la valeur stable puis `useMemo`.
 - **shadcn** : ne jamais laisser `init`/`add` redéfinir `--accent`, `--card`, `--chart-*` ni le fond de `body` (ADR-017) ; vérifier `git diff src/styles/index.css` après chaque commande shadcn.
 - **Carte d'info** : toujours blanche (posée sur la carte sombre) → couleurs brutes (`bg-card`, `bg-[var(--panel)]`, `text-ink`), jamais `panel-*` qui suit le thème.
-- **Superposition** : la carte passe 8 px sous le panneau ; en haut le bord en S masque 40 px → marges droites ≥ 64 px pour les éléments posés en haut à droite.
+- **Superposition** : la bulle couvre la droite de la carte → éléments posés sur la carte à `right-[calc(var(--panel-w)_+_var(--panel-gap)_+_24px)]` (≥ 1024 px) ou au-dessus de `var(--sheet-h)` (< 1024 px) ; variante `panel-collapsed:` quand la bulle est repliée.
+- **Verre** : `--glass-map-*` = contrôles sombres sur la carte (`glass`) ; `--glass-*` = bulle du panneau (`glass-bubble`), opacité verrouillée par `tokens.test.ts` : ne pas la baisser sans relancer le test.
 - **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
 - **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

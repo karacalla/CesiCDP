@@ -19,7 +19,7 @@ export function MapOverlay() {
   return (
     <>
       <MapMarkers />
-      <div className="pointer-events-none absolute inset-x-6 top-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-4 lg:right-16">
+      <div className="pointer-events-none absolute inset-x-6 top-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-4 lg:right-[calc(var(--panel-w)_+_var(--panel-gap)_+_24px)] panel-collapsed:lg:right-6">
         <div className="text-on-dark">
           <p className="text-3xl font-light leading-tight tracking-tight sm:text-4xl">{fr.tours.mapTitle}</p>
           {instance && <p className="mt-1 text-xs text-white/60">{fr.tours.mapSub(instance.id, instance.customers.length, instance.fleet.k)}</p>}
@@ -30,7 +30,7 @@ export function MapOverlay() {
       </div>
       <InfoCard />
       <StatusPill />
-      <MapToolbar className="absolute bottom-20 right-6 lg:right-16" />
+      <MapToolbar className="absolute bottom-[calc(var(--sheet-h)_+_56px)] right-5 lg:bottom-16 lg:right-[calc(var(--panel-w)_+_var(--panel-gap)_+_20px)] panel-collapsed:bottom-16 panel-collapsed:lg:right-5" />
     </>
   )
 }

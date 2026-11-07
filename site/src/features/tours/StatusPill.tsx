@@ -13,7 +13,7 @@ export function StatusPill() {
   if (!selected?.track || !state) return null
   const left = Math.max(0, (selected.track.cum.at(-1) ?? 0) - state.distance) / 1000
   return (
-    <p className="glass absolute bottom-14 left-6 inline-flex h-9 lg:bottom-6 items-center gap-2 rounded-full px-4 text-sm text-on-dark">
+    <p className="glass absolute bottom-[calc(var(--sheet-h)_+_24px)] left-5 inline-flex h-9 items-center lg:bottom-6 lg:left-6 panel-collapsed:bottom-6 gap-2 rounded-full px-4 text-sm text-on-dark">
       <Truck size={16} aria-hidden className="text-accent" />
       <span className="font-semibold">{fr.tours.truck(selected.route.vehicleId)}</span>
       <span className="text-white/70">· {fr.tours.remaining(left.toLocaleString('fr-FR', { maximumFractionDigits: 1 }))} · {formatHm(clock)}</span>

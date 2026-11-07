@@ -14,6 +14,7 @@ import { bearing, splitAt, type LngLat } from '@/lib/route'
 import { labelLayerId, MAP_ID } from '@/features/map/mapId'
 import { useSelection } from '@/store/selection'
 import { useTours } from './useTours'
+import { visiblePadding } from '@/lib/cameraPadding'
 
 const line = (coords: LngLat[], props: Record<string, unknown> = {}): Feature<LineString> => ({ type: 'Feature', properties: props, geometry: { type: 'LineString', coordinates: coords } })
 const EMPTY: FeatureCollection<LineString> = { type: 'FeatureCollection', features: [] }
@@ -67,10 +68,10 @@ export function RoutesLayer() {
       w = Math.min(w, p[0]); e = Math.max(e, p[0]); s = Math.min(s, p[1]); n = Math.max(n, p[1])
       if (Math.hypot(p[0] - start[0], p[1] - start[1]) > Math.hypot(far[0] - start[0], far[1] - start[1])) far = p
     }
-    // marges : la carte d'info occupe le bas à gauche quand la carte est large
+    // marges : la carte d'info occupe le bas à gauche quand la carte est large ; la bulle du panneau est ajoutée
     const el = map.getContainer()
-    const wide = el.clientWidth > 700 && el.clientHeight > 520
-    const padding = wide ? { top: 150, bottom: 230, left: 380, right: 110 } : { top: 110, bottom: 60, left: 40, right: 70 }
+    const wide = el.clientWidth >= 1024
+    const padding = visiblePadding(el, wide ? { top: 140, bottom: 80, left: 360, right: 48 } : { top: 120, bottom: 40, left: 40, right: 72 })
     map.fitBounds([[w, s], [e, n]], { bearing: bearing(start, far), pitch: DRONE_PITCH, padding, duration: reduced ? 0 : CAMERA_MS, maxZoom: 13 })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- recadrage au seul changement de camion
   }, [map, selectedId])

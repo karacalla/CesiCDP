@@ -52,5 +52,11 @@ export const useUi = create<UiState>((set, get) => ({
     applyTheme(theme)
     set({ theme })
   },
-  togglePanel: () => set((s) => ({ panelCollapsed: !s.panelCollapsed })),
+  togglePanel: () =>
+    set((s) => {
+      const panelCollapsed = !s.panelCollapsed
+      // attribut lu par la variante CSS `panel-collapsed:` (outils et attribution reprennent la place libérée)
+      if (typeof document !== 'undefined') document.documentElement.dataset.panel = panelCollapsed ? 'collapsed' : 'open'
+      return { panelCollapsed }
+    }),
 }))

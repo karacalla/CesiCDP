@@ -12,6 +12,7 @@ import { useSelection } from '@/store/selection'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useVrp } from '@/store/vrp'
 import { labelLayerId, MAP_ID } from './mapId'
+import { visiblePadding } from '@/lib/cameraPadding'
 
 /** Au-delà de ce nombre de clients, les points proches sont regroupés (lisibilité). */
 const CLUSTER_FROM = 300
@@ -65,7 +66,7 @@ export function CustomersLayer() {
       s = Math.min(s, c.lat)
       n = Math.max(n, c.lat)
     }
-    map.fitBounds([[w, s], [e, n]], { padding: { top: 120, bottom: 60, left: 60, right: 100 }, duration: reduced ? 0 : CAMERA_MS, pitch: DRONE_PITCH })
+    map.fitBounds([[w, s], [e, n]], { padding: visiblePadding(map.getContainer(), { top: 120, bottom: 60, left: 60, right: 60 }), duration: reduced ? 0 : CAMERA_MS, pitch: DRONE_PITCH })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- recadrage voulu au seul changement d'instance
   }, [map, instanceId, geo])
 

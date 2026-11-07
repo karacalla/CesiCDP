@@ -1,13 +1,15 @@
 /**
- * Rôle : cadre arrondi de l'application et répartition carte 62 % / panneau 38 % (≥ 1024 px),
- *   carte au-dessus et panneau en dessous en deçà (aucun défilement horizontal à 768 px).
- * Choix retenu : la carte occupe toute la hauteur et passe SOUS le panneau sur 40 px (bord en S) ;
- *   replier le panneau rend toute la largeur à la carte (MapLibre se redimensionne seul).
- * Question probable du jury : « pourquoi 62/38 ? » → proche du nombre d'or : la carte domine, le panneau reste lisible.
+ * Rôle : la carte occupe toute la fenêtre (ADR-018) ; le panneau est une bulle de verre posée dessus (ADR-019) :
+ *   à droite, à 20 px des bords, largeur 380–560 px (≥ 1024 px) ; feuille flottante en bas, ≈ 48 % de la hauteur,
+ *   en deçà. La poignée replie la bulle et rend toute la carte.
+ * Choix retenu : deux couches de verre : un liseré flou (le « verre » visible, sans texte) et une surface dont
+ *   l'opacité minimale est calculée pour garder 4,5:1 sur n'importe quel fond (tokens.test.ts).
+ * Alternative écartée : panneau latéral opaque collé au bord (la carte redevient une moitié d'écran).
+ * Question probable du jury : « le texte reste-t-il lisible sur une carte claire ? » → oui : contraste vérifié
+ *   en composant le verre sur blanc pur et sur noir pur ; repli opaque si la transparence est réduite.
  */
 import type { ReactNode } from 'react'
 import { fr } from '@/i18n/fr'
-import { SEdge } from './SEdge'
 
 interface Props {
   map: ReactNode
@@ -17,38 +19,46 @@ interface Props {
 }
 
 const PANEL_ID = 'panneau'
+export const BUBBLE_ID = 'panneau-bulle'
 
 export function AppFrame({ map, panel, collapsed, onTogglePanel }: Props) {
   return (
-    <div className="flex min-h-svh justify-center bg-bg-darker sm:p-3 lg:p-6">
+    <div className="fixed inset-0 h-dvh overflow-hidden bg-bg-darker">
       <a href={`#${PANEL_ID}`} className="sr-only z-50 rounded-full bg-accent px-4 py-2 font-semibold text-on-accent focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         Aller au panneau de travail
       </a>
-      <div className="relative flex w-full max-w-[var(--frame-max)] flex-col overflow-hidden border-white/10 bg-bg sm:rounded-frame sm:border lg:block lg:h-[calc(100svh-3rem)] lg:min-h-[640px]">
-        <div
-          className={`relative h-[52svh] min-h-[380px] lg:absolute lg:inset-y-0 lg:left-0 lg:h-auto ${
-            collapsed ? 'lg:right-0' : 'lg:right-[calc(38%_-_8px)]'
-          }`}
+      <div className="absolute inset-0">{map}</div>
+
+      <div
+        id={BUBBLE_ID}
+        hidden={collapsed}
+        className="glass-bubble absolute inset-x-3 bottom-3 z-20 h-[var(--sheet-h)] rounded-[28px] p-1.5 lg:inset-x-auto lg:bottom-[var(--panel-gap)] lg:right-[var(--panel-gap)] lg:top-[var(--panel-gap)] lg:h-auto lg:w-[var(--panel-w)] lg:rounded-bubble"
+      >
+        <main
+          id={PANEL_ID}
+          aria-label={fr.panel.label}
+          tabIndex={-1}
+          className="flex h-full flex-col gap-6 overflow-y-auto overscroll-contain rounded-[22px] bg-[var(--glass-bg)] px-5 py-6 text-panel-ink sm:px-6 lg:rounded-[30px]"
         >
-          {map}
-        </div>
-        <div
-          className={`relative z-10 -mt-10 rounded-t-[32px] bg-panel shadow-[var(--shadow-panel)] lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:rounded-none lg:shadow-none ${
-            collapsed ? 'lg:w-0' : 'lg:w-[38%]'
-          }`}
-        >
-          <SEdge collapsed={collapsed} onToggle={onTogglePanel} controls={PANEL_ID} />
-          <main
-            id={PANEL_ID}
-            aria-label={fr.panel.label}
-            tabIndex={-1}
-            hidden={collapsed}
-            className="flex h-full flex-col gap-6 overflow-y-auto px-5 py-6 text-panel-ink sm:px-7 lg:pl-4"
-          >
-            {panel}
-          </main>
-        </div>
+          {panel}
+        </main>
       </div>
+
+      <button
+        type="button"
+        onClick={onTogglePanel}
+        aria-expanded={!collapsed}
+        aria-controls={BUBBLE_ID}
+        aria-label={collapsed ? fr.panel.expand : fr.panel.collapse}
+        title={collapsed ? fr.panel.expand : fr.panel.collapse}
+        className={`glass absolute z-30 grid place-items-center rounded-full text-on-dark transition-colors hover:bg-black/60 ${
+          collapsed
+            ? 'bottom-3 left-1/2 h-8 w-16 -translate-x-1/2 lg:bottom-auto lg:left-auto lg:right-[var(--panel-gap)] lg:top-1/2 lg:h-16 lg:w-8 lg:-translate-y-1/2 lg:translate-x-0'
+            : 'bottom-[calc(var(--sheet-h)_-_4px)] left-1/2 h-8 w-16 -translate-x-1/2 lg:bottom-auto lg:left-auto lg:right-[calc(var(--panel-w)_+_var(--panel-gap)_-_14px)] lg:top-1/2 lg:h-16 lg:w-8 lg:-translate-y-1/2 lg:translate-x-0'
+        }`}
+      >
+        <span aria-hidden className="h-1.5 w-8 rounded-full bg-white/70 lg:h-8 lg:w-1.5" />
+      </button>
     </div>
   )
 }

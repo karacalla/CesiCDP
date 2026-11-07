@@ -6,6 +6,8 @@
 
 /* Variante `dark:` de Tailwind/shadcn = notre thème sombre (attribut data-theme, pas de classe .dark) */
 @custom-variant dark (&:is([data-theme='dark'] *));
+/* Variante `panel-collapsed:` : bulle du panneau repliée (attribut posé par store/ui.ts) */
+@custom-variant panel-collapsed (&:is([data-panel='collapsed'] *));
 
 /* Expose les jetons à Tailwind (bg-accent, text-panel-ink…) ; `inline` garde la référence à la variable,
    donc le changement de thème se propage sans régénérer les classes. */
@@ -42,7 +44,7 @@
   --color-panel-late: var(--panel-late);
   --color-panel-ok: var(--panel-ok);
   --color-panel-wait: var(--panel-wait);
-  --radius-frame: var(--radius-frame);
+  --radius-bubble: var(--radius-bubble);
   --radius-card: var(--radius-card);
   --radius-journey: var(--radius-journey);
   --font-heading: var(--font-sans);
@@ -73,11 +75,20 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Bulle du panneau : liseré de verre (flou) ; la surface intérieure porte le texte (opacité calculée, ADR-019) */
+@utility glass-bubble {
+  background: var(--glass-rim);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
 @utility glass {
-  background: var(--glass-bg);
+  background: var(--glass-map-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--glass-map-border);
 }
 
 @layer base {
@@ -124,16 +135,21 @@
   filter: invert(1);
 }
 
-/* Attribution en bas à droite : décalée du recouvrement du panneau (40 px, ≥ 1024 px) ou de sa remontée (< 1024 px) */
+/* Attribution en bas à droite de la zone VISIBLE : à gauche de la bulle (≥ 1024 px), au-dessus de la feuille (< 1024 px) */
 @media (width >= 64rem) {
-  .maplibregl-ctrl-bottom-right {
-    right: 48px;
+  .maplibregl-map .maplibregl-ctrl-bottom-right {
+    right: calc(var(--panel-w) + var(--panel-gap) + 12px);
   }
 }
 @media (width < 64rem) {
-  .maplibregl-ctrl-bottom-right {
-    bottom: 40px;
+  .maplibregl-map .maplibregl-ctrl-bottom-right {
+    bottom: calc(var(--sheet-h) + 16px);
   }
+}
+/* Panneau replié : la carte reprend toute la largeur */
+:root[data-panel='collapsed'] .maplibregl-map .maplibregl-ctrl-bottom-right {
+  right: 0;
+  bottom: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

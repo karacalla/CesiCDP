@@ -12,7 +12,7 @@
 | P3 Contraintes et lancement | ✅ terminé (07/11/2026) | « non pris en compte » si contrainte non gérée | `e2e/run.spec.ts`, `src/services/mockRun.test.ts`, `captures/p3-*.png`, axe 12/12 |
 | P4 Résultats | ✅ terminé (07/11/2026) | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | `e2e/journey.spec.ts`, `captures/ux-*.png`, `p4-gantt-*.png`, `spikes/gantt.tsx` (survol p95 16,8 ms), axe 20/20 |
 | P4b Immersion · lot 0 essais | ✅ terminé (07/11/2026) | S4 globe, S5 camion mesurés ; ADR-018→022 | `docs/spikes/resultats.json` (S4-*, S5-*), `captures/s4-*.png` |
-| P4b · lot 1 plein écran + verre | à faire | 0 défilement à 768/1280/1920 ; contraste du verre testé sur blanc et noir | |
+| P4b · lot 1 plein écran + verre | ✅ terminé (07/11/2026) | 0 défilement à 768/1280/1920 ; contraste du verre testé sur blanc et noir | `e2e/layout.spec.ts` ×6, axe 30/30, `tokens.test.ts` (verre), `captures/p4b-l1-*.png` |
 | P4b · lot 2 globe + vol | à faire | ≥ 30 images/s ; CPU ≈ 0 à l'arrêt ; reduced-motion | |
 | P4b · lot 3 partage | à faire | GPX valide, impression, dialogue clavier | |
 | P4b · lot 4 camion du panneau | à faire | 0 tâche > 50 ms, CLS 0 ; machine d'états testée | |
@@ -67,7 +67,7 @@ P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein
 1. Noms des 4 membres : à saisir dans `src/config/team.ts` (E1).
 2. Source du facteur CO₂ 0,29 kg/km (repris du prototype, non sourcé).
 3. Contrat : le solveur a **4** mouvements (`PROBAS_DEFAUT`), CLAUDE.md §5 en annonce 7 → le type suivra le solveur (tableau de longueur libre, noms fournis par le solveur).
-4. CLAUDE.md §3 (lignes « Carte », « Pins nombreux ») à mettre à jour selon ADR-002/004 ? (non modifié sans accord).
+4. CLAUDE.md §3 (lignes « Carte », « Pins nombreux ») à mettre à jour selon ADR-002/004 ? (non modifié sans accord ; §4 et §3 bis mis à jour le 07/11 sur demande).
 5. Profil Mapbox (`VITE_BASEMAP=mapbox`) : déclaré dans `config/basemap.ts` mais **non opérationnel** avec MapLibre (URL `mapbox://`) ; le garder (ADR + `transformRequest`) ou le retirer ?
 6. Pousser `bulle` : exige `git push --force` (divergence avec `origin/bulle`).
 8. **Modèle de trafic du solveur** : « temps × coefficient de la tranche de départ » (non FIFO) ou vitesse par tranche intégrée (FIFO, Ichoua 2003) ? L'éditeur et l'alerte en dépendent.
@@ -91,6 +91,7 @@ P4b « Immersion » : lot 0 (essais S4 globe, S5 camion), puis lots 1–4 (plein
 
 ## Journal
 
+- 07/11/2026 — P4b lot 1 : plein écran (ADR-018), bulle de verre à deux couches (blanc 96 % / navy 88 %, testé sur blanc et noir), feuille du bas < 1024 px, `lib/cameraPadding`, CLAUDE.md §4 (Cadre, Panneau) et §3 bis (budget d'effets) mis à jour.
 - 07/11/2026 — P4b lot 0 : essais S4 (globe : 60 img/s rotation, 58–60 vol, relief + deck.gl compatibles, `cameraForBounds` faux sur globe) et S5 (WAAPI composé, `offset-path` non) ; ADR-018→022.
 - 07/11/2026 — Fin de P4 : Gantt SVG (fenêtres, attente hachurée, retard ▼, heure affichée, info-bulle, zoom Ctrl+molette/boutons/glisser par transform) ; mesure sur le composant réel 20×50. Dépendances : retrait de `@deck.gl/extensions` et `@loaders.gl/gltf` (inutilisées), `shadcn` (CLI) passé en dépendance de développement.
 - 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.

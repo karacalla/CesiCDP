@@ -52,18 +52,26 @@
   --route-7: #bbcc33;
   --route-8: #dddddd;
 
-  /* — Verre — */
-  --glass-bg: rgb(0 0 0 / 0.45);
-  --glass-border: rgb(255 255 255 / 0.15);
+  /* — Verre sombre des contrôles posés sur la carte (boutons, pastilles) — */
+  --glass-map-bg: rgb(0 0 0 / 0.45);
+  --glass-map-border: rgb(255 255 255 / 0.15);
+
+  /* — Bulle de verre du panneau (ADR-019), thème clair. Opacité MINIMALE pour que tout texte du panneau
+       (encre, encre secondaire, encres d'état, ambre lisible) garde ≥ 4,5:1 sur un fond blanc pur ET noir pur :
+       calculée et vérifiée par tokens.test.ts. Le liseré extérieur (rim), plus transparent, ne porte aucun texte. — */
+  --glass-bg: rgb(255 255 255 / 0.96);
+  --glass-rim: rgb(241 243 245 / 0.38);
+  --glass-border: rgb(255 255 255 / 0.55);
+  --glass-blur: 24px;
+  --glass-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.65), 0 30px 60px -24px rgb(2 6 23 / 0.7), 0 12px 24px -12px rgb(2 6 23 / 0.45);
 
   /* — Gabarits — */
-  --frame-max: 1536px;
-  --radius-frame: 36px;
+  --panel-w: clamp(380px, 38vw, 560px); /* bulle du panneau (≥ 1024 px) */
+  --panel-gap: 20px; /* marge entre la bulle et les bords de la fenêtre */
+  --sheet-h: 48dvh; /* feuille du bas (< 1024 px) */
+  --radius-bubble: 36px;
   --radius-card: 24px;
   --radius-journey: 16px;
-  --split-map: 62%;
-  --s-curve: 40px; /* empiètement du panneau sur la carte */
-  --shadow-panel: -24px 0 48px -16px rgb(2 6 23 / 0.55);
   --shadow-float: 0 24px 50px -18px rgb(2 6 23 / 0.6);
 
   /* — Typographie — */
@@ -71,7 +79,8 @@
 
   /* — Thème du panneau (clair par défaut) : seules ces variables changent avec le thème — */
   --panel-bg: var(--panel);
-  --panel-surface: var(--card);
+  /* surfaces internes : gris du panneau, pour se détacher de la bulle blanche (ADR-019) */
+  --panel-surface: var(--panel);
   --panel-ink: var(--ink);
   --panel-ink-2: var(--ink-2);
   --panel-line: var(--line);
@@ -85,6 +94,10 @@
 }
 
 :root[data-theme='dark'] {
+  --glass-bg: rgb(15 23 42 / 0.88);
+  --glass-rim: rgb(15 23 42 / 0.32);
+  --glass-border: rgb(255 255 255 / 0.14);
+  --glass-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.12), 0 30px 60px -24px rgb(0 0 0 / 0.8), 0 12px 24px -12px rgb(0 0 0 / 0.5);
   --panel-bg: var(--bg);
   --panel-surface: var(--muted-bg);
   --panel-ink: var(--on-dark);
@@ -96,4 +109,14 @@
   --panel-wait: var(--wait);
   --chart-1: #6366f1;
   --chart-2: #d97706;
+}
+
+/* Replis opaques : transparence réduite demandée par le système, ou navigateur sans backdrop-filter */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass-bg: rgb(255 255 255 / 1); --glass-rim: rgb(241 243 245 / 1); }
+  :root[data-theme='dark'] { --glass-bg: rgb(15 23 42 / 1); --glass-rim: rgb(15 23 42 / 1); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --glass-bg: rgb(255 255 255 / 1); --glass-rim: rgb(241 243 245 / 1); }
+  :root[data-theme='dark'] { --glass-bg: rgb(15 23 42 / 1); --glass-rim: rgb(15 23 42 / 1); }
 }

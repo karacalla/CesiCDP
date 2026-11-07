@@ -263,6 +263,12 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 - **Carte « drone »** : style vectoriel sombre OpenFreeMap retouché à l'exécution (`features/map/basemapStyle.ts`) : satellite désaturé (ADR-007), ombrage du relief (ombres noires, lumières blanc 22 %), aplats d'occupation du sol masqués, routes en blanc 16 %, libellés `#9aa4b2` sur halo sombre ; relief Terrarium exagéré ×1,4 ; ciel et brouillard navy (`sky`) ; voile vertical noir 55 % → 0 → 35 % et vignette radiale. Vue initiale inclinée à 28° sur Nancy et les Vosges.
 - **Thèmes** : clair (défaut) et sombre ne changent que les variables `--panel-*` ; préférence mémorisée localement (`localStorage`, sans donnée personnelle).
 
+### 6.1 ter Plein écran et bulle de verre (P4b, lot 1, 07/11/2026)
+- **Gabarit** : carte `fixed inset-0` (100dvh) ; bulle à 20 px des bords, largeur `clamp(380px, 38vw, 560px)`, rayon 36 px ; sous 1024 px, feuille à 12 px des bords, 48 % de la hauteur, rayon 28 px. Le bord en S et le cadre sont retirés (ADR-018). Poignée en verre sombre : replier rend toute la carte (variante CSS `panel-collapsed:` pour les outils et l'attribution).
+- **Verre** (ADR-019) : deux couches : liseré `--glass-rim` flou (24 px, saturation 1,3) qui porte l'impression de verre, et surface `--glass-bg` qui porte le texte. Opacités retenues : clair blanc 96 % (l'ambre lisible `#b45309` impose ce minimum ; l'encre secondaire seule tolérerait 79 %), sombre `#0f172a` 88 %. Surfaces internes du thème clair passées au gris `--panel` pour se détacher de la bulle blanche (palette inchangée). Test : `tokens.test.ts` compose liseré + surface sur blanc pur et noir pur pour 12 couples encre/thème.
+- **Caméra** : `lib/cameraPadding.ts` lit l'emprise de la bulle au moment du mouvement et l'ajoute à la marge de caméra (droite, ou bas pour la feuille) ; utilisé par le recadrage des tournées, des clients, la recherche et la colonne d'outils.
+- **Vérifié** : aucun défilement de page à 768, 1280, 1920 px dans les deux thèmes (`e2e/layout.spec.ts`) ; axe 0 violation sur 30 combinaisons (5 écrans × 2 thèmes × 3 largeurs) ; captures `captures/p4b-l1-*.png` (accueil, tournées, panneau replié).
+
 ### 6.1 bis Analyse d'écart avec la maquette de référence (07/11/2026) et corrections
 
 | Élément | Maquette « Roam » | Avant | Après |
