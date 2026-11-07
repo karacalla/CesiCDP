@@ -5,11 +5,15 @@
 import { expect, test } from '@playwright/test'
 import { openApp } from './helpers'
 
-const PHASE = process.env.SHOTS_PHASE ?? 'p1'
+const PHASE = process.env.SHOTS_PHASE ?? 'p3'
 const WIDTHS = [1280, 768] as const
 const THEMES = ['light', 'dark'] as const
 /** Vue → libellé du bouton de l'îlot de navigation. */
-const VIEWS: Array<{ name: string; nav: string | null }> = [{ name: 'donnees', nav: null }]
+const VIEWS: Array<{ name: string; nav: string | null }> = [
+  { name: 'donnees', nav: null },
+  { name: 'contraintes', nav: 'Contraintes' },
+  { name: 'calcul', nav: 'Calcul' },
+]
 
 
 for (const v of VIEWS) {

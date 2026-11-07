@@ -139,6 +139,27 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Critique** : ce résultat n'est pas celui du solveur ; il ne respecte pas les fenêtres (tirées après coup).
 - **Conséquence** : le résultat simulé est étiqueté (« Résultat simulé (mock) », objectif « … SIMULÉ ») et déclare `ignoredConstraints: ['timeWindows']`. Le tracé (≈ 350 Ko) est chargé à la demande, hors du bundle principal.
 
+### ADR-012 — Trafic : éditeur à tranches contiguës et contrôle FIFO
+- **Contexte** : E3 impose le trafic par tranche horaire ; le modèle doit être compris et éditable, et ses défauts visibles.
+- **Options** : (a) saisir début et fin de chaque tranche ; (b) ne saisir que la fin (le début est la fin de la précédente, la dernière finit à 24:00), avec « scinder » et « fusionner » ; pour le contrôle : (c) aucun ; (d) détection des baisses de coefficient.
+- **Critique** : (a) autorise trous et chevauchements, à rattraper par des messages d'erreur ; (b) rend la contiguïté vraie par construction. Avec le modèle « temps de parcours = temps hors trafic × coefficient de la tranche de départ », une baisse de coefficient permet d'arriver plus tôt en partant plus tard : partir à b − ε arrive à b + T·d_i, partir à b arrive à b + T·d_{i+1} < b + T·d_i.
+- **Choix** : (b) + (d). Courbe en escalier du temps d'un trajet de référence (30 min par défaut) qui réagit à chaque saisie ; frontières fautives marquées ; alerte chiffrée (« À 09:30, le coefficient passe de 1,6 à 1,15 : partir à 09:30 fait arriver à 10:05, contre 10:17 en partant une minute plus tôt »). L'interface **illustre** le modèle ; elle ne planifie rien.
+- **Conséquence** : NANCY-60 déclenche l'alerte (baisse de 1,6 à 1,15 à 09:30), ce qui sert la démonstration. Remède proposé : vitesse par tranche intégrée à travers les frontières (Ichoua, Gendreau et Potvin, 2003), à arbitrer avec l'équipe solveur.
+
+### ADR-013 — Calcul simulé : refuser plutôt que fabriquer
+- **Contexte** : critère P3 : « un algorithme qui ne gère pas une contrainte activée affiche “non pris en compte” et ne produit aucun faux résultat ».
+- **Options** : (a) renvoyer le résultat simulé de NANCY-60 quel que soit l'algorithme ; (b) le renvoyer uniquement quand il correspond à la demande, refuser sinon.
+- **Critique** : (a) présenterait la solution « recuit » comme un résultat de PLNE ou de Clarke-Wright, ou comme valable pour une instance modifiée : faux résultat.
+- **Choix** : (b). Le mock accepte seulement le recuit simulé sur NANCY-60 **non modifiée** (empreinte des clients, du dépôt, de la flotte et du trafic) ; tout autre cas est refusé avec un message qui explique pourquoi. Les contraintes actives que l'algorithme ne traite pas (capacités déclarées dans `config/solver.ts` : seul le PLNE traite fenêtres et trafic, CLAUDE.md §6) sont annoncées **avant** le lancement et inscrites dans le résultat (`ignoredConstraints`).
+- **Conséquence** : la démonstration du calcul ne fonctionne que sur NANCY-60 en mode simulé ; avec le solveur branché (`VITE_API_MODE=http`), tout passe par `POST /solve` et le suivi `GET /runs/:id`.
+
+### ADR-014 — Graphiques : Recharts, deux graphiques sur un même axe des temps
+- **Contexte** : convergence (coût courant, meilleur coût, température) en direct ; courbe de trafic.
+- **Options** : (a) un graphique à deux axes verticaux (coût et température) ; (b) deux graphiques empilés sur le même axe des temps.
+- **Critique** : (a) les deux échelles se lisent l'une contre l'autre et suggèrent des croisements sans signification.
+- **Choix** : (b). Couleurs `--chart-1` (indigo) et `--chart-2` (ambre), une paire par thème, validées par le script de la méthode dataviz (`validate_palette.js` : bande de luminosité, chroma, séparation pour les daltonismes ΔE ≥ 31, contraste ≥ 3:1) sur `#ffffff`, `#0f172a` et `#1e293b`. Légende dont le texte reste à l'encre du panneau ; info-bulle à réticule ; tableau des valeurs repliable ; ≤ 500 points ; pas d'animation.
+- **Conséquence** : nouvelle paire de jetons dépendant du thème ; les couleurs sont lues dans les variables CSS au rendu (le thème est appliqué de façon synchrone par le store).
+
 ## 5. Essais techniques S1–S3
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
@@ -210,6 +231,7 @@ Autres jetons : rayons (`--radius-frame` 36 px, `--radius-card` 24 px, `--radius
 
 Cible WCAG 2.1 AA.
 - **P0** : contrastes des jetons vérifiés automatiquement, focus toujours visible (anneau ambre doublé d'un liseré sombre), `prefers-reduced-motion` coupe animations et transitions, règles `jsx-a11y` dans le lint, aucune taille de texte < 12 px.
+- **P3** : interrupteurs natifs `role="switch"` reliés à leur libellé et à leur description ; choix d'algorithme en groupe de boutons radio (`fieldset`) ; capacités « pris en compte / non pris en compte » en icône + texte ; alerte FIFO et contraintes ignorées annoncées (`role="alert"` / `role="status"`) ; barre de progression `role="progressbar"` ; état du calcul dans une région `aria-live` ; graphiques décrits par un libellé textuel (dernière valeur) et doublés d'un tableau. axe : 0 violation sur les vues Données, Contraintes et Calcul (2 thèmes × 2 largeurs).
 - **P2** : formulaires étiquetés (`label` relié), erreurs reliées par `aria-describedby` et `aria-invalid` ; table : vrai `<table>`, `aria-rowcount` / `aria-rowindex` malgré la virtualisation, tri par boutons dans les en-têtes avec `aria-sort`, chaque cellule éditable nommée (« Demande — Client 12 »), erreur de cellule annoncée (`role="alert"`) ; statut de fenêtre en icône + libellé ; rapport d'import dans une région `aria-live`. axe : 0 violation sur la vue Données (2 thèmes × 2 largeurs). Nouveaux jetons `--late-ink`, `--ok-ink`, `--wait-ink` pour les états sur fond clair (`--late` sur blanc n'atteint pas 3:1).
 - **P1** : audit axe (règles WCAG 2.0/2.1 A et AA) de la coque : **0 violation** en thème clair et sombre, à 1280 et 768 px (`npm run test:a11y`). Le canevas WebGL est exclu de l'audit (axe ne peut pas lire ses pixels) : les textes posés dessus sont vérifiés sur capture (blanc et `#9aa4b2` sur voile noir). Lien d'évitement « Aller au panneau de travail » ; régions nommées (carte, navigation, panneau, outils) ; `aria-current` sur la vue active ; `aria-expanded` sur la poignée ; `aria-busy` sur la carte pendant le chargement ; boutons-icônes nommés (`aria-label` exigé par le typage de `IconButton`) ; textes internes de MapLibre traduits (`locale`), dont les raccourcis clavier de la carte ; caméra instantanée si `prefers-reduced-motion`.
 - **À venir** : alternative textuelle complète à la carte (liste des arrêts, P4).
@@ -229,6 +251,7 @@ Cible WCAG 2.1 AA.
 | `npm run lint` | oxlint : correctness en erreur, `no-explicit-any`, `ban-ts-comment`, jsx-a11y, `import/no-cycle` |
 | `npm test` | Vitest : contrastes des jetons, taille de texte minimale, en-tête d'équipe, poignée du panneau, îlot de navigation (24 tests en P1) |
 | `npm run test:a11y` | axe sur la vue Données (coque comprise), 2 thèmes × 2 largeurs |
+| `e2e/run.spec.ts` | critère P3 : « non pris en compte » avant et après calcul, convergence en direct, annulation sans résultat, PLNE refusé en mode simulé ; éditeur de trafic : l'alerte FIFO disparaît quand les coefficients ne baissent plus |
 | `npm run test:perf` | build de production : import CSV de 1000 lignes (3 erreurs), tâches longues du fil principal (`docs/perf/import-1000.json`) |
 
 Mesure P2 (build de production, poste de §5) : analyse 16 ms dans le worker ; 184 à 331 ms entre le choix du fichier et l'affichage du rapport ; **0 tâche longue (> 50 ms)**. En serveur de développement, une image de ≈ 120 ms apparaît : le profil CPU (protocole CDP) l'attribue au recalcul du relief par MapLibre lors du recadrage de la carte et à React en mode développement, pas à l'import.
@@ -270,6 +293,8 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 - Résultat de NANCY-60 simulé, fenêtres non respectées par construction (ADR-011).
 - Instances à coordonnées planes (VRPLIB, Solomon) : pas d'affichage cartographique.
 - Table clients : 9 colonnes dans le panneau (38 %) → défilement horizontal interne.
+- Modèle de trafic illustré (temps × coefficient de la tranche de départ) non confirmé par l'équipe solveur (ADR-012).
+- Courbe de convergence simulée en mode mock ; capacités des algorithmes déclarées en dur (`config/solver.ts`) tant que l'API ne les fournit pas.
 
 ## 12. Glossaire
 
@@ -292,6 +317,8 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 3. *Comment savez-vous que vos couleurs sont accessibles ?* — Chaque paire est recalculée par un test automatique (formule WCAG 2.1) ; la suite de tests échoue si une paire passe sous son seuil.
 4. *Vos images/s sont-elles crédibles ?* — Mesurées dans Chromium avec accélération GPU ; le nom du moteur WebGL est enregistré avec chaque mesure ; protocole et données brutes en §5.
 5. *Pourquoi la carte reste-t-elle sombre en thème clair ?* — Le tracé ambre et les statuts sont conçus pour un fond sombre (contrastes de 6,7 à 9,3:1) ; sur fond clair, l'ambre tomberait à 2,15:1.
+9. *Votre recuit gère-t-il les fenêtres de temps ?* — Pas encore : l'interface l'affiche (« Fenêtres : non pris en compte ») avant le lancement et sur le résultat ; seul le PLNE les traite aujourd'hui.
+10. *Qu'est-ce que la propriété FIFO et pourquoi l'alerte ?* — Partir plus tard ne doit jamais faire arriver plus tôt. Avec un coefficient appliqué à tout le trajet selon l'heure de départ, une baisse de coefficient la viole ; l'éditeur le détecte et chiffre l'exemple.
 7. *Pourquoi ne pas appeler OSRM depuis l'interface ?* — Chaque requête contiendrait les coordonnées des clients (donnée potentiellement personnelle) ; les tracés viennent du solveur, et en démonstration ils ont été calculés une fois, sur des points fictifs.
 8. *Comment prouvez-vous que l'import ne bloque pas l'interface ?* — Test automatisé sur le build de production : un `PerformanceObserver` compte les tâches longues pendant l'import de 1000 lignes ; résultat 0 (§9).
 6. *Et au clavier, sur la carte ?* — Flèches, + et −, Maj + flèches pour incliner et tourner (MapLibre) ; un lien d'évitement mène directement au panneau ; toute l'information de la carte sera aussi dans la liste des arrêts (P4).

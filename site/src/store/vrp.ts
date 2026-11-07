@@ -8,7 +8,7 @@ import { create } from 'zustand'
 import { api } from '@/services/api'
 import type { ImportIssue, ImportResult } from '@/lib/parsers'
 import { validateCustomer, type FieldError } from '@/lib/validation'
-import { CustomerSchema, DepotSchema, FleetSchema, InstanceSchema, type Customer, type Depot, type Fleet, type Instance } from '@/types/vrp'
+import { CustomerSchema, DepotSchema, FleetSchema, InstanceSchema, OptionsSchema, TrafficSchema, type Customer, type Depot, type Fleet, type Instance, type Options, type TrafficSlot } from '@/types/vrp'
 
 export interface ImportReport {
   fileName: string
@@ -31,6 +31,9 @@ interface VrpState {
   removeCustomer: (id: number) => void
   setDepot: (d: Depot) => boolean
   setFleet: (f: Fleet) => boolean
+  /** Remplace les tranches de trafic ; renvoie les messages d'erreur (vide si accepté). */
+  setTraffic: (slots: TrafficSlot[]) => string[]
+  setOptions: (o: Partial<Options>) => void
 }
 
 export const useVrp = create<VrpState>((set, get) => ({
@@ -104,5 +107,20 @@ export const useVrp = create<VrpState>((set, get) => ({
     if (!inst || !p.success) return false
     set({ instance: { ...inst, fleet: p.data } })
     return true
+  },
+
+  setTraffic: (slots) => {
+    const inst = get().instance
+    if (!inst) return ['aucune instance']
+    const p = TrafficSchema.safeParse({ slots })
+    if (!p.success) return [...new Set(p.error.issues.map((i) => i.message))]
+    set({ instance: { ...inst, traffic: p.data } })
+    return []
+  },
+
+  setOptions: (o) => {
+    const inst = get().instance
+    const p = OptionsSchema.safeParse({ ...inst?.options, ...o })
+    if (inst && p.success) set({ instance: { ...inst, options: p.data } })
   },
 }))

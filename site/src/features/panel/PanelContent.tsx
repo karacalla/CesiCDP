@@ -3,7 +3,9 @@
  * En phase 1 le corps des vues est un état vide explicite ; chaque phase suivante remplit une vue.
  */
 import { Inbox } from 'lucide-react'
+import { ConstraintsView } from '@/features/constraints/ConstraintsView'
 import { DataView } from '@/features/data/DataView'
+import { RunView } from '@/features/run/RunView'
 import { PanelHeader } from '@/components/layout/PanelHeader'
 import { PrivacyNotice } from '@/components/layout/PrivacyNotice'
 import { fr } from '@/i18n/fr'
@@ -21,6 +23,10 @@ export function PanelContent() {
       </div>
       {view === 'data' ? (
         <DataView />
+      ) : view === 'constraints' ? (
+        <ConstraintsView />
+      ) : view === 'run' ? (
+        <RunView />
       ) : (
         <div className="grid flex-1 place-items-center rounded-card border border-dashed border-panel-line p-8 text-center">
           <div className="flex flex-col items-center gap-3">

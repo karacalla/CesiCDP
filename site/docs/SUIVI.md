@@ -9,14 +9,14 @@
 | P0 Socle | ✅ terminé (07/11/2026) | build OK ; matrice d'écart + S1–S3 au dossier | `docs/spikes/resultats.json`, `docs/captures/s*.png`, `p0-*.png` |
 | P1 Coque et identité | ✅ terminé (07/11/2026) | 1280/768 sans défilement horizontal ; axe sur la coque | `e2e/a11y.spec.ts` (0 violation × 4), `captures/p1-*.png` |
 | P2 Données | ✅ terminé (07/11/2026) | import 1000 clients sans tâche > 100 ms ; erreurs ligne à ligne | `e2e/import.spec.ts` (build prod : 0 tâche > 50 ms), `docs/perf/import-1000.json`, `captures/p2-*.png` |
-| P3 Contraintes et lancement | à faire | « non pris en compte » si contrainte non gérée | |
+| P3 Contraintes et lancement | ✅ terminé (07/11/2026) | « non pris en compte » si contrainte non gérée | `e2e/run.spec.ts`, `src/services/mockRun.test.ts`, `captures/p3-*.png`, axe 12/12 |
 | P4 Résultats | à faire | Gantt 20×50 fluide ; carte ⇔ liste des arrêts | |
 | P5 Simulation 3D | à faire | reduced-motion ; camion sur le relief | |
 | P6 Étude et finition | à faire | dossier autosuffisant | |
 
 ## Prochaine action
 
-P3 : éditeur de trafic (tranches contiguës, coefficients, courbe, alerte FIFO), interrupteurs fenêtres/attente, panneau de lancement (algo, recuit, durée, graine), tâche simulée avec convergence en direct + annulation, « non pris en compte » selon les capacités de l'algorithme.
+P4 : tracés sur la carte (parcouru/à venir, sélection ambre, autres 45 %), pins (masse native, verre ≤ 40 positionnés par le code), carte d'info + profil d'altitude + ETA, KPI (dont CO₂ vs `comparison`), cartes « Dernières tournées », showcase du camion, Gantt SVG (ADR-005) + liste des arrêts accessible.
 
 ## Matrice d'écart (existant → cible)
 
@@ -48,6 +48,9 @@ P3 : éditeur de trafic (tranches contiguës, coefficients, courbe, alerte FIFO)
 - ADR-008 Navigation par état (Zustand), sans routeur : la carte reste montée d'une vue à l'autre.
 - ADR-009 Contrat : schémas Zod = source unique (types déduits) ; horaires d'arrêt **nullables** (le solveur actuel n'en produit pas) ; coordonnées planes acceptées (VRPLIB, Solomon).
 - ADR-010 Import dans un Web Worker, parseurs maison (CSV, JSON, VRPLIB, Solomon), store toujours valide.
+- ADR-012 Trafic : l'éditeur ILLUSTRE le modèle « temps × coefficient de la tranche de départ » ; toute baisse de coefficient viole FIFO → alerte chiffrée (NANCY-60 en contient une à 09:30, volontairement visible).
+- ADR-013 Calcul simulé : seul le recuit sur NANCY-60 non modifiée produit un résultat ; PLNE, Clarke-Wright, autre instance ou instance modifiée → refus explicite (aucun faux résultat).
+- ADR-014 Graphiques Recharts : deux graphiques (coût, température) sur un même axe des temps, jamais deux échelles ; couleurs `--chart-1/2` validées par le script dataviz dans chaque thème.
 - ADR-011 NANCY-60 : clients fictifs + 5 requêtes OSRM uniques (1 matrice, 4 tracés) ; résultat **simulé** commité, marqué comme tel.
 
 ## Décisions ouvertes (à trancher par l'équipe)
@@ -58,6 +61,8 @@ P3 : éditeur de trafic (tranches contiguës, coefficients, courbe, alerte FIFO)
 4. CLAUDE.md §3 (lignes « Carte », « Pins nombreux ») à mettre à jour selon ADR-002/004 ? (non modifié sans accord).
 5. Profil Mapbox (`VITE_BASEMAP=mapbox`) : déclaré dans `config/basemap.ts` mais **non opérationnel** avec MapLibre (URL `mapbox://`) ; le garder (ADR + `transformRequest`) ou le retirer ?
 6. Pousser `bulle` : exige `git push --force` (divergence avec `origin/bulle`).
+8. **Modèle de trafic du solveur** : « temps × coefficient de la tranche de départ » (non FIFO) ou vitesse par tranche intégrée (FIFO, Ichoua 2003) ? L'éditeur et l'alerte en dépendent.
+9. Capacités des algorithmes (`config/solver.ts`) : à mettre à jour quand le recuit traitera fenêtres/trafic (ou à fournir par l'API).
 7. Transmettre `docs/CONTRAT_SOLVEUR.md` + `src/types/vrp.ts` à l'équipe solveur (clés françaises attendues, `contraintes_ignorees`, `comparaison`).
 
 ## Écarts connus
@@ -67,11 +72,14 @@ P3 : éditeur de trafic (tranches contiguës, coefficients, courbe, alerte FIFO)
 - Le relief de la vue initiale (plateau lorrain, inclinaison 28°) reste discret ; il se révèle à l'inclinaison (`captures/p1-relief-dark-1280.png`) et en P5.
 - NANCY-60 : fenêtres tirées APRÈS la construction des tournées simulées (pour montrer attente et retard) → le résultat simulé déclare `ignoredConstraints: ['timeWindows']`.
 - Perf d'import mesurée sur le **build de production** (`npm run test:perf`) ; en dev, le recadrage de la carte sur le relief produit une image de ≈ 120 ms (MapLibre), sans lien avec l'import.
+- Éditeur de trafic : après validation par Entrée, l'éditeur est recréé (clé) et le focus revient au début de la page ; validation par sortie de champ sans perte.
+- Courbe de convergence simulée en mode mock (seuls les coûts initial et final viennent du résultat simulé) ; étiquetée dans l'interface.
 - Table clients : défilement horizontal interne au panneau (9 colonnes dans 38 %).
 - Mesures S2/S3 faites sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
 
 ## Journal
 
 - 07/11/2026 — P0 : socle TS, jetons + test de contraste (19 paires), essais S1–S3, ADR-001→006.
+- 07/11/2026 — P3 : contraintes (interrupteurs, éditeur de tranches contiguës, courbe, alerte FIFO), vue Calcul (algorithmes + capacités, « non pris en compte », réglages du recuit, lancement/annulation, convergence en direct), API `solve` (mock + http) ; 56 tests unitaires, e2e P3, axe 0 violation sur 3 vues.
 - 07/11/2026 — P2 : contrat Zod, mock + http + adaptateurs, NANCY-60 (OSRM une fois) et GEN-1000, formulaires, table TanStack v9 virtualisée éditable, import Worker (4 formats), carte des clients ; 47 tests, axe 0 violation.
 - 07/11/2026 — P1 : coque (cadre, split 62/38, bord en S + poignée, îlot de navigation, en-tête équipe, thèmes, RGPD), carte drone (satellite, ombrage, relief, ciel/brouillard, voile), axe 0 violation, 24 tests. README racine réécrit, `TODO.md` supprimé (réalisé).

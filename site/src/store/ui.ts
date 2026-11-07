@@ -19,6 +19,11 @@ function readTheme(): Theme {
   }
 }
 
+/** Applique le thème immédiatement (avant le rendu) : les couleurs de graphique lues au rendu sont alors à jour. */
+function applyTheme(theme: Theme): void {
+  if (typeof document !== 'undefined') document.documentElement.dataset.theme = theme
+}
+
 interface UiState {
   view: ViewId
   theme: Theme
@@ -30,7 +35,11 @@ interface UiState {
 
 export const useUi = create<UiState>((set, get) => ({
   view: 'data',
-  theme: readTheme(),
+  theme: (() => {
+    const t = readTheme()
+    applyTheme(t)
+    return t
+  })(),
   panelCollapsed: false,
   setView: (view) => set({ view }),
   toggleTheme: () => {
@@ -40,6 +49,7 @@ export const useUi = create<UiState>((set, get) => ({
     } catch {
       /* préférence non mémorisée : sans conséquence */
     }
+    applyTheme(theme)
     set({ theme })
   },
   togglePanel: () => set((s) => ({ panelCollapsed: !s.panelCollapsed })),

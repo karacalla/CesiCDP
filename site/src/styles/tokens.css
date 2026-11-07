@@ -79,6 +79,9 @@
   --panel-late: var(--late-ink);
   --panel-ok: var(--ok-ink);
   --panel-wait: var(--wait-ink);
+  /* Séries des graphiques (validées par dataviz/validate_palette.js : clair sur #ffffff, sombre sur #0f172a et #1e293b) */
+  --chart-1: #4f46e5;
+  --chart-2: #b45309;
 }
 
 :root[data-theme='dark'] {
@@ -91,4 +94,6 @@
   --panel-late: var(--late);
   --panel-ok: var(--ok);
   --panel-wait: var(--wait);
+  --chart-1: #6366f1;
+  --chart-2: #d97706;
 }

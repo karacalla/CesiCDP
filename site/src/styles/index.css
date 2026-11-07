@@ -65,6 +65,12 @@
   }
 }
 
+/* Légendes des graphiques : le texte porte l'encre du panneau, jamais la couleur de la série */
+.recharts-legend-item-text {
+  color: var(--panel-ink) !important;
+  font-size: 12px;
+}
+
 /* Attribution de la carte (obligatoire, OSM/EOX/Mapzen) : verre sombre, largeur bornée pour ne pas passer sous
    le panneau ni sous la colonne d'outils. #9aa4b2 et #f1f5f9 sur voile ≥ 80 % de #0a1120 : ≥ 7:1. */
 .maplibregl-map .maplibregl-ctrl.maplibregl-ctrl-attrib {

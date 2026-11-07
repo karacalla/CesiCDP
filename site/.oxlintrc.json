@@ -47,7 +47,13 @@
       }
     ],
     "jsx-a11y/prefer-tag-over-role": "off",
-    "react/incompatible-library": "off"
+    "react/incompatible-library": "off",
+    "jsx-a11y/label-has-associated-control": [
+      "error",
+      {
+        "depth": 3
+      }
+    ]
   },
   "ignorePatterns": [
     "dist",

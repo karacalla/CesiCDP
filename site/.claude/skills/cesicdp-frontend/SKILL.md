@@ -39,6 +39,14 @@ site/
 │  ├─ workers/import.worker.ts  parseFile hors du fil principal
 │  ├─ features/data/          DataView, InstancePicker, ImportPanel(+useImport), DepotForm, FleetForm,
 │  │                          CustomerTable(+useCustomerTable, EditableCell, StatusBadge), useDraft
+│  ├─ config/solver.ts        ALGOS + capacités (seul milp traite fenêtres/trafic), MOVE_NAMES, DEFAULT_PARAMS
+│  ├─ lib/traffic.ts          illustration du modèle de trafic : fifoViolations, travelTimeSteps
+│  ├─ lib/constraints.ts      activeConstraints, ignoredBy(algo, instance) → « non pris en compte »
+│  ├─ services/mockRun.ts     calcul simulé (refuse tout sauf recuit sur NANCY-60 intacte) ; httpApi.solve = POST + sondage
+│  ├─ store/run.ts            réglages, progression, résultat, annulation (un calcul à la fois)
+│  ├─ hooks/useChartColors.ts couleurs de graphique lues dans les jetons (--chart-1/2, --panel-*)
+│  ├─ features/constraints/   ConstraintsView, TrafficEditor (clé = tranches), TravelTimeChart
+│  ├─ features/run/           RunView, AlgoPicker, SaParams, ConvergenceCharts
 │  ├─ features/map/CustomersLayer.tsx  clients + dépôt (couches natives, regroupement > 300)
 │  ├─ components/ui/          IconButton (aria-label obligatoire ; variantes glass / panel / solid)
 │  ├─ components/layout/      AppFrame (cadre + split 62/38), SEdge (bord en S + poignée), NavIsland,
@@ -99,4 +107,7 @@ site/
 - **Mesures de performance** : toujours sur le build de production (`playwright.perf.config.ts`), jamais en dev (React dev + recadrage du relief faussent tout).
 - **Scripts Node en TS** : `node scripts/x.ts` (types retirés par Node 24) ; imports relatifs avec extension `.ts` (`allowImportingTsExtensions`).
 - **Cycle d'imports** : `MAP_ID` vit dans `features/map/mapId.ts` (pas dans MapStage).
+- **Graphiques** : jamais deux axes Y ; couleurs = `useChartColors()` (Recharts veut des couleurs résolues) ; toute nouvelle couleur de série passe par `validate_palette.js` (skill dataviz) en clair ET en sombre.
+- **Thème** : appliqué de façon synchrone par `store/ui.ts` (sinon les couleurs lues au rendu sont celles du thème précédent).
+- **Mock de calcul** : ne JAMAIS lui faire renvoyer un résultat qui ne correspond pas à la demande (ADR-013).
 - Couches ajoutées au style : dans `onLoad` de `MapStage` (sources `cdp-*`) ; deux sources raster-dem distinctes pour relief et ombrage.

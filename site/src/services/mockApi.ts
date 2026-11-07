@@ -5,6 +5,7 @@
  */
 import { makeGen1000 } from '@/data/gen1000'
 import { InstanceSchema } from '@/types/vrp'
+import { mockSolve } from './mockRun'
 import type { ApiClient, InstanceSummary } from './types'
 
 const SUMMARIES: InstanceSummary[] = [
@@ -23,4 +24,5 @@ export const mockApi: ApiClient = {
     if (id === 'GEN-1000') return makeGen1000()
     throw new Error(`Instance inconnue : ${id}`)
   },
+  solve: mockSolve,
 }
