@@ -385,5 +385,30 @@
     "longTasks": [],
     "cls": 0,
     "compositor": "aucun évènement de composition dans la trace"
+  },
+  "S6-camion-physique": {
+    "date": "2026-11-08T00:05:10.972Z",
+    "shots": [
+      "docs/captures/s6-sortie-0150ms.png",
+      "docs/captures/s6-sortie-0600ms.png",
+      "docs/captures/s6-sortie-1000ms.png",
+      "docs/captures/s6-sortie-1400ms.png",
+      "docs/captures/s6-sortie-1800ms.png",
+      "docs/captures/s6-sortie-2200ms.png",
+      "docs/captures/s6-sortie-2600ms.png",
+      "docs/captures/s6-retour-0200ms.png",
+      "docs/captures/s6-retour-0800ms.png",
+      "docs/captures/s6-retour-1400ms.png",
+      "docs/captures/s6-retour-2000ms.png",
+      "docs/captures/s6-retour-2600ms.png",
+      "docs/captures/s6-retour-3200ms.png",
+      "docs/captures/s6-retour-3800ms.png"
+    ],
+    "compositeFailed": [],
+    "longTasks": [
+      258
+    ],
+    "layoutShift": 0,
+    "animatedParts": 62
   }
 }

@@ -9,7 +9,7 @@
 2. Besoin et utilisateurs
 3. Existant et matrice d'écart
 4. Décisions d'architecture (ADR)
-5. Essais techniques S1–S5
+5. Essais techniques S1–S6
 6. Identité visuelle et jetons
 7. Accessibilité
 8. Protection des données (RGPD)
@@ -228,7 +228,30 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : (c), `features/tours/Truck3D.tsx` : caisse (toit nervuré, flanc, face avant), cabine (toit navy, pare-brise, feux roses), roues en disques sur le plan du flanc (pneu `--truck-tire`, jante `--truck-rim` : `#1e293b`/`#6d7580` en clair, `#6d7580`/`#cbd5e1` en sombre, couleurs de la palette), ombre au sol ; vue de trois quarts (`rotateX(54°) rotateZ(6°)`). Le camion passe au-dessus de la carte de tournée (`z-20`). Animation : un `IntersectionObserver` suit la baie ; visible à moins de 50 %, aucune animation n'est jouée (changement d'état immédiat), le passage de démonstration (T5) est suspendu, et une animation en cours se termine si la baie sort de l'écran.
 - **Conséquence** : remplace `TruckShowcase.tsx` (SVG à plat, supprimé). Mesuré (`e2e/cameo.spec.ts`) : toujours 0 tâche longue et décalage de mise en page 0 pendant l'animation ; aucune animation quand le panneau est défilé jusqu'aux arrêts. Le camion glTF reste prévu sur la carte en P5 (ADR-003).
 
-## 5. Essais techniques S1–S5
+### ADR-025 — Camion du panneau physiquement réaliste (remplace l'animation d'ADR-022 et le modèle d'ADR-024)
+- **Contexte** : demande du propriétaire (08/11/2026) : analyser, critiquer, essayer, puis ne livrer que la solution la plus réaliste (forme, courbe, trajectoire, mouvement, suivi de caméra, reflets, ombres).
+- **Critique de l'existant** :
+
+| Aspect | Avant | Défaut |
+|---|---|---|
+| Forme | trois pavés, roues en disques plats, 3 faces | pas de cabine lisible, pas d'épaisseur de pneu ; une rotation aurait montré des faces manquantes |
+| Trajectoire | Bézier libre, point suivi = centre du camion | courbure arbitraire (rayon parfois < longueur du camion), l'arrière « glisse » |
+| Mouvement | rotation 2D de l'image entière, `cubic-bezier` | le camion 3D tourne comme un autocollant ; vitesse sans limite d'accélération ; roues immobiles ; ni roulis ni tangage |
+| Caméra | réduction d'échelle fixe (×0,72), inclinaison fixe | aucune perspective réelle quand le camion s'éloigne |
+| Lumière | dégradés figés, ombre floue fixe | l'ombre ne tourne pas, les faces ne changent pas de teinte, aucun reflet |
+| Effets | traînée pointillée rose, fondu en fin de course, lueur rose | décor non physique |
+
+- **Plan retenu** (une seule solution livrée) : (1) modèle à faces orientées (`backface-visibility`) ; (2) trajectoire de l'essieu arrière ; (3) planification de vitesse ; (4) caméra fixe qui suit du regard ; (5) éclairage par face et ombre portée ; (6) images clés par pièce, temps linéaire, la physique étant dans les échantillons.
+- **Choix** :
+  - *Forme* (`features/truck3d/`) : porteur cabine avancée (cabine blanche, habitacle vitré en retrait, déflecteur, rétroviseur, calandre, pare-chocs), caisse à toit nervuré et bandeau rose, portes et feux arrière, trois essieux (tandem arrière), pneus épais (deux flancs), jantes à 5 goujons. Faces jamais visibles (dessous, flanc nord sur toute la trajectoire) non dessinées.
+  - *Trajectoire* (`cameo/motion.ts`) : celle de l'essieu arrière (pivot réel d'un véhicule non articulé) ; ligne droite, **clothoïde** (le volant tourne progressivement), arc de **rayon 330 unités = empattement / tan 40°** (braquage maximal d'un porteur), clothoïde, ligne droite ; braquage des roues avant = `atan(empattement × courbure)`.
+  - *Mouvement* : vitesse planifiée (passe avant : accélération ≤ 330 u/s² ; passe arrière : freinage ≤ 300 u/s² ; plafond `√(a_lat / courbure)` dans le virage), à-coups lissés, arrêt de 0,35 s avant le départ (desserrage du frein) ; retour **en marche arrière** à 0,4 × la vitesse avant, jusqu'à l'arrêt dans la baie ; roulis ∝ v²·courbure (la caisse penche vers l'extérieur), tangage ∝ accélération (cabré au départ, plongée au freinage) ; rotation des jantes = distance / rayon. Temps accéléré ≈ ×3 (lisibilité), rapports réalistes conservés.
+  - *Caméra* : fixe, élévation 36° au repos, distance = perspective CSS ; quand le camion s'éloigne, l'échelle, l'inclinaison apparente (vue plus rasante) et l'azimut découlent de la projection (aucun facteur arbitraire). La trajectoire est coupée quand le camion entier a quitté l'écran.
+  - *Lumière* : soleil en haut à gauche (même côté que le halo du globe) ; voile par face selon Lambert, recalculé au fil du virage ; ombre portée décalée selon le soleil, qui tourne avec le camion ; occlusion sous le véhicule et ombres de contact des pneus ; reflet du ciel qui glisse sur le pare-brise et les vitres ; phares et faisceaux au sol en marche avant, feux de recul en marche arrière, feux stop au freinage.
+  - *Rendu* : 36 animations WAAPI (`transform` / `opacity` seulement), créées avant l'affichage de la couche ; valeurs constantes posées sans animation.
+- **Conséquences** : la traînée pointillée, le fondu et l'échelle arbitraire sont supprimés. Mesures (S6 et `e2e/cameo.spec.ts`) : 0 échec de composition, mise en place 23–33 ms, 0 tâche longue et 0 décalage de mise en page pendant l'animation, 60 images/s une fois le GPU chaud. Limite : la toute première animation d'une session compile les shaders du GPU (≈ 0,2 s de saccade), masquée par l'arrêt de départ ou par le départ hors écran du retour.
+
+## 5. Essais techniques S1–S6
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).
 
@@ -266,6 +289,20 @@ Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM)
 - **Protocole** (`spikes/s5.ts`, `e2e/s5.spec.ts`) : même trajet (courbe du panneau vers le coin supérieur droit puis hors écran), 2,8 s ; mesures : tâches longues, `layout-shift`, intervalle entre images ; trace Chromium `blink.animations` pour savoir si l'animation est composée. Tentative écartée : deux captures pendant un blocage du fil principal (une capture attend le fil principal : résultat inexploitable).
 - **Résultats** : (a) `offset-path` : 0 tâche longue, CLS 0, p95 16,7 ms, mais trace `compositeFailed`, propriété non composable `offset-distance` ; (b) WAAPI `transform` : 0 tâche longue, CLS 0, p95 16,8 ms, aucun échec de composition, précalcul 3,7 ms.
 - **Conclusion** : (b) retenu (ADR-022) : l'animation continue même si le fil principal est occupé (calcul, import).
+
+### S6 — Camion physique : coût de rendu et composition (08/11/2026)
+- **Protocole** : `e2e/s6.spec.ts` (séquence d'images de la sortie et du retour, trace `blink.animations`) ; variantes A/B mesurées par la trace `viz` (`Display::DrawAndSwap`, tâches du processus GPU) sur « Rejouer l'animation ».
+- **Résultats et décisions** :
+
+| Essai | Mesure | Décision |
+|---|---|---|
+| Première version (134 animations) | 20 échecs de composition « aucun changement visible », fil principal 91 ms au départ | animer seulement ce qui change ; animations créées avant d'afficher la couche → 50 animations, 0 échec, 57 ms |
+| Ombres en `filter: blur` | tâche GPU de 170–190 ms au départ | remplacées par des dégradés masqués (même rendu, pas de filtre) |
+| `will-change` sur chaque face | tâches GPU jusqu'à 171 ms, plus de saccades | **rejeté** (trop de couches) |
+| Faces jamais visibles retirées (flanc nord, châssis) | 36 animations, fil principal 41 ms | retenu |
+| A/B à froid / à chaud | 1re animation de la session : 47–52 img/s ; ensuite **60 img/s**, écarts ≤ 34 ms ; sans masque, sans halos : identique à chaud | coût à froid = compilation des shaders, une fois ; masques et halos conservés |
+
+- **Conclusion** : le réalisme (≈ 100 éléments 3D, 36 animations) tient 60 images/s sur le poste de mesure (GPU intégré). Images : `captures/s6-sortie-*.png`, `captures/s6-retour-*.png`.
 
 ## 6. Identité visuelle et jetons
 
@@ -468,7 +505,8 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 
 13. *Pourquoi un globe à l'ouverture ?* — Il dit en une image que l'outil passe de l'échelle d'un réseau à celle d'une tournée ; il est natif (MapLibre, aucune bibliothèque 3D), étiqueté « démonstration », s'arrête à la première interaction ou après 60 s, et disparaît si l'on demande moins d'animations.
 14. *Le partage envoie-t-il les données des clients à Google ?* — Non par défaut : les fichiers sont produits dans le navigateur ; un lien Google Maps ou Waze n'est ouvert qu'après un avertissement qui nomme le service et le nombre de points transmis.
-15. *Combien coûte l'animation du camion ?* — Rien sur le fil principal : images clés `transform`/`opacity` jouées par le compositeur (S5 : l'alternative `offset-path` n'est pas composée) ; mesuré : 0 tâche longue, décalage de mise en page 0 ; aucune boucle en continu, rien quand l'onglet est caché.
+15. *Combien coûte l'animation du camion ?* — Une mise en place de 23–33 ms, puis rien sur le fil principal : 36 animations `transform`/`opacity` jouées par le compositeur (S5, S6 : 0 échec de composition) ; mesuré : 0 tâche longue, décalage de mise en page 0, 60 images/s ; aucune boucle continue ; rien si le camion n'est pas visible ou si l'onglet est caché.
+19. *Votre camion est-il physiquement plausible ?* — Le point suivi est l'essieu arrière ; le virage est une clothoïde de rayon empattement / tan 40° ; la vitesse est planifiée sous des limites d'accélération longitudinale et latérale ; roulis, tangage, braquage, rotation des roues, ombre et éclairage découlent de ces grandeurs ; la perspective vient d'une caméra fixe. Seul le temps est accéléré (≈ ×3), avec des rapports réalistes (marche arrière ≈ 0,4 × marche avant).
 16. *Pourquoi Google Maps en plusieurs parties ?* — La documentation limite un lien à 9 étapes intermédiaires (3 sur navigateur mobile) ; au-delà, l'itinéraire est tronqué. Waze ne prend qu'une destination : on propose l'arrêt suivant ; Apple Plans n'a pas de format multi-étapes documenté : on fournit le GPX.
 17. *Un panneau transparent reste-t-il lisible ?* — L'opacité est la plus faible qui garde 4,5:1 pour chaque texte, calculée en composant le verre sur blanc pur et sur noir pur (test automatique) ; si le système demande moins de transparence, le panneau devient opaque.
 18. *Que devient le globe pendant l'usage quotidien ?* — Il n'apparaît que sans tournée ; un recalcul ne repasse pas par le globe ; la rotation est arrêtée par la première interaction ; mesuré : 0 rendu de carte par seconde une fois arrêté.

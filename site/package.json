@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "test:a11y": "playwright test e2e/a11y.spec.ts",
     "shots": "playwright test e2e/screenshots.spec.ts",
-    "spikes": "playwright test e2e/spikes.spec.ts e2e/s5.spec.ts",
+    "spikes": "playwright test e2e/spikes.spec.ts e2e/s5.spec.ts e2e/s6.spec.ts",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
     "preview": "vite preview",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",

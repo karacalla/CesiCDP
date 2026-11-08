@@ -54,7 +54,7 @@ site/
 │  ├─ lib/cameraPadding.ts    marge de caméra = place de la bulle (TOUT flyTo/fitBounds/easeTo passe par visiblePadding)
 │  ├─ lib/share.ts            partage pur (Google découpé, Waze, GPX, GeoJSON, CSV, noms) ; lib/download.ts (Blob)
 │  ├─ features/share/         ShareDialog (Base UI Dialog), ShareNav (confirmation tiers), RouteSheet (impression), QrCode
-│  ├─ features/cameo/         camion du panneau : cameoMachine (pure, testée), useCameo (WAAPI), flight, PanelTruck, bus
+│  ├─ features/cameo/         camion du panneau : cameoMachine (pure), motion (physique, pure), keyframes, useCameo (WAAPI), PanelTruck, bus ; features/truck3d/ : modèle 3D CSS
 │  ├─ config/cameo.ts         durées et seuils du camion (T5 : 120 s, 10 min, 20 s)
 │  ├─ lib/route.ts            géométrie d'affichage : buildTrack, stateAt(heure), splitAt, bearing
 │  ├─ store/scene.ts          phase de la carte globe → flying → routes, rotation, « passer », annonce
@@ -138,7 +138,8 @@ site/
 - **e2e** : `openApp(page, thème, largeur, motion = 'none')` ; passer `'full'` pour tester le globe et le vol.
 - **Impression** : `.print-sheet` (portail dans <body>) est la seule chose imprimée (`@media print` dans index.css) ; tester avec `page.emulateMedia({ media: 'print' })`.
 - **Lien vers un service tiers** : toujours via la confirmation de `ShareNav` (coordonnées = données clients).
-- **Camion 3D** (`features/tours/Truck3D.tsx`) : faces CSS en `preserve-3d`, unités `--u` = 100cqw/420 ; ajouter une face = un plan tourné (toit `translateZ`, flanc `rotateX(90deg)` origine haut, avant `rotateY(-90deg)` origine gauche). Jamais de WebGL dans le panneau.
+- **Camion physique** : `cameo/motion.ts` (trajectoire, vitesse, caméra : pur, testé) → `cameo/keyframes.ts` (une liste d'images clés par `data-part`) → `useCameo` (WAAPI linéaire). Toute nouvelle pièce animée : `data-part` + entrée dans `PartFrames` ; ne jamais animer une valeur constante (échec de composition « aucun changement visible »). Mesurer avec `e2e/s6.spec.ts`.
+- **Camion 3D** (`features/truck3d/`) : `--u` = 100cqw/460 ; normales vers l'extérieur + `backface-visibility: hidden` (sud `rotateX(-90deg)` origine bas, avant `rotateY(90deg)` origine droite, arrière `rotateY(-90deg)` origine gauche, toit `translateZ`) ; ne pas dessiner l'invisible (dessous, flanc nord) ; pas de `filter: blur` (coût GPU, S6). Jamais de WebGL dans le panneau.
 - **Camion du panneau** : effet n° 3 = budget épuisé (§3 bis) ; animer en `transform`/`opacity` WAAPI uniquement (S5 : `offset-path` n'est pas composé) ; en P5, appeler `notifySimulation()` de `features/cameo/bus.ts`.
 - **Testing Library** : `cleanup` explicite dans `src/test/setup.ts` (pas de `globals`).
 - **Nom accessible** d'un bouton à contenu riche : laisser le texte visible former le nom (axe `label-content-name-mismatch`).

@@ -17,4 +17,4 @@ export interface TeamMember {
 
 export const TEAM_NAME = 'CesiCDP — Groupe 6'
 
-export const TEAM: readonly TeamMember[] = [{ name: null }, { name: null }, { name: null }, { name: null }]
+export const TEAM: readonly TeamMember[] = [{ name: "Dahirou NOUNSI" }, { name: "Emmanuela MESSANGA" }, { name: "Maria KARAKALLA" }, { name: "Paul MASSING" }]
