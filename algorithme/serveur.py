@@ -1,3 +1,17 @@
+# =====================================================================================================
+# serveur.py : le pont entre le site web et le solveur Python
+# =====================================================================================================
+#
+# EN BREF
+#   Le site (dans le navigateur) ne sait pas exécuter du Python. Ce petit serveur tourne sur l'ordinateur
+#   et sert d'intermédiaire :
+#     1. le site lui demande la liste des instances, puis une instance ;
+#     2. le site lui envoie un calcul à faire (l'instance + les réglages) ;
+#     3. le serveur traduit l'instance au format du solveur, lance resoudre() dans un processus à part,
+#        puis renvoie les tournées et les horaires au format attendu par le site.
+#   Le site demande toutes les 0,5 s « où en est le calcul ? » jusqu'à recevoir le résultat.
+#   Le code du solveur (recuit_simple.py) n'est pas modifié : on l'importe tel quel.
+#
 # Serveur HTTP local qui branche le site (site/, mode « http ») sur le solveur Python
 #
 #   python serveur.py            puis, dans site/ : npm run dev:solveur

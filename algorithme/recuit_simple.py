@@ -1,18 +1,35 @@
-# Recuit simulé pour le CVRP (camions avec capacité) et le CVRPTW (capacité + fenêtres de temps)
-# dépôt = lieu 0, clients = 1..n, chaque camion porte au plus Q
-# avec fenêtres : le client i doit être livré entre a_i et b_i ; si le camion arrive
-# avant a_i il attend, s'il arrive après b_i la tournée est interdite
+# =====================================================================================================
+# recuit_simple.py : le solveur du projet (recuit simulé)
+# =====================================================================================================
 #
-# plan du fichier :
-#   1. lecture d'une instance (.vrp sans fenêtres, .txt de Solomon avec fenêtres)
-#   2. distances et voisins proches
+# EN BREF
+#   Un dépôt (le lieu 0), des clients (lieux 1 à n), des camions qui portent chacun au plus Q.
+#   On cherche des tournées « dépôt -> clients -> dépôt » qui livrent chaque client une seule fois,
+#   sans surcharger un camion, et dont la longueur totale est la plus petite possible.
+#   - CVRP (niveau B)   : seulement la capacité ;
+#   - CVRPTW (niveau A) : en plus, chaque client a une fenêtre de temps [a_i, b_i]. Un camion en avance
+#                         attend l'ouverture ; un camion qui arriverait après b_i n'a pas le droit de livrer.
+#
+# LA MÉTHODE EN 3 PHRASES
+#   1. On construit vite une bonne solution de départ (algorithme des économies de Clarke et Wright).
+#   2. On la modifie un tout petit peu, des millions de fois (déplacer un client, en échanger deux...).
+#   3. On garde les modifications qui raccourcissent ; on garde AUSSI parfois celles qui rallongent
+#      (c'est le « recuit simulé ») pour ne pas rester bloqué dans une solution moyenne.
+#
+# ORGANISATION DU FICHIER
+#   1. lire une instance (.vrp sans fenêtres, .txt de Solomon avec fenêtres)
+#   2. distances entre tous les lieux, et liste des voisins proches de chaque client
 #   3. solution de départ (Clarke et Wright)
-#   4. fonctions utiles (longueur, charge, horaires, vérification)
-#   5. les 5 mouvements
-#   6. le recuit + resoudre() qui enchaîne tout
+#   4. petites fonctions utiles (longueur, charge, horaires, vérification)
+#   5. les 5 « mouvements » (les petites modifications)
+#   6. le recuit, puis resoudre() qui enchaîne tout
 #
-# exemples : python recuit_simple.py instances/X-n101-k25.vrp
-#            python recuit_simple.py solomon/r101.txt
+# ESSAYER
+#   python recuit_simple.py instances/X-n101-k25.vrp   (CVRP, 10 s)
+#   python recuit_simple.py solomon/c101.txt           (CVRPTW, 10 s, trouve l'optimum 827,3)
+#
+# Aucune bibliothèque externe : seulement math, random et time (rien à installer, tout est lisible).
+# =====================================================================================================
 
 import math
 import random
@@ -21,7 +38,12 @@ import time
 
 # ---------- 1. lecture d'une instance ----------
 
-# lit un fichier .vrp ; le dépôt devient le lieu 0 et les clients 1..n
+# Lit un fichier .vrp (format VRPLIB des instances X d'Uchoa).
+# Le fichier contient un en-tête « CLE : valeur » puis des sections :
+#   NODE_COORD_SECTION (coordonnées), DEMAND_SECTION (demandes), DEPOT_SECTION (numéro du dépôt).
+# Dans le fichier les lieux sont numérotés à partir de 1 ; ici le dépôt devient le lieu 0 et les
+# clients 1..n, ce qui permet d'écrire D[0][i] pour « du dépôt au client i ».
+# Renvoie un dictionnaire : nom, coordonnées, demandes, capacité Q, et la règle d'arrondi des distances.
 def lire_instance(chemin):
     nom = ""
     capacite = 0
@@ -62,10 +84,13 @@ def lire_instance(chemin):
                 demandes.append(int(morceaux[1]))
             elif section == "DEPOT_SECTION":
                 # on suppose que le dépôt est le lieu 1, sinon la numérotation est fausse
+                # (-1 marque seulement la fin de la section)
                 if morceaux[0] not in ("1", "-1"):
                     raise ValueError("le dépôt doit être le lieu numéro 1")
 
     # coords[i] = (x, y) du lieu i, demandes[0] = 0 pour le dépôt
+    # "arrondi" : les instances EUC_2D arrondissent chaque distance à l'entier (sinon nos coûts ne
+    # seraient pas comparables aux meilleurs coûts publiés)
     return {
         "nom": nom,
         "coords": coords,
@@ -75,8 +100,11 @@ def lire_instance(chemin):
     }
 
 
-# lit un fichier de Solomon (.txt) : mêmes informations + fenêtres de temps
-# colonnes : numéro, x, y, demande, début de fenêtre, fin de fenêtre, durée de service
+# Lit un fichier de Solomon (.txt) : les mêmes informations + les fenêtres de temps.
+# Chaque lieu est une ligne de 7 nombres :
+#   numéro, x, y, demande, début de fenêtre a, fin de fenêtre b, durée de livraison s
+# La première de ces lignes est le dépôt ; sa « fenêtre » donne ses horaires d'ouverture.
+# Dans ces instances, le temps de trajet est égal à la distance (vitesse 1).
 def lire_instance_solomon(chemin):
     with open(chemin, encoding="utf-8") as fichier:
         lignes = [ligne.split() for ligne in fichier if ligne.strip() != ""]
@@ -111,9 +139,14 @@ def lire_instance_solomon(chemin):
 
 # ---------- 2. distances et voisins proches ----------
 
-# matrice des distances : D[i][j] = distance entre le lieu i et le lieu j
-# arrondi = True : entier le plus proche (instances .vrp)
-# arrondi = "dixieme" : coupé à 1 décimale (instances de Solomon), False : rien
+# Calcule une fois pour toutes la « matrice des distances » : D[i][j] = distance du lieu i au lieu j.
+# Distance à vol d'oiseau sur le plan (théorème de Pythagore), puis la règle d'arrondi de l'instance :
+#   arrondi = True      -> entier le plus proche (instances X)
+#   arrondi = "dixieme" -> coupé à 1 décimale (instances de Solomon)
+#   arrondi = False     -> aucun arrondi
+# Pourquoi tout calculer d'avance ? Le recuit lit ces distances des millions de fois : les lire dans
+# un tableau est immédiat, les recalculer à chaque fois serait beaucoup plus lent.
+# Coût : n² cases (1 million pour 1000 clients) : c'est ce qui limite la taille des instances.
 def calcul_distances(coords, arrondi=True):
     nb_lieux = len(coords)
     D = []
@@ -133,9 +166,11 @@ def calcul_distances(coords, arrondi=True):
     return D
 
 
-# pour chaque client, ses K clients les plus proches (voisins[0] = dépôt, vide)
-# le recuit ne teste que des mouvements entre voisins proches : ça évite de perdre
-# du temps à échanger deux clients qui sont aux deux bouts de la carte
+# Pour chaque client, la liste de ses K clients les plus proches (voisins[0] = dépôt, liste vide).
+# Idée : dans une bonne solution, un client est presque toujours relié à des clients proches. Le recuit
+# ne tente donc que des modifications entre un client et un de ses voisins proches : il ne perd pas
+# son temps à rapprocher deux clients situés aux deux bouts de la carte.
+# K a été réglé par les expériences (K = 20 ; avec K = 5 on rate des modifications utiles).
 def voisins_proches(D, K):
     n = len(D) - 1
     # on ne peut pas avoir plus de n-1 voisins
@@ -151,9 +186,16 @@ def voisins_proches(D, K):
 
 # ---------- 3. solution de départ : Clarke et Wright ----------
 
-# on fusionne les tournées dans l'ordre des plus grosses économies
-# s(i, j) = D[0][i] + D[0][j] - D[i][j] tant que la capacité est respectée
-# (et les fenêtres de temps, s'il y en a)
+# Algorithme des « économies » (Clarke et Wright, 1964) : une bonne solution en moins d'une seconde.
+#   - Au départ, chaque client a son propre camion : dépôt -> client -> dépôt.
+#   - Livrer i puis j avec le même camion évite un retour au dépôt et un nouveau départ :
+#       on économise s(i, j) = D[0][i] + D[0][j] - D[i][j].
+#   - On essaie les fusions de la plus grosse économie à la plus petite, et on fusionne deux tournées
+#     si le camion reste sous sa capacité Q (et, avec des fenêtres, si la tournée reste à l'heure).
+# On ne peut relier i et j que s'ils sont au BOUT de leurs tournées : un client au milieu a déjà
+# un voisin de chaque côté.
+# C'est un algorithme « glouton » : il prend la meilleure fusion du moment sans revenir en arrière,
+# d'où une solution bonne mais pas optimale (≈ 5 % au-dessus du meilleur connu sur les instances X).
 def clarke_wright(D, demandes, Q, fenetres=None, services=None):
     n = len(D) - 1
 
@@ -186,7 +228,8 @@ def clarke_wright(D, demandes, Q, fenetres=None, services=None):
         # i et j doivent être chacun à un bout de leur tournée
         if i not in (A[0], A[-1]) or j not in (B[0], B[-1]):
             continue
-        # on met i à la fin de A et j au début de B (en retournant si besoin)
+        # on met i à la fin de A et j au début de B (en retournant si besoin) : parcourir une tournée
+        # à l'envers ne change pas sa longueur
         if A[-1] != i:
             A = A[::-1]
         if B[0] != j:
@@ -194,7 +237,8 @@ def clarke_wright(D, demandes, Q, fenetres=None, services=None):
         fusion = A + B
 
         if fenetres is not None:
-            # avec des fenêtres le sens de parcours compte : on essaie les deux sens
+            # avec des fenêtres le sens de parcours compte (il change les heures d'arrivée) :
+            # on essaie les deux sens
             if not horaires_ok(fusion, D, fenetres, services):
                 fusion = fusion[::-1]
                 if not horaires_ok(fusion, D, fenetres, services):
@@ -211,8 +255,11 @@ def clarke_wright(D, demandes, Q, fenetres=None, services=None):
     return list(tournees.values())
 
 
-# s'il y a plus de tournées que de camions, on vide la moins chargée
-# et on remet ses clients là où ça rallonge le moins
+# Utilisée seulement si on impose un nombre maximal de camions (k_max).
+# Tant qu'il y a trop de tournées : on vide la moins chargée et on replace chacun de ses clients
+# là où il rallonge le moins le trajet (en respectant la capacité et les fenêtres).
+# Limite : c'est une méthode simple ; elle peut échouer alors qu'une solution existe
+# (savoir si k camions suffisent est déjà un problème difficile : le « bin packing »).
 def reduire_nb_tournees(tournees, D, demandes, Q, k_max, fenetres=None, services=None):
     tournees = [t[:] for t in tournees]
     while len(tournees) > k_max:
@@ -236,6 +283,7 @@ def reduire_nb_tournees(tournees, D, demandes, Q, k_max, fenetres=None, services
                         apres = t[p]
                     else:
                         apres = 0
+                    # insérer c entre « avant » et « apres » : on ajoute deux trajets, on en retire un
                     rallonge = D[avant][c] + D[c][apres] - D[avant][apres]
                     if meilleur is not None and rallonge >= meilleur[0]:
                         continue
@@ -252,7 +300,8 @@ def reduire_nb_tournees(tournees, D, demandes, Q, k_max, fenetres=None, services
 
 # ---------- 4. fonctions utiles ----------
 
-# longueur d'une tournée : dépôt -> clients -> dépôt
+# Longueur d'une tournée : dépôt -> clients -> dépôt.
+# Une tournée est stockée SANS le dépôt (ex. [5, 2, 9]) : on ajoute ici le départ et le retour.
 def longueur(tournee, D):
     if len(tournee) == 0:
         return 0
@@ -264,7 +313,7 @@ def longueur(tournee, D):
     return total
 
 
-# quantité totale livrée par une tournée
+# Quantité totale livrée par une tournée (doit rester <= Q).
 def charge_de(tournee, demandes):
     total = 0
     for c in tournee:
@@ -272,8 +321,15 @@ def charge_de(tournee, demandes):
     return total
 
 
-# vrai si la tournée respecte toutes les fenêtres de temps
-# le camion part du dépôt à l'ouverture ; le temps de trajet = la distance
+# Vrai si la tournée respecte toutes les fenêtres de temps.
+# On suit le camion avec une horloge :
+#   - il part du dépôt à l'ouverture ;
+#   - il roule jusqu'au client (temps de trajet = distance, convention des instances de Solomon) ;
+#   - s'il arrive après la fermeture b_c : interdit, on répond Faux ;
+#   - s'il arrive avant l'ouverture a_c : il attend jusqu'à a_c ;
+#   - il livre (durée s_c), puis repart vers le client suivant ;
+#   - à la fin il doit être rentré avant la fermeture du dépôt.
+# Le coût de ce contrôle grandit avec la longueur de la tournée : le recuit le fait donc en dernier.
 def horaires_ok(tournee, D, fenetres, services):
     heure = fenetres[0][0]
     avant = 0
@@ -289,7 +345,8 @@ def horaires_ok(tournee, D, fenetres, services):
     return heure + D[avant][0] <= fenetres[0][1]
 
 
-# détail des horaires d'une tournée : pour chaque client (arrivée, attente, départ)
+# Même parcours que horaires_ok, mais on note pour chaque client (heure d'arrivée, attente, départ).
+# Sert à afficher le planning (notebook, site) : les horaires viennent toujours du solveur.
 def horaires(tournee, D, fenetres, services):
     resultat = []
     heure = fenetres[0][0]
@@ -303,7 +360,7 @@ def horaires(tournee, D, fenetres, services):
     return resultat
 
 
-# coût d'une solution = somme des longueurs des tournées
+# Coût d'une solution = somme des longueurs de ses tournées (c'est ce qu'on cherche à minimiser).
 def cout_total(tournees, D):
     total = 0
     for t in tournees:
@@ -311,7 +368,9 @@ def cout_total(tournees, D):
     return total
 
 
-# vérifie qu'une solution est correcte, renvoie (True/False, message)
+# Vérifie qu'une solution est correcte et renvoie (vrai/faux, message).
+# On l'appelle toujours à la fin : on ne fait pas confiance aux calculs faits en cours de route.
+# C'est aussi la preuve que le problème est « dans NP » : vérifier une solution proposée est rapide.
 def verifier(tournees, demandes, Q, k_max=None, D=None, fenetres=None, services=None):
     n = len(demandes) - 1
     # chaque client doit apparaître exactement une fois
@@ -336,10 +395,16 @@ def verifier(tournees, demandes, Q, k_max=None, D=None, fenetres=None, services=
 
 
 # ---------- 5. les 5 mouvements ----------
-# chaque mouvement renvoie {numéro de tournée: nouvelle tournée} sans modifier
-# la solution, ou None si le mouvement n'a pas de sens
+# Un « mouvement » est une petite modification de la solution autour de deux clients :
+#   u (tiré au hasard) et v (un de ses voisins proches) ;
+#   tu, tv = numéros de leurs tournées ; pu, pv = leurs positions dans ces tournées.
+# Chaque mouvement renvoie seulement les tournées modifiées, sous la forme {numéro : nouvelle tournée},
+# sans toucher à la solution (ou None si le mouvement n'a pas de sens). Avantage : si le recuit
+# refuse la modification, il n'y a rien à annuler.
 
-# déplacer : on enlève u et on le remet juste avant ou juste après v (au hasard)
+# DÉPLACER : on enlève u et on le remet juste avant ou juste après v (au hasard).
+# Exemple : A = [a, u, b], B = [c, v, d]  ->  A = [a, b], B = [c, v, u, d]
+# C'est le seul mouvement qui fait passer UN client d'un camion à un autre : il rééquilibre les charges.
 def deplacer(tournees, tu, pu, tv, pv):
     u = tournees[tu][pu]
     v = tournees[tv][pv]
@@ -356,7 +421,8 @@ def deplacer(tournees, tu, pu, tv, pv):
     return {tu: nouvelle_u, tv: nouvelle_v}
 
 
-# échanger : u et v échangent leur place (même tournée ou pas)
+# ÉCHANGER : u et v échangent leurs places (dans la même tournée ou entre deux tournées).
+# Exemple : A = [a, u, b], B = [c, v, d]  ->  A = [a, v, b], B = [c, u, d]
 def echanger(tournees, tu, pu, tv, pv):
     u = tournees[tu][pu]
     v = tournees[tv][pv]
@@ -372,7 +438,10 @@ def echanger(tournees, tu, pu, tv, pv):
     return {tu: nouvelle_u, tv: nouvelle_v}
 
 
-# 2-opt : on retourne le morceau entre u et v (même tournée)
+# 2-OPT : dans une même tournée, on retourne le morceau compris entre u et v.
+# Exemple : [a, u, b, c, v, d]  ->  [a, u, v, c, b, d]
+# Effet : deux trajets qui se croisent sont « décroisés » (un parcours qui se croise n'est jamais le
+# plus court).
 def deux_opt(tournees, tu, pu, tv, pv):
     if tu != tv:
         return None
@@ -389,11 +458,13 @@ def deux_opt(tournees, tu, pu, tv, pv):
     return {tu: t[:i + 1] + milieu + t[j + 1:]}
 
 
-# 2-opt* entre deux tournées A = début_A u | fin_A et B = début_B v | fin_B
+# 2-OPT* : entre deux tournées, on coupe après u et après v, puis on recolle les morceaux autrement.
+#   A = début_A u | fin_A        B = début_B v | fin_B
 #   version 1 : on échange les fins  -> début_A u fin_B   et   début_B v fin_A
 #   version 2 : on relie u à v       -> début_A u v (début_B à l'envers)
 #                                       et (fin_A à l'envers) fin_B
-# une des nouvelles tournées peut être vide : le recuit la supprime
+# On tire l'une ou l'autre version à pile ou face. Une des deux tournées peut devenir vide :
+# le recuit la supprime (un camion de moins). C'est le mouvement le plus utile sans fenêtres.
 def deux_opt_etoile(tournees, tu, pu, tv, pv):
     if tu == tv:
         return None
@@ -412,9 +483,11 @@ def deux_opt_etoile(tournees, tu, pu, tv, pv):
     return {tu: nouvelle_A, tv: nouvelle_B}
 
 
-# nouvelle tournée : u quitte sa tournée et part seul avec un camion de plus
-# (la nouvelle tournée porte le numéro len(tournees) : le recuit l'ajoute au bout de la liste)
-# utile surtout avec des fenêtres de temps, quand un client gêne tous les autres
+# NOUVELLE TOURNÉE : u quitte sa tournée et part seul dans un camion supplémentaire.
+# (La nouvelle tournée prend le numéro len(tournees) : le recuit l'ajoutera au bout de la liste.)
+# Utile avec des fenêtres de temps : un client « gênant » peut bloquer toute une tournée ; sans ce
+# mouvement, le recuit n'avait aucun moyen d'ouvrir un camion (il restait jusqu'à 8 % au-dessus de
+# l'optimum sur de petites instances).
 def nouvelle_tournee(tournees, tu, pu, tv, pv):
     if len(tournees[tu]) == 1:
         return None  # u est déjà seul
@@ -422,7 +495,7 @@ def nouvelle_tournee(tournees, tu, pu, tv, pv):
     return {tu: tournees[tu][:pu] + tournees[tu][pu + 1:], len(tournees): [u]}
 
 
-# liste des mouvements et probabilité de tirer chacun (même ordre)
+# Liste des mouvements et probabilité de tirer chacun (dans le même ordre).
 MOUVEMENTS = [deplacer, echanger, deux_opt, deux_opt_etoile, nouvelle_tournee]
 NOMS_MOUVEMENTS = ["déplacer", "échanger", "2-opt", "2-opt*", "nouvelle tournée"]
 # sans fenêtres de temps : on n'utilise pas "nouvelle tournée" (un client seul dans un
@@ -432,8 +505,9 @@ PROBAS_DEFAUT = [0.4, 0.2, 0.2, 0.2, 0.0]
 PROBAS_FENETRES = [0.395, 0.2, 0.2, 0.2, 0.005]
 
 
-# tire le numéro d'un mouvement au hasard en respectant les probabilités
-# ex : [0.4, 0.2, 0.2, 0.2] -> 0 dans 40 % des cas, 1 dans 20 % ...
+# Tire le numéro d'un mouvement au hasard en respectant les probabilités (méthode de la « roulette »).
+# Exemple : [0.4, 0.2, 0.2, 0.2, 0] -> 0 dans 40 % des cas, 1 dans 20 % des cas...
+# On tire un nombre x entre 0 et la somme des probabilités, puis on regarde dans quelle « case » il tombe.
 def tirer_mouvement(probas):
     x = random.random() * sum(probas)
     total = 0
@@ -441,10 +515,11 @@ def tirer_mouvement(probas):
         total += probas[m]
         if x < total:
             return m
-    return len(probas) - 1
+    return len(probas) - 1  # sécurité contre les arrondis des nombres à virgule
 
 
-# remet à jour ou[c] = numéro de la tournée qui contient le client c
+# Remet à jour le tableau ou[c] = numéro de la tournée qui contient le client c
+# (il permet de retrouver la tournée d'un client immédiatement, sans chercher partout).
 def numeroter(tournees, ou):
     for numero in range(len(tournees)):
         for c in tournees[numero]:
@@ -453,11 +528,19 @@ def numeroter(tournees, ou):
 
 # ---------- 6. le recuit simulé ----------
 
-# améliore la solution pendant `duree` secondes
-# à chaque tour : on tire u, un voisin v et un mouvement, on calcule delta,
-# on accepte si ça raccourcit, sinon avec la proba exp(-delta / T)
-# T baisse de T_debut à T_fin au cours du temps
-# s'il y a des fenêtres de temps, un mouvement qui met un camion en retard est refusé
+# Améliore la solution pendant `duree` secondes. À chaque tour de boucle :
+#   1) on tire un client u, un de ses voisins proches v et un mouvement ;
+#   2) si un camion dépasse sa capacité : refusé ;
+#   3) on calcule delta = nouveau coût - ancien coût, SEULEMENT sur les 1 ou 2 tournées modifiées
+#      (c'est ce qui permet de faire des millions d'essais) ;
+#   4) delta <= 0 (plus court) : accepté ; delta > 0 (plus long) : accepté avec la probabilité
+#      exp(-delta / T). C'est le cœur du recuit : accepter parfois une solution moins bonne permet de
+#      sortir d'une impasse où aucune petite modification n'améliore plus rien ;
+#   5) si on accepte et qu'il y a des fenêtres : on vérifie les horaires (test le plus long, fait en dernier) ;
+#   6) on applique la modification et on retient la meilleure solution jamais vue.
+# La « température » T baisse au fil du temps, de T_debut à T_fin (baisse géométrique) :
+#   au début T est grand -> on accepte souvent des dégradations (on explore) ;
+#   à la fin T est presque nul -> on n'accepte plus que les améliorations (on peaufine).
 def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
            probas=PROBAS_DEFAUT, pas_historique=0.5, verbose=False,
            fenetres=None, services=None, k_max=None):
@@ -470,26 +553,27 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
     ou = [0] * (n + 1)
     numeroter(tournees, ou)
 
-    # on retient toujours la meilleure solution vue
+    # on retient toujours la meilleure solution vue (le recuit peut finir sur une moins bonne)
     cout = sum(longueurs)
     meilleur_cout = cout
     meilleures_tournees = [t[:] for t in tournees]
 
     # stats : nb de fois où chaque mouvement est accepté + évolution du coût
     acceptes = [0] * len(MOUVEMENTS)
-    historique = []  # (temps, coût, meilleur coût, T)
+    historique = []  # (temps, coût, meilleur coût, T) : la courbe de convergence
     iterations = 0
     T = T_debut
     debut = time.time()
     prochain_point = 0.0
 
     while True:
-        # on ne regarde l'heure que toutes les 500 itérations
+        # on ne regarde l'heure que toutes les 500 itérations (lire l'horloge coûte plus cher qu'un essai)
         if iterations % 500 == 0:
             ecoule = time.time() - debut
             if ecoule >= duree:
                 break
             # baisse géométrique de la température (T = 0 -> simple descente)
+            # comme elle dépend du temps écoulé, on atteint T_fin pile à la fin, quelle que soit la machine
             if T_debut > 0 and T_fin > 0:
                 T = T_debut * (T_fin / T_debut) ** (ecoule / duree)
             else:
@@ -544,6 +628,7 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
                 delta += nouvelles_longueurs[numero]  # tournée qui n'existait pas avant
 
         # 4) on accepte si ça raccourcit, sinon avec une probabilité exp(-delta / T)
+        #    (delta grand ou T petit -> probabilité proche de 0 ; delta petit ou T grand -> proche de 1)
         if delta <= 0:
             accepte = True
         elif T > 0:
@@ -589,7 +674,7 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
             charges = [charges[k] for k in garder]
             numeroter(tournees, ou)
 
-        # nouvelle meilleure solution ?
+        # nouvelle meilleure solution ? (1e-9 : on ignore les minuscules écarts dus aux arrondis)
         if cout < meilleur_cout - 1e-9:
             meilleur_cout = cout
             meilleures_tournees = [t[:] for t in tournees]
@@ -598,9 +683,18 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
     return meilleures_tournees, meilleur_cout, iterations, historique, acceptes
 
 
-# t0 et t1 sont en fraction de la longueur moyenne d'un trajet
-# (si inst contient déjà "D", on l'utilise : c'est le cas dans gen_carte.py)
-# fait tout : distances, solution de départ, recuit, vérification
+# Point d'entrée : fait tout dans l'ordre et renvoie un dictionnaire de résultats.
+#   1. distances (ou celles fournies dans inst["D"]) et voisins proches ;
+#   2. solution de départ (Clarke et Wright) ;
+#   3. températures ;
+#   4. recuit ;
+#   5. vérification finale et coût recalculé depuis zéro.
+# Paramètres : duree (secondes de recuit), graine (même graine = mêmes tirages au hasard),
+#   K (nombre de voisins proches), t0 et t1 (températures de début et de fin), probas (mouvements),
+#   k_max (nombre maximal de camions, None = libre).
+# t0 et t1 sont exprimés en fraction de la longueur moyenne d'un trajet : la température s'adapte
+# ainsi à l'échelle de chaque instance. Exemple avec t0 = 2 : au début, une modification qui
+# rallonge de deux trajets moyens est acceptée environ une fois sur trois (e^-1 ≈ 37 %).
 def resoudre(inst, duree=10.0, graine=0, K=20, t0=2.0, t1=0.01,
              probas=None, k_max=None, verbose=False):
     debut = time.time()
@@ -662,12 +756,13 @@ def resoudre(inst, duree=10.0, graine=0, K=20, t0=2.0, t1=0.01,
         "temps": time.time() - debut,
         "historique": historique,
         "acceptes": acceptes,
-        # 0 avec des distances entières ; ~1e-10 avec des km à virgule (arrondis)
+        # écart entre le coût suivi pendant le recuit et le coût recalculé : doit valoir 0
+        # (≈ 1e-10 avec des distances à virgule, à cause des arrondis)
         "ecart_suivi": abs(cout - cout_recalcule),
     }
 
 
-# petit test : python recuit_simple.py
+# Petit essai en ligne de commande : python recuit_simple.py [fichier]
 if __name__ == "__main__":
     import sys
     chemin = "instances/X-n101-k25.vrp"

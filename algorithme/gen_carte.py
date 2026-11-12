@@ -1,8 +1,16 @@
-# calcule les tournées sur la carte de France et écrit le fichier du site
+# =====================================================================================================
+# gen_carte.py : le recuit sur des données géographiques (France)
+# =====================================================================================================
+#
+# EN BREF
+#   Un dépôt à Paris et 500 clients répartis en France (latitude, longitude), 30 camions de capacité 100.
+#   On calcule les distances en km à vol d'oiseau (formule de haversine), on les donne au même recuit
+#   (via inst["D"] : le solveur ne connaît que la matrice D), puis on vérifie et on enregistre les tournées.
+#   C'était le fichier du premier prototype du site ; le site actuel passe par serveur.py.
 #
 # donnees/donnees_cvrp_france.json  (dépôt + 500 clients)
 #     -> gen_carte.py (recuit de recuit_simple.py)
-#     -> ../site/src/data/tournees.json  (lu par le site React)
+#     -> resultats/tournees_france.json
 #
 # python gen_carte.py [durée en secondes, 60 par défaut]
 #
@@ -14,8 +22,7 @@
 #   écartée       ou une grosse matrice, et envoi des coordonnées des clients à un tiers (RGPD)
 # Question jury : « pourquoi k_max ici et pas dans les expériences ? » -> ici la flotte est réelle (30 camions) ;
 #                 dans le jeu X le nombre de camions est libre
-# NB : tournees.json n'est plus lu par la version actuelle du site (qui tourne sur données simulées NANCY-60) ;
-#      le branchement prévu est une API HTTP (voir site/docs/CONTRAT_SOLVEUR.md)
+# NB : le site actuel ne lit plus ce fichier ; il lance le solveur par algorithme/serveur.py (ADR-026)
 
 import json
 import math
@@ -27,8 +34,8 @@ from recuit_simple import resoudre, verifier, longueur, charge_de
 os.chdir(os.path.dirname(os.path.abspath(__file__)))  # chemins relatifs au dossier algorithme/
 
 FICHIER_DONNEES = os.path.join("donnees", "donnees_cvrp_france.json")
-FICHIER_REGLAGE = os.path.join("resultats", "reglage_choisi.json")
-FICHIER_SITE = os.path.join("..", "site", "src", "data", "tournees.json")
+FICHIER_REGLAGE = os.path.join("resultats", "reglage_choisi.json")  # facultatif : sinon le réglage par défaut
+FICHIER_SITE = os.path.join("resultats", "tournees_france.json")  # ancien prototype : site/src/data/tournees.json
 
 
 # distance en km entre deux points GPS (formule de haversine)
@@ -75,7 +82,7 @@ if __name__ == "__main__":
 
     # 3) le recuit
     # réglage choisi par experiences.py (sinon valeurs par défaut)
-    reglage = {"t0": 0.5, "t1": 0.01, "K": 20}
+    reglage = {"t0": 2.0, "t1": 0.01, "K": 20}  # réglage retenu dans le notebook (partie 8.1)
     if os.path.exists(FICHIER_REGLAGE):
         with open(FICHIER_REGLAGE) as f:
             reglage = json.load(f)

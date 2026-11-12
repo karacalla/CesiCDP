@@ -1,5 +1,14 @@
-# télécharge les instances X (Uchoa et al. 2017) et leurs meilleures solutions connues
-# puis écrit bks.json (BKS = Best Known Solution)
+# =====================================================================================================
+# telecharger_instances.py : récupère les instances X et leurs meilleurs coûts connus
+# =====================================================================================================
+#
+# EN BREF
+#   Télécharge chaque instance X (fichier .vrp) et sa meilleure solution connue (fichier .sol), puis écrit
+#   bks.json = {nom de l'instance : meilleur coût connu}. C'est la référence pour calculer le gap.
+#   Les fichiers déjà présents ne sont pas retéléchargés.
+#   Les instances de Solomon (dossier solomon/) et leurs optimums (bks_solomon.json, valeurs de CVRPLIB)
+#   ont été ajoutés à la main : ce script ne s'en occupe pas.
+#
 # source : https://github.com/PyVRP/Instances
 #
 # Rôle          : rendre l'étude reproductible : n'importe qui retrouve exactement nos instances et nos BKS
@@ -33,8 +42,12 @@ ETUDE = [
     "X-n783-k48", "X-n837-k142", "X-n876-k59", "X-n936-k151",
 ]
 
+# grande instance de référence de l'expérience 8.6 (1000 clients) : sans elle dans bks.json,
+# experiences.py taille ne pourrait pas calculer son gap
+GRANDE = ["X-n1001-k43"]
 
-# télécharge un fichier seulement s'il n'est pas déjà là
+
+# Télécharge un fichier seulement s'il n'est pas déjà là ; renvoie son chemin.
 def telecharger(nom_fichier, dossier):
     chemin = os.path.join(dossier, nom_fichier)
     if not os.path.exists(chemin):
@@ -43,7 +56,7 @@ def telecharger(nom_fichier, dossier):
     return chemin
 
 
-# la ligne "Cost 27591" du fichier .sol donne le meilleur coût connu (BKS)
+# Lit le meilleur coût connu dans un fichier .sol : c'est la ligne « Cost 27591 ».
 def lire_cout_solution(chemin_sol):
     with open(chemin_sol, encoding="utf-8") as f:
         for ligne in f:
@@ -56,7 +69,7 @@ if __name__ == "__main__":
     os.makedirs("instances", exist_ok=True)
     # pour chaque instance : le .vrp, le .sol, et on garde le coût de référence
     bks = {}
-    for nom in sorted(set(DEMO + REGLAGE + ETUDE)):
+    for nom in sorted(set(DEMO + REGLAGE + ETUDE + GRANDE)):
         telecharger(nom + ".vrp", "instances")
         chemin_sol = telecharger(nom + ".sol", "instances")
         bks[nom] = lire_cout_solution(chemin_sol)

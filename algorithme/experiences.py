@@ -1,10 +1,32 @@
-# expériences de la partie 8 du notebook, résultats dans resultats/ (csv relus par le notebook)
-# python experiences.py reglage | ablation | budget | cvrp | cvrptw | taille | tout
+# =====================================================================================================
+# experiences.py : l'étude expérimentale (partie 8 du notebook)
+# =====================================================================================================
+#
+# EN BREF
+#   Ce script lance le recuit des centaines de fois sur des instances de référence et écrit un fichier
+#   CSV par expérience dans resultats/. Le notebook relit ces CSV pour faire les tableaux et les
+#   graphiques : on n'a pas besoin de refaire 1 h 30 de calcul pour relire le notebook.
+#
+# LES QUESTIONS POSÉES (une fonction par question)
+#   reglage()      8.1  quelles valeurs pour t0, t1 et K ?
+#   ablation()     8.2  chaque mouvement sert-il ? le recuit fait-il mieux qu'une simple descente ?
+#   budget()       8.3  que gagne-t-on en laissant plus de temps (2 à 40 s) ?
+#   etude_cvrp()   8.4  qualité sur 24 instances X sans fenêtres (105 à 935 clients)
+#   etude_cvrptw() 8.5  qualité sur les 56 instances de Solomon avec fenêtres (100 clients)
+#   taille()       8.6  et sur de très grandes instances (jusqu'à 3000 clients) ?
+#
+# COMMENT ON MESURE
+#   gap = 100 × (notre coût − meilleur coût connu) / meilleur coût connu   (0 % = aussi bien que le record)
+#   Le recuit utilise le hasard : chaque cas est relancé avec plusieurs « graines » (2 ou 3), et on regarde
+#   la moyenne ET l'écart entre graines.
+#
+# LANCER
+#   python experiences.py reglage | ablation | budget | cvrp | cvrptw | taille | tout
+#   Si on arrête le script en cours de route, on peut le relancer : il reprend là où il en était.
 #
 # deux familles d'instances :
 #   - CVRP   : instances X (fichiers instances/X-....vrp), sans fenêtres de temps
 #   - CVRPTW : instances de Solomon (fichiers solomon/....txt), avec fenêtres de temps
-# si on arrête le script en cours de route, on peut le relancer : il reprend où il en était
 
 import csv
 import json
@@ -18,14 +40,16 @@ from recuit_simple import (lire_instance, lire_instance_solomon, resoudre, calcu
                            voisins_proches, clarke_wright, cout_total, PROBAS_DEFAUT, PROBAS_FENETRES,
                            NOMS_MOUVEMENTS)
 
-# on laisse 2 coeurs libres si la machine en a beaucoup
+# plusieurs exécutions en même temps, une par cœur du processeur (on en laisse 2 libres si la machine
+# en a beaucoup). On utilise des PROCESSUS et pas des threads : en Python, deux threads ne peuvent pas
+# calculer en même temps (verrou global de l'interpréteur, le « GIL »), deux processus si.
 NB_PROCESSUS = max(1, min(6, os.cpu_count() - (2 if os.cpu_count() > 4 else 0)))
 
 # meilleurs coûts connus : instances X (bks.json) et optimums de Solomon (bks_solomon.json)
 BKS = json.load(open("bks.json", encoding="utf-8"))
 BKS.update(json.load(open("bks_solomon.json", encoding="utf-8")))
 
-# pour le réglage : 2 instances sans fenêtres et 2 avec
+# pour le réglage : 2 instances sans fenêtres et 2 avec (assez différentes pour que le réglage soit général)
 INSTANCES_REGLAGE = ["X-n153-k22", "X-n303-k21", "r107", "rc203"]
 GRAINES_REGLAGE = [1, 2]
 DUREE_REGLAGE = 10
@@ -38,7 +62,10 @@ INSTANCES_CVRP = [
     "X-n627-k43", "X-n641-k35", "X-n670-k130", "X-n716-k35", "X-n749-k98",
     "X-n783-k48", "X-n837-k142", "X-n876-k59", "X-n936-k151",
 ]
-# les 56 instances de Solomon de l'étude CVRPTW (6 familles)
+# les 56 instances de Solomon de l'étude CVRPTW, en 6 familles :
+#   C = clients regroupés en paquets, R = clients au hasard, RC = mélange des deux ;
+#   type 1 = fenêtres étroites et petits camions, type 2 = fenêtres larges et gros camions
+# "c1%02d" % 3 donne "c103" : c'est une façon courte d'écrire la liste des noms
 INSTANCES_CVRPTW = (["c1%02d" % k for k in range(1, 10)] + ["c2%02d" % k for k in range(1, 9)]
                     + ["r1%02d" % k for k in range(1, 13)] + ["r2%02d" % k for k in range(1, 12)]
                     + ["rc1%02d" % k for k in range(1, 9)] + ["rc2%02d" % k for k in range(1, 9)])
@@ -59,6 +86,7 @@ def gap(cout, nom):
 
 
 # plus il y a de clients, plus on laisse de temps au recuit
+# (chaque client doit être « visité » assez souvent par les mouvements pour être bien placé)
 def duree_selon_taille(n):
     if n <= 200:
         return 10
@@ -69,7 +97,10 @@ def duree_selon_taille(n):
     return 45
 
 
-# une exécution du recuit -> une ligne du csv
+# Une exécution du recuit -> une ligne du CSV.
+# p est un dictionnaire qui décrit l'essai : instance, graine, durée, réglages, variante d'ablation.
+# On lit l'instance, on choisit les probabilités des mouvements (avec ou sans fenêtres), on retire
+# éventuellement un mouvement (ablation), on lance resoudre() et on range le résultat.
 def une_execution(p):
     nom = p["instance"]
     # si un paramètre n'est pas donné on prend la valeur par défaut
@@ -113,17 +144,25 @@ def une_execution(p):
     return ligne
 
 
-# ce qui identifie une exécution (pour ne pas la refaire si elle est déjà dans le csv)
+# Ce qui identifie une exécution : (instance, graine, durée, t0, t1, K, variante).
+# Sert à savoir si un essai est déjà dans le CSV, pour ne pas le refaire après une interruption.
 def cle(p):
     return (p["instance"], str(p["graine"]), str(float(p["duree"])), str(float(p.get("t0", 0.5))),
             str(float(p.get("t1", 0.01))), str(int(p.get("K", 20))), p.get("variante", ""))
 
 
+# clé de tri : la durée d'un essai
 def duree_de(p):
     return p["duree"]
 
 
-# lance les exécutions qui manquent et complète le csv au fur et à mesure
+# Lance les exécutions qui manquent et complète le CSV au fur et à mesure.
+#   - relit le CSV s'il existe et retire de la liste les essais déjà faits ;
+#   - trie les essais du plus long au plus court : ainsi tous les cœurs finissent à peu près ensemble ;
+#   - les répartit sur plusieurs processus (Pool) et écrit chaque ligne dès qu'elle arrive (flush) :
+#     si on coupe le script, rien de ce qui est fini n'est perdu.
+# Attention sous Windows : chaque processus relit ce fichier ; c'est pourquoi le lancement est protégé
+# par if __name__ == "__main__" tout en bas.
 def lancer(liste, fichier):
     os.makedirs("resultats", exist_ok=True)
     chemin = os.path.join("resultats", fichier)
@@ -153,7 +192,8 @@ def lancer(liste, fichier):
     return lignes
 
 
-# valeur du paramètre qui donne le plus petit gap moyen
+# Affiche le gap moyen pour chaque valeur d'un paramètre et renvoie la valeur qui donne le plus petit.
+# (On ne prend pas forcément ce minimum : voir REGLAGE_RETENU plus bas, à cause du bruit.)
 def meilleure_valeur(lignes, colonne):
     # on regroupe les gaps par valeur du paramètre
     gaps = {}
@@ -175,7 +215,7 @@ def meilleure_valeur(lignes, colonne):
     return meilleure
 
 
-# toutes les combinaisons instance x graine avec ces paramètres
+# Toutes les combinaisons « instance de réglage × graine » pour un jeu de paramètres (t0, t1, K).
 def essais_reglage(t0, t1, K):
     liste = []
     for i in INSTANCES_REGLAGE:
@@ -190,7 +230,10 @@ def essais_reglage(t0, t1, K):
 REGLAGE_RETENU = {"t0": 2.0, "t1": 0.01, "K": 20}
 
 
-# 8.1 réglage : on fait varier un paramètre à la fois autour du réglage retenu
+# 8.1 Réglage : on fait varier UN paramètre à la fois autour du réglage retenu
+#   (t0 de 0,05 à 8, puis t1, puis K), sur les 4 instances de réglage × 2 graines × 10 s.
+# Plus simple qu'une grille complète (toutes les combinaisons seraient beaucoup trop longues),
+# mais on ne voit pas les effets croisés entre paramètres.
 def reglage():
     r = REGLAGE_RETENU
     liste = []
@@ -209,11 +252,15 @@ def reglage():
     meilleure_valeur(lancer(liste, "reglage_K.csv"), "K")
 
 
+# Renvoie le réglage utilisé par toutes les autres expériences.
 def reglage_choisi():
     return REGLAGE_RETENU
 
 
-# 8.2 ablation : on enlève un mouvement à la fois
+# 8.2 Ablation : on relance le solveur en RETIRANT un mouvement à la fois (sa probabilité passe à 0).
+#   Si le gap augmente sans un mouvement, c'est que ce mouvement est utile.
+#   « Descente seule (T = 0) » : on n'accepte plus que les améliorations ; la différence avec le
+#   recuit complet montre ce qu'apporte la température.
 def ablation():
     r = reglage_choisi()
     # (nom de la variante, numéro du mouvement retiré, t0, t1)
@@ -235,7 +282,8 @@ def ablation():
     lancer(liste, "ablation.csv")
 
 
-# 8.3 effet du temps de calcul
+# 8.3 Effet du temps de calcul : les mêmes instances avec 2, 5, 10, 20 et 40 secondes.
+#   Comme la température dépend de la durée, chaque essai est un recuit complet (pas un recuit coupé).
 def budget():
     r = reglage_choisi()
     liste = []
@@ -247,7 +295,8 @@ def budget():
     lancer(liste, "budget.csv")
 
 
-# 8.4 étude CVRP : 24 instances X, 3 graines
+# 8.4 Étude CVRP : 24 instances X (105 à 935 clients) × 3 graines, durée selon la taille.
+#   Le nombre de camions n'est pas imposé, comme pour les meilleures solutions publiées.
 def etude_cvrp():
     r = reglage_choisi()
     liste = []
@@ -259,7 +308,7 @@ def etude_cvrp():
     lancer(liste, "cvrp.csv")
 
 
-# 8.5 étude CVRPTW : 56 instances de Solomon, 3 graines
+# 8.5 Étude CVRPTW : les 56 instances de Solomon (100 clients) × 3 graines × 20 s.
 def etude_cvrptw():
     r = reglage_choisi()
     liste = []
@@ -270,7 +319,9 @@ def etude_cvrptw():
     lancer(liste, "cvrptw.csv")
 
 
-# 8.6 grandes instances : clients tirés au hasard, jusqu'à 3000 clients
+# 8.6 Grandes instances : clients tirés au hasard, jusqu'à 3000 clients.
+#   On chronomètre chaque étape de la préparation (distances, voisins, Clarke et Wright), qui grandit
+#   comme n², puis on mesure ce que le recuit gagne en 60 s par rapport à la solution de départ.
 # (pas de meilleure solution connue : on compare à la solution de départ)
 # on teste deux températures de départ : le réglage retenu et un départ plus froid
 def une_taille(p):
@@ -312,6 +363,7 @@ def une_taille(p):
     return ligne
 
 
+# Lance les 10 essais de taille (5 tailles × 2 températures) puis l'instance X-n1001-k43 (vrai gap).
 def taille():
     liste = [(n, t0) for n in [250, 500, 1000, 2000, 3000] for t0 in [2.0, 0.2]]
     with Pool(NB_PROCESSUS) as pool:
@@ -327,6 +379,7 @@ def taille():
     lancer(liste, "grande.csv")
 
 
+# Lancement : python experiences.py <étape> (ou « tout » pour toutes les étapes dans l'ordre).
 if __name__ == "__main__":
     etapes = {"reglage": reglage, "ablation": ablation, "budget": budget,
               "cvrp": etude_cvrp, "cvrptw": etude_cvrptw, "taille": taille}
