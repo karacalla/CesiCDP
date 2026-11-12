@@ -67,12 +67,12 @@ P5 (simulation) : animer l'heure affichée, vue inclinée, camion glTF ; **appel
 
 1. Noms des 4 membres : à saisir dans `src/config/team.ts` (E1).
 2. Source du facteur CO₂ 0,29 kg/km (repris du prototype, non sourcé).
-3. Contrat : le solveur a **4** mouvements (`PROBAS_DEFAUT`), CLAUDE.md §5 en annonce 7 → le type suivra le solveur (tableau de longueur libre, noms fournis par le solveur).
+3. Contrat : le solveur (niveau A) a **5** mouvements (`PROBAS_FENETRES` par défaut côté site), CLAUDE.md §5 en annonce 7 → le type suit le solveur (tableau de longueur libre).
 4. CLAUDE.md §3 (lignes « Carte », « Pins nombreux ») à mettre à jour selon ADR-002/004 ? (non modifié sans accord ; §4 et §3 bis mis à jour le 07/11 sur demande).
 5. Profil Mapbox (`VITE_BASEMAP=mapbox`) : déclaré dans `config/basemap.ts` mais **non opérationnel** avec MapLibre (URL `mapbox://`) ; le garder (ADR + `transformRequest`) ou le retirer ?
 6. Pousser `bulle` : exige `git push --force` (divergence avec `origin/bulle`).
 8. **Modèle de trafic du solveur** : « temps × coefficient de la tranche de départ » (non FIFO) ou vitesse par tranche intégrée (FIFO, Ichoua 2003) ? L'éditeur et l'alerte en dépendent.
-9. Capacités des algorithmes (`config/solver.ts`) : à mettre à jour quand le recuit traitera fenêtres/trafic (ou à fournir par l'API).
+9. Capacités (`config/solver.ts`) : fenêtres traitées par le recuit et Clarke-Wright depuis le niveau A (12/11) ; trafic : PLNE seul, à mettre à jour s'il entre dans le recuit.
 7. Transmettre `docs/CONTRAT_SOLVEUR.md` + `src/types/vrp.ts` à l'équipe solveur (clés françaises attendues, `contraintes_ignorees`, `comparaison`).
 
 ## Écarts connus
@@ -91,7 +91,7 @@ P5 (simulation) : animer l'heure affichée, vue inclinée, camion glTF ; **appel
 - Mesures S2–S5 et P4b sur un seul poste (AMD Radeon intégrée, D3D11) : à refaire sur le PC de soutenance.
 
 ## Journal
-- 12/11/2026 — Préparation soutenance : commentaires seulement (aucun code modifié) : en-têtes Rôle/Choix/Alternative/Question ajoutés à `main.tsx`, `lib/utils.ts`, `fx/border-beam.tsx` ; solveur Python commenté (complexités, justifications). typecheck, lint, tests OK.
+- 12/11/2026 — `config/solver.ts` aligné sur le solveur niveau A (5 mouvements, t0 = 2, fenêtres traitées) ; ordre stable des contraintes ignorées (mockRun) ; tests constraints/run mis à jour ; check + e2e run/journey OK, captures 1280/768 regardées. Préparation soutenance : commentaires seulement (aucun code modifié) : en-têtes Rôle/Choix/Alternative/Question ajoutés à `main.tsx`, `lib/utils.ts`, `fx/border-beam.tsx` ; solveur Python commenté (complexités, justifications). typecheck, lint, tests OK.
 - 07/11/2026 — Palette de l'équipe (ADR-023, rose = marque, retard indigo), barre de défilement stylée, accrocs corrigés : roues/rétroviseurs du camion qui dépassaient, bouton principal sous le pli de la feuille (768 px), menu Réglages (libellé coupé), contour du camion sélectionné masqué par la carte suivante, bandeau « Résultat simulé » invisible en clair ; onglet découpé des cartes de tournées retiré (masque qui coupait le contour et mordait la carte voisine), roues du camion masquées. 08/11 : camion du panneau en 3D CSS (ADR-024), roues selon le thème, premier plan, animation suspendue hors écran. Camion physique (ADR-025) : modèle, trajectoire, vitesse, caméra, lumière ; essai S6.
 - 07/11/2026 — P4b lot 4 : camion du panneau (machine d'états + WAAPI, T1/T4/T5 actifs, T2/T3 prêts pour P5, « Rejouer l'animation »), script de démonstration et questions 13–18 au dossier Lot 3 : partage (feuille de route imprimable, Google Maps découpé N = 9, Waze arrêt suivant, GPX/GeoJSON/CSV, Web Share, QR code via `uqr`, confirmation avant tout service tiers).
 - 07/11/2026 — P4b lot 2 : globe d'ouverture (MapLibre globe, dépôts fictifs, arcs, anneaux, fond d'espace CSS), vol 4,5 s + « Passer l'animation »/Échap, retour au globe, réglage « Animations » ; `fadeDuration` 0 ; correctif : enfants du panneau qui se tassaient (feuille du bas). Lot 1 : plein écran (ADR-018), bulle de verre à deux couches (blanc 96 % / navy 88 %, testé sur blanc et noir), feuille du bas < 1024 px, `lib/cameraPadding`, CLAUDE.md §4 (Cadre, Panneau) et §3 bis (budget d'effets) mis à jour.

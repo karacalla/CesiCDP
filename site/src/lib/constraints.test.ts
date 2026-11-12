@@ -26,9 +26,9 @@ describe('trafic : propriété FIFO (modèle temps × coefficient de départ)', 
 
 describe('contraintes non prises en compte (critère P3)', () => {
   const inst = makeGen1000(20)
-  it('le recuit ignore fenêtres strictes et trafic actifs ; le PLNE les traite', () => {
+  it('le recuit traite les fenêtres mais ignore le trafic actif ; le PLNE traite les deux', () => {
     expect(activeConstraints(inst)).toEqual(['timeWindows', 'traffic'])
-    expect(ignoredBy('sa', inst)).toEqual(['timeWindows', 'traffic'])
+    expect(ignoredBy('sa', inst)).toEqual(['traffic'])
     expect(ignoredBy('milp', inst)).toEqual([])
   })
   it('une contrainte désactivée n’est jamais signalée', () => {

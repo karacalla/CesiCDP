@@ -8,9 +8,10 @@ import { openApp } from './helpers'
 test('calcul simulé : non pris en compte, convergence en direct, annulation, PLNE refusé', async ({ page }) => {
   await openApp(page, 'light', 1280)
   await page.getByRole('button', { name: 'Calcul', exact: true }).click()
-  // le recuit ne traite ni fenêtres ni trafic, tous deux actifs sur NANCY-60
+  // le recuit (niveau A) traite les fenêtres mais pas le trafic, actif sur NANCY-60
   await expect(page.getByText('Contraintes activées non prises en compte')).toBeVisible()
-  await expect(page.getByText(/Fenêtres : non pris en compte ; Trafic : non pris en compte/)).toBeVisible()
+  await expect(page.getByRole('radio', { name: /Recuit simulé.*Fenêtres : pris en compte Trafic : non pris en compte/ })).toBeVisible()
+  await expect(page.getByText(/^Trafic : non pris en compte : cet algorithme ne les traite pas/)).toBeVisible()
 
   await page.getByRole('spinbutton', { name: 'Durée (s)' }).fill('6')
   await page.getByRole('button', { name: 'Lancer le calcul' }).click()

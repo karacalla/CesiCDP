@@ -84,7 +84,7 @@ export function mockSolve(req: SolveRequest): RunHandle {
           resolve({
             ...fx.result,
             history,
-            ignoredConstraints: [...ignored],
+            ignoredConstraints: active.filter((c) => ignored.has(c)), // ordre stable : celui des contraintes actives
             message: `${fx.result.message} Algorithme demandé : ${req.algo}.`,
           })
         }
