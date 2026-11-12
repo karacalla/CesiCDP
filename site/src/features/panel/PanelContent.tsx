@@ -5,6 +5,7 @@
 import { Inbox } from 'lucide-react'
 import { ConstraintsView } from '@/features/constraints/ConstraintsView'
 import { DataView } from '@/features/data/DataView'
+import { StudyView } from '@/features/study/StudyView'
 import { RunView } from '@/features/run/RunView'
 import { ToursView } from '@/features/tours/ToursView'
 import { PanelHeader } from '@/components/layout/PanelHeader'
@@ -29,6 +30,8 @@ export function PanelContent() {
         <ConstraintsView />
       ) : view === 'run' ? (
         <RunView />
+      ) : view === 'study' ? (
+        <StudyView />
       ) : (
         <div className="grid flex-1 place-items-center rounded-card border border-dashed border-panel-line p-8 text-center">
           <div className="flex flex-col items-center gap-3">

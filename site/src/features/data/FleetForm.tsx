@@ -35,7 +35,8 @@ function FleetFields({ fleet }: { fleet: Fleet }) {
     <div className="grid grid-cols-2 gap-3">
       <Field label={fr.data.k} inputMode="numeric" {...field('k')} />
       <Field label={fr.data.Q} inputMode="decimal" {...field('Q')} />
-      <Field label={fr.data.fixedCost} inputMode="decimal" {...field('fixedCost')} />
+      {/* aucun algorithme n'utilise encore le coût fixe : champ visible mais bloqué (prochaine version) */}
+      <Field label={fr.data.fixedCostNext} inputMode="decimal" disabled title={fr.data.fixedCostHint} {...field('fixedCost')} />
       <Field label={fr.data.speed} inputMode="decimal" {...field('baseSpeedKmh')} />
     </div>
   )

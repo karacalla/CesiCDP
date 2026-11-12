@@ -21,7 +21,7 @@ export function Field({ label, error, className = '', ...rest }: Props) {
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errId : undefined}
-        className={`h-9 min-w-0 rounded-xl border bg-panel-surface px-3 text-sm text-panel-ink ${error ? 'border-panel-late' : 'border-panel-line'}`}
+        className={`h-9 min-w-0 rounded-xl border bg-panel-surface px-3 text-sm text-panel-ink disabled:cursor-not-allowed disabled:opacity-60 ${error ? 'border-panel-late' : 'border-panel-line'}`}
         {...rest}
       />
       {error && (

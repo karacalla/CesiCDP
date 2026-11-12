@@ -27,7 +27,8 @@ export function ConstraintsView() {
     <div className="flex flex-col gap-4">
       <Section title={fr.constraints.windows}>
         <Switch label={fr.constraints.strict} description={fr.constraints.strictHint} checked={options.timeWindows === 'strict'} onChange={(v) => setOptions({ timeWindows: v ? 'strict' : 'off' })} />
-        <Switch label={fr.constraints.wait} description={fr.constraints.waitHint} checked={options.allowWait} disabled={options.timeWindows === 'off'} onChange={(v) => setOptions({ allowWait: v })} />
+        {/* le solveur attend TOUJOURS l'ouverture de la fenêtre : l'interrupteur est affiché, coché et bloqué (prochaine version) */}
+        <Switch label={fr.constraints.wait} description={fr.constraints.waitNext} checked disabled onChange={() => undefined} />
       </Section>
 
       <Section title={fr.constraints.traffic}>
