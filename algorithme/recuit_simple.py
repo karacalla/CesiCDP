@@ -4,7 +4,7 @@
 # avant a_i il attend, s'il arrive après b_i la tournée est interdite
 #
 # plan du fichier :
-#   1. lecture d'une instance (.vrp sans fenêtres, .txt de Solomon avec fenêtres)
+#   1. lecture d'une instance avec vrplib (.vrp sans fenêtres, .txt de Solomon avec fenêtres)
 #   2. distances et voisins proches
 #   3. solution de départ (Clarke et Wright)
 #   4. fonctions utiles (longueur, charge, horaires, vérification)
@@ -18,95 +18,37 @@ import math
 import random
 import time
 
+import vrplib   # lecture des fichiers d'instances : pip install vrplib
+
 
 # ---------- 1. lecture d'une instance ----------
 
-# lit un fichier .vrp ; le dépôt devient le lieu 0 et les clients 1..n
+# lit une instance avec la bibliothèque vrplib ; le dépôt devient le lieu 0 et les clients 1..n
+#   - fichier .vrp : instance sans fenêtres de temps (CVRP)
+#   - fichier .txt : instance de Solomon, avec fenêtres de temps (CVRPTW)
 def lire_instance(chemin):
-    nom = ""
-    capacite = 0
-    type_distance = "EUC_2D"
-    coords = []
-    demandes = []
-    section = None
+    if chemin.endswith(".txt"):
+        donnees = vrplib.read_instance(chemin, instance_format="solomon", compute_edge_weights=False)
+    else:
+        donnees = vrplib.read_instance(chemin, compute_edge_weights=False)
 
-    with open(chemin, encoding="utf-8") as fichier:
-        for ligne in fichier:
-            ligne = ligne.strip()
-            if ligne == "" or ligne == "EOF":
-                continue
-
-            # en-tête du fichier : lignes "CLE : valeur"
-            if ":" in ligne:
-                cle, valeur = ligne.split(":", 1)
-                cle = cle.strip()
-                valeur = valeur.strip()
-                if cle == "NAME":
-                    nom = valeur
-                elif cle == "CAPACITY":
-                    capacite = int(valeur)
-                elif cle == "EDGE_WEIGHT_TYPE":
-                    type_distance = valeur
-                continue
-
-            # on change de section (coordonnées, demandes, dépôt)
-            if ligne.endswith("_SECTION"):
-                section = ligne
-                continue
-
-            # sinon c'est une ligne de données de la section en cours
-            morceaux = ligne.split()
-            if section == "NODE_COORD_SECTION":
-                coords.append((float(morceaux[1]), float(morceaux[2])))
-            elif section == "DEMAND_SECTION":
-                demandes.append(int(morceaux[1]))
-            elif section == "DEPOT_SECTION":
-                # on suppose que le dépôt est le lieu 1, sinon la numérotation est fausse
-                if morceaux[0] not in ("1", "-1"):
-                    raise ValueError("le dépôt doit être le lieu numéro 1")
-
-    # coords[i] = (x, y) du lieu i, demandes[0] = 0 pour le dépôt
-    return {
-        "nom": nom,
-        "coords": coords,
-        "demandes": demandes,
-        "Q": capacite,
-        "arrondi": type_distance == "EUC_2D",
+    # vrplib renvoie des tableaux numpy : on les transforme en listes Python ordinaires
+    inst = {
+        "nom": donnees["name"],
+        "coords": [(float(x), float(y)) for x, y in donnees["node_coord"]],
+        "demandes": [int(d) for d in donnees["demand"]],   # demandes[0] = 0 pour le dépôt
+        "Q": int(donnees["capacity"]),
+        # façon d'arrondir les distances : entier le plus proche pour les fichiers .vrp
+        "arrondi": True,
     }
-
-
-# lit un fichier de Solomon (.txt) : mêmes informations + fenêtres de temps
-# colonnes : numéro, x, y, demande, début de fenêtre, fin de fenêtre, durée de service
-def lire_instance_solomon(chemin):
-    with open(chemin, encoding="utf-8") as fichier:
-        lignes = [ligne.split() for ligne in fichier if ligne.strip() != ""]
-    nom = lignes[0][0]
-    coords = []
-    demandes = []
-    fenetres = []
-    services = []
-    capacite = 0
-    for k in range(len(lignes)):
-        morceaux = lignes[k]
-        # la ligne qui suit "NUMBER CAPACITY" donne le nombre de camions et la capacité
-        if morceaux[0] == "NUMBER":
-            capacite = int(lignes[k + 1][1])
-        # une ligne de 7 nombres = un lieu (la première est le dépôt)
-        if len(morceaux) == 7 and morceaux[0].isdigit():
-            coords.append((float(morceaux[1]), float(morceaux[2])))
-            demandes.append(int(float(morceaux[3])))
-            fenetres.append((float(morceaux[4]), float(morceaux[5])))
-            services.append(float(morceaux[6]))
-    return {
-        "nom": nom,
-        "coords": coords,
-        "demandes": demandes,
-        "Q": capacite,
-        # convention des instances de Solomon sur CVRPLIB : distances coupées à 1 décimale
-        "arrondi": "dixieme",
-        "fenetres": fenetres,   # fenetres[i] = (a_i, b_i) ; fenetres[0] = horaires du dépôt
-        "services": services,   # durée de la livraison chez chaque client
-    }
+    if "time_window" in donnees:
+        # fenetres[i] = (a_i, b_i) ; fenetres[0] = horaires d'ouverture du dépôt
+        inst["fenetres"] = [(float(a), float(b)) for a, b in donnees["time_window"]]
+        # durée de la livraison chez chaque client
+        inst["services"] = [float(s) for s in donnees["service_time"]]
+        # convention des instances de Solomon : distances coupées à 1 décimale
+        inst["arrondi"] = "dixieme"
+    return inst
 
 
 # ---------- 2. distances et voisins proches ----------
@@ -673,10 +615,7 @@ if __name__ == "__main__":
     chemin = "instances/X-n101-k25.vrp"
     if len(sys.argv) > 1:
         chemin = sys.argv[1]
-    if chemin.endswith(".txt"):
-        instance = lire_instance_solomon(chemin)
-    else:
-        instance = lire_instance(chemin)
+    instance = lire_instance(chemin)
     resultat = resoudre(instance, duree=10, graine=1, verbose=True)
     print("solution :", resultat["message"])
     print(f"départ (Clarke et Wright) : {resultat['cout_initial']:.0f}")

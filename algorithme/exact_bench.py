@@ -12,7 +12,7 @@ import time
 
 import pulp
 
-from recuit_simple import lire_instance, lire_instance_solomon, calcul_distances, resoudre
+from recuit_simple import lire_instance, calcul_distances, resoudre
 
 LIMITE = 60  # secondes laissées au solveur exact
 
@@ -79,7 +79,7 @@ def resoudre_plne(inst, limite):
 
 if __name__ == "__main__":
     cas = [("CVRP", lire_instance("instances/X-n101-k25.vrp"), [6, 8, 10, 12, 14, 16]),
-           ("CVRPTW", lire_instance_solomon("solomon/rc201.txt"), [10, 20, 30, 40, 60, 80, 100])]
+           ("CVRPTW", lire_instance("solomon/rc201.txt"), [10, 20, 30, 40, 60, 80, 100])]
     # on peut ne lancer qu'un des deux problèmes : python exact_bench.py CVRPTW
     if len(sys.argv) > 1:
         cas = [c for c in cas if c[0] == sys.argv[1]]

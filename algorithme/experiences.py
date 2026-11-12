@@ -14,7 +14,7 @@ import sys
 import time
 from multiprocessing import Pool
 
-from recuit_simple import (lire_instance, lire_instance_solomon, resoudre, calcul_distances,
+from recuit_simple import (lire_instance, resoudre, calcul_distances,
                            voisins_proches, clarke_wright, cout_total, PROBAS_DEFAUT, PROBAS_FENETRES,
                            NOMS_MOUVEMENTS)
 
@@ -50,7 +50,7 @@ DUREE_CVRPTW = 20
 def charger(nom):
     if nom.startswith("X-"):
         return lire_instance(os.path.join("instances", nom + ".vrp"))
-    return lire_instance_solomon(os.path.join("solomon", nom + ".txt"))
+    return lire_instance(os.path.join("solomon", nom + ".txt"))
 
 
 # écart en % entre notre coût et le meilleur coût connu

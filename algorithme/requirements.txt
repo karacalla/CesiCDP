@@ -1,12 +1,12 @@
 # Bibliothèques Python utilisées (testé avec Python 3.12 et 3.13)
 # Installation : pip install -r requirements.txt
 #
-# recuit_simple.py n'utilise AUCUNE bibliothèque externe.
-# Les bibliothèques ci-dessous servent au notebook et aux expériences.
+# recuit_simple.py n'utilise que vrplib (lecture des instances).
+# Les autres bibliothèques servent au notebook et aux expériences.
 pandas               # tableaux de résultats dans le notebook
 matplotlib           # graphiques
 scipy                # tests statistiques (Wilcoxon, Spearman, Kruskal-Wallis)
-vrplib               # lecture des instances de référence (contrôle de la partie 7)
+vrplib               # lecture des instances de référence
 pulp>=4.1            # modèle PLNE (parties 2 et 3)
 highspy              # solveur HiGHS utilisé par PuLP
 jupyter              # pour ouvrir le notebook
