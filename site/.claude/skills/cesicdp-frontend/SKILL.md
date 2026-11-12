@@ -61,7 +61,7 @@ site/
 │  ├─ features/globe/         GlobeDirector (caméra + boucle unique), GlobeLayer, GlobeControls, globeData, camera
 │  ├─ config/globe.ts         réglages du globe et dépôts FICTIFS ; hooks/useMotionLevel (full/reduced/none)
 │  ├─ store/selection.ts      camion / arrêt sélectionnés, heure affichée (DEMO_CLOCK)
-│  ├─ components/shadcn/      composants shadcn (alias de components.json) ; components/fx/ : effets (BorderBeam)
+│  ├─ components/shadcn/      composants shadcn (alias de components.json ; vide depuis le 12/11) ; components/fx/ : effets (BorderBeam)
 │  ├─ components/layout/      + CustomerSearch (combobox), AlertsButton
 │  ├─ features/map/CustomersLayer.tsx  clients + dépôt (couches natives, regroupement > 300)
 │  ├─ components/ui/          IconButton (aria-label obligatoire ; variantes glass / panel / solid)

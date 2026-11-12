@@ -544,7 +544,7 @@ Source unique : `src/types/vrp.ts` (schémas Zod, types déduits). Fiche destin�
 | Relief Terrarium (AWS Open Data) | — | données libres, attribution « Mapzen Terrain Tiles » affichée |
 | Sentinel-2 cloudless 2016 (EOX IT Services) | — | CC BY 4.0 ; contient des données Copernicus Sentinel modifiées ; attribution affichée |
 | lucide-react (icônes) | 1.66 | ISC |
-| shadcn/ui (`cn`, Base UI, class-variance-authority), motion | 4.23 / 1.9 / 0.7 / 14.10 | MIT |
+| shadcn/ui (`cn`, Base UI), motion | 4.23 / 1.9 / 14.10 | MIT |
 | Magic UI `BorderBeam` (copié) | — | MIT (ADR-015) |
 | uqr (encodage de QR code) | 0.1.3 | MIT, sans dépendance (ADR-021) |
 | OSRM (serveur de démonstration) | — | 5 requêtes uniques sur points fictifs (ADR-011) ; données routières © OpenStreetMap (ODbL) |
