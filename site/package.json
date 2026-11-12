@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:solveur": "vite --mode solveur",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint",
     "test": "vitest run",

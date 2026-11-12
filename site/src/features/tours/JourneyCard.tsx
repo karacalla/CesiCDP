@@ -7,6 +7,7 @@
 import { Truck } from 'lucide-react'
 import { fr } from '@/i18n/fr'
 import { formatDuration, formatHm } from '@/lib/time'
+import { formatDistance } from '@/lib/units'
 import type { Route } from '@/types/vrp'
 
 /** Texture « plan de rues » (tracé fixe, décoratif). */
@@ -32,10 +33,12 @@ interface Props {
   selected: boolean
   onSelect: () => void
   className?: string
+  /** Coordonnées planes (Solomon, VRPLIB) : distance dans l'unité de l'instance, pas en km. */
+  planar?: boolean
 }
 
-export function JourneyCard({ route, Q, selected, onSelect, className = '' }: Props) {
-  const km = route.distanceM === null ? '—' : `${(route.distanceM / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} km`
+export function JourneyCard({ route, Q, selected, onSelect, className = '', planar = false }: Props) {
+  const km = formatDistance(route.distanceM, planar)
   const timed = route.start !== null && route.end !== null
   return (
     <button

@@ -251,6 +251,13 @@ Format : contexte → options → critique → choix → conséquence. La pile f
   - *Rendu* : 36 animations WAAPI (`transform` / `opacity` seulement), créées avant l'affichage de la couche ; valeurs constantes posées sans animation.
 - **Conséquences** : la traînée pointillée, le fondu et l'échelle arbitraire sont supprimés. Mesures (S6 et `e2e/cameo.spec.ts`) : 0 échec de composition, mise en place 23–33 ms, 0 tâche longue et 0 décalage de mise en page pendant l'animation, 60 images/s une fois le GPU chaud. Limite : la toute première animation d'une session compile les shaders du GPU (≈ 0,2 s de saccade), masquée par l'arrêt de départ ou par le départ hors écran du retour.
 
+### ADR-026 — Branchement du solveur Python par un serveur local à la bibliothèque standard (12/11/2026)
+- **Contexte** : demande du propriétaire : lancer depuis le site un vrai calcul du solveur (niveau A) sur les instances Solomon / X et NANCY-60, **sans modifier la structure du code Python**.
+- **Options** : (a) réécrire le recuit en TypeScript dans le navigateur ; (b) serveur FastAPI ; (c) serveur `http.server` + `multiprocessing` de la bibliothèque standard, qui importe `recuit_simple.py` tel quel.
+- **Critique** : (a) interdit (le solveur est la seule source de vérité, CLAUDE.md §5) et dupliquerait l'algorithme ; (b) une dépendance de plus pour 4 routes ; (c) rien à installer, un processus par calcul (« Annuler » arrête vraiment le calcul, le serveur reste réactif).
+- **Choix** : (c), `algorithme/serveur.py` (127.0.0.1:8000) : traduit l'instance du site vers le solveur (planes : distances du jeu, temps = distance ; géographiques : haversine, temps = distance / vitesse de la flotte), lance `resoudre()` ou `clarke_wright()`, renvoie tournées, horaires (`horaires()` du solveur), trajets et historique au format d'`adapters.ts`. PLNE refusé (trop lent). Site : `npm run dev:solveur` (`.env.solveur` : `VITE_API_MODE=http`) ; le mode simulé reste le défaut.
+- **Conséquences** : instances planes affichées en « u » (unité de l'instance), sans CO₂ ni carte (`lib/units.ts`) ; tracés géographiques en **lignes droites** (pas de réseau routier sans OSRM local) ; trafic toujours « non pris en compte » ; progression connue seulement à la fin (historique renvoyé avec le résultat) ; nombre de camions non imposé (comme l'étude).
+
 ## 5. Essais techniques S1–S6
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).

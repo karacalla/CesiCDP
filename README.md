@@ -14,7 +14,14 @@ npm run dev        # serveur de développement
 npm run check      # vérification de types, lint, tests, build
 ```
 
-Option (fichier `site/.env.local`, facultatif) : `VITE_API_MODE=mock|http` (données simulées par défaut).
+Par défaut le site tourne sur des **données simulées**. Pour lancer le **vrai solveur Python** depuis le site (instances Solomon, X et NANCY-60) :
+
+```bash
+cd algorithme && python serveur.py      # terminal 1 : solveur sur http://127.0.0.1:8000 (bibliothèque standard seulement)
+cd site && npm run dev:solveur          # terminal 2 : site branché sur ce serveur
+```
+
+Puis : vue **Données** → choisir l'instance (ex. `c101`) → vue **Tournées** → « Calculer les tournées ».
 
 Documentation : `site/docs/SUIVI.md` (état d'avancement) et `site/docs/DOSSIER_CONCEPTION.md` (dossier de conception).
 

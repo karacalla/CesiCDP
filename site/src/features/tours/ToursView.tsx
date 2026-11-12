@@ -9,6 +9,7 @@ import { ShareDialog } from '@/features/share/ShareDialog'
 import { CO2_KG_PER_KM } from '@/config/app'
 import { fr } from '@/i18n/fr'
 import { formatDuration, formatHm } from '@/lib/time'
+import { formatDistance } from '@/lib/units'
 import { useSelection } from '@/store/selection'
 import { Gantt } from './gantt/Gantt'
 import { JourneyCard } from './JourneyCard'
@@ -37,7 +38,8 @@ function ShareButton({ vehicleId, onClick }: { vehicleId: number; onClick: () =>
 }
 
 export function ToursView() {
-  const { instance, result, tours, selected, customers, kpis, stale } = useTours()
+  const { instance, result, tours, selected, customers, kpis, stale, geo } = useTours()
+  const planar = !geo
   const vehicleId = useSelection((s) => s.vehicleId)
   const stopId = useSelection((s) => s.stopId)
   const clock = useSelection((s) => s.clock)
@@ -61,7 +63,7 @@ export function ToursView() {
       {sel && (
         <div className="relative mx-auto w-full max-w-[460px]">
           <PanelTruck vehicleId={sel.route.vehicleId} returnAt={sel.route.end} className="z-20 -mb-16 ml-[2%] w-[96%]" />
-          <JourneyCard route={sel.route} Q={instance.fleet.Q} selected onSelect={() => selectVehicle(sel.route.vehicleId)} className="pt-14" />
+          <JourneyCard route={sel.route} Q={instance.fleet.Q} planar={planar} selected onSelect={() => selectVehicle(sel.route.vehicleId)} className="pt-14" />
           <div className="mt-3 flex justify-end">
             <ShareButton vehicleId={sel.route.vehicleId} onClick={() => setShareOpen(true)} />
           </div>
@@ -70,16 +72,16 @@ export function ToursView() {
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <Kpi label={fr.tours.kpi.distance} value={`${num(kpis.distanceM / 1000)} km`} />
-        <Kpi label={fr.tours.kpi.drive} value={formatDuration(kpis.driveMin)} />
+        <Kpi label={fr.tours.kpi.distance} value={formatDistance(kpis.distanceM, planar)} />
+        <Kpi label={fr.tours.kpi.drive} value={kpis.driveMin > 0 ? formatDuration(kpis.driveMin) : '—'} />
         <Kpi label={fr.tours.kpi.trucks} value={`${kpis.used} / ${kpis.k}`} />
         <Kpi label={fr.tours.kpi.fill} value={`${num(100 * kpis.fill)} %`} />
-        <Kpi label={fr.tours.kpi.co2} value={`${num(kpis.co2)} kg`} sub={kpis.co2Ref !== null ? fr.tours.co2Saved(num(kpis.co2Ref - kpis.co2)) : undefined} />
+        <Kpi label={fr.tours.kpi.co2} value={planar ? '—' : `${num(kpis.co2)} kg`} sub={planar ? fr.tours.kpi.co2Planar : kpis.co2Ref !== null ? fr.tours.co2Saved(num(kpis.co2Ref - kpis.co2)) : undefined} />
         <Kpi label={fr.tours.kpi.late} value={String(kpis.late)} sub={indicative ? fr.tours.kpi.lateIndicative : undefined} />
       </div>
       <p className="-mt-2 text-xs text-panel-ink-2">
         {fr.run.objective} : {result.objective}. {result.comparison ? `${fr.tours.comparison} : ${result.comparison.label}. ` : ''}
-        {fr.tours.co2Source(num(CO2_KG_PER_KM, 2))}.
+        {planar ? fr.tours.planarNote : `${fr.tours.co2Source(num(CO2_KG_PER_KM, 2))}.`}
       </p>
 
       <label className="flex flex-col gap-2 text-xs font-medium text-panel-ink-2">
@@ -97,6 +99,7 @@ export function ToursView() {
             key={t.route.vehicleId}
             route={t.route}
             Q={instance.fleet.Q}
+            planar={planar}
             selected={t.route.vehicleId === vehicleId}
             onSelect={() => selectVehicle(t.route.vehicleId)}
           />
