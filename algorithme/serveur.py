@@ -49,6 +49,25 @@ JOURNEE = [{"from": 0, "to": 1440, "factor": 1}]  # pas de trafic dans les insta
 
 # ---------- 1. instances de référence -> format du site ----------
 
+# Les instances Solomon / X sont en coordonnées planes (x, y) sans lieu réel. Pour garder l'effet de carte, on les
+# PROJETTE sur une zone d'environ 60 km entre Nancy et les Vosges, POUR L'AFFICHAGE SEULEMENT : au moment du calcul,
+# le serveur relit le fichier d'origine (distances, fenêtres) : coûts et gaps restent ceux de l'instance.
+CENTRE_LAT, CENTRE_LNG, COTE_KM = 48.45, 6.40, 60.0
+
+
+def projeter(coords):
+    xs = [x for x, _ in coords]
+    ys = [y for _, y in coords]
+    xc, yc = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+    km_par_unite = COTE_KM / max(max(xs) - min(xs), max(ys) - min(ys), 1e-9)
+    k_lat = km_par_unite / 111.32
+    k_lng = km_par_unite / (111.32 * math.cos(math.radians(CENTRE_LAT)))
+    return [(CENTRE_LAT + (y - yc) * k_lat, CENTRE_LNG + (x - xc) * k_lng) for x, y in coords]
+
+
+NOTE_PROJECTION = ("Positions PROJETÉES autour de Nancy pour l'affichage (instance de référence sans lieu réel) ; "
+                   "distances, coûts et gap : ceux du fichier d'origine.")
+
 def nb_camions_solomon(chemin):
     # la ligne qui suit « NUMBER CAPACITY » donne le nombre de camions (lire_instance_solomon ne le garde pas)
     lignes = [l.split() for l in open(chemin, encoding="utf-8") if l.strip()]
@@ -61,15 +80,16 @@ def nb_camions_solomon(chemin):
 def instance_solomon(nom):
     chemin = os.path.join(ICI, "solomon", nom + ".txt")
     inst = lire_instance_solomon(chemin)
-    (x0, y0), (a0, b0) = inst["coords"][0], inst["fenetres"][0]
+    pos = projeter(inst["coords"])
+    (y0, x0), (a0, b0) = pos[0], inst["fenetres"][0]
     n = len(inst["demandes"]) - 1
     clients = []
     for i in range(1, n + 1):
-        x, y = inst["coords"][i]
+        lat, lng = pos[i]
         a, b = inst["fenetres"][i]
-        clients.append({"id": i, "name": f"Client {i}", "lat": y, "lng": x, "demand": inst["demandes"][i],
+        clients.append({"id": i, "name": f"Client {i}", "lat": lat, "lng": lng, "demand": inst["demandes"][i],
                         "tw": {"a": a, "b": b}, "service": inst["services"][i]})
-    meta = {"source": "solomon", "coordinates": "planar",
+    meta = {"source": "solomon", "coordinates": "geo", "projected": True, "note": NOTE_PROJECTION,
             "bksObjective": "Distance totale (distances coupées au dixième), optimum publié sur CVRPLIB"}
     if nom in BKS:
         meta["bks"] = BKS[nom]
@@ -82,11 +102,12 @@ def instance_solomon(nom):
 
 def instance_x(nom):
     inst = lire_instance(os.path.join(ICI, "instances", nom + ".vrp"))
-    x0, y0 = inst["coords"][0]
+    pos = projeter(inst["coords"])
+    y0, x0 = pos[0]
     n = len(inst["demandes"]) - 1
-    clients = [{"id": i, "name": f"Client {i}", "lat": inst["coords"][i][1], "lng": inst["coords"][i][0],
+    clients = [{"id": i, "name": f"Client {i}", "lat": pos[i][0], "lng": pos[i][1],
                 "demand": inst["demandes"][i], "tw": None, "service": 0} for i in range(1, n + 1)]
-    meta = {"source": "vrplib", "coordinates": "planar",
+    meta = {"source": "vrplib", "coordinates": "geo", "projected": True, "note": NOTE_PROJECTION,
             "bksObjective": "Somme des distances euclidiennes arrondies (EUC_2D), meilleure solution connue"}
     if nom in BKS:
         meta["bks"] = BKS[nom]
@@ -103,11 +124,11 @@ def liste_instances():
     for f in sorted(os.listdir(os.path.join(ICI, "solomon"))):
         if f.endswith(".txt"):
             out.append({"id": f[:-4], "name": f"{f[:-4].upper()} (Solomon, fenêtres de temps)",
-                        "customers": 100, "hasGeometry": False})
+                        "customers": 100, "hasGeometry": True})
     for f in sorted(os.listdir(os.path.join(ICI, "instances")), key=lambda s: int(s.split("-")[1][1:])):
         if f.endswith(".vrp"):
             n = int(f.split("-")[1][1:]) - 1
-            out.append({"id": f[:-4], "name": f"{f[:-4]} (Uchoa, sans fenêtres)", "customers": n, "hasGeometry": False})
+            out.append({"id": f[:-4], "name": f"{f[:-4]} (Uchoa, sans fenêtres)", "customers": n, "hasGeometry": True})
     return out
 
 
@@ -130,11 +151,39 @@ def haversine_km(lat1, lon1, lat2, lon2):
     return 2 * 6371.0 * math.asin(math.sqrt(a))
 
 
+def reference_fichier(site):
+    """Instance projetée : relit le fichier d'origine et vérifie que le site ne l'a pas modifiée."""
+    ident = site["id"]
+    solomon = os.path.join(ICI, "solomon", ident + ".txt")
+    ref = lire_instance_solomon(solomon) if os.path.exists(solomon) else lire_instance(
+        os.path.join(ICI, "instances", ident + ".vrp"))
+    clients = site["customers"]
+    modifiee = (len(clients) != len(ref["demandes"]) - 1
+                or any(c["id"] != i + 1 or c["demand"] != ref["demandes"][i + 1] for i, c in enumerate(clients))
+                or site["fleet"]["Q"] != ref["Q"])
+    if "fenetres" in ref and not modifiee:
+        modifiee = any(c["tw"] is None or (c["tw"]["a"], c["tw"]["b"]) != tuple(ref["fenetres"][i + 1])
+                       or c["service"] != ref["services"][i + 1] for i, c in enumerate(clients))
+    if modifiee:
+        raise ValueError(f"{ident} a été modifiée dans le site : rechargez-la (le serveur calcule les distances "
+                         "depuis le fichier d'origine, les positions affichées sont projetées).")
+    inst = {"nom": ident, "demandes": ref["demandes"], "Q": ref["Q"],
+            "D": calcul_distances(ref["coords"], ref["arrondi"])}
+    if site["options"]["timeWindows"] == "strict" and "fenetres" in ref:
+        inst["fenetres"], inst["services"] = ref["fenetres"], ref["services"]
+    return inst
+
+
 def vers_solveur(site):
-    """Renvoie (inst pour resoudre, D_km ou None, liste des identifiants du site dans l'ordre 1..n)."""
+    """Renvoie (inst pour resoudre, D_km ou None, liste des identifiants du site dans l'ordre 1..n).
+    D_km n'est fourni que pour une instance géographique RÉELLE (distances en km)."""
     depot, clients = site["depot"], site["customers"]
     ids = [c["id"] for c in clients]
     lieux = [depot] + clients
+    # instance de référence affichée en positions projetées : on calcule sur le fichier d'origine
+    if site["meta"].get("projected") or (site["meta"]["source"] in ("solomon", "vrplib")
+                                         and site["meta"]["coordinates"] == "geo"):
+        return reference_fichier(site), None, ids
     inst = {"nom": site["id"], "demandes": [0] + [c["demand"] for c in clients], "Q": site["fleet"]["Q"]}
     D_km = None
     if site["meta"]["coordinates"] == "geo":
@@ -161,19 +210,20 @@ def trafic_actif(site):
 # ---------- 3. résultat du solveur -> clés attendues par le site (adapters.ts) ----------
 
 def vers_site(site, inst, D_km, ids, routes, res):
-    geo = D_km is not None
+    geo = D_km is not None                               # distances réelles en km
+    carte = site["meta"]["coordinates"] == "geo"         # positions affichables (réelles ou projetées)
     D = inst["D"]
     fen, serv = inst.get("fenetres"), inst.get("services")
     lieux = [site["depot"]] + site["customers"]
     tournees = []
     for numero, t in enumerate(routes, start=1):
+        chemin = [0] + t + [0]
         if geo:
-            chemin = [0] + t + [0]
             dist = sum(D_km[chemin[k]][chemin[k + 1]] for k in range(len(chemin) - 1)) * 1000
-            geometrie = [[lieux[c]["lng"], lieux[c]["lat"]] for c in chemin]  # lignes droites
         else:
-            dist = sum(D[a][b] for a, b in zip([0] + t, t + [0]))
-            geometrie = None
+            dist = sum(D[a][b] for a, b in zip(chemin, chemin[1:]))  # unité de l'instance
+        # tracé en lignes droites entre arrêts (pas de réseau routier), sur les positions affichées
+        geometrie = [[lieux[c]["lng"], lieux[c]["lat"]] for c in chemin] if carte else None
         tour = {"camion": numero, "charge": sum(inst["demandes"][c] for c in t), "distance_m": dist,
                 "geometrie": geometrie, "debut": None, "fin": None,
                 "arrets": [{"client": ids[c - 1], "arrivee": None, "attente": None, "depart": None, "retard": None}

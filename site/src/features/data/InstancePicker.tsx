@@ -40,7 +40,7 @@ export function InstancePicker() {
           <span>
             {instance.customers.length} clients · {instance.fleet.k} camions · Q = {instance.fleet.Q}
             {instance.meta.note ? ` · ${instance.meta.note}` : ''}
-            {instance.meta.coordinates === 'planar' ? ` ${fr.data.planar}` : ''}
+            {instance.meta.coordinates === 'planar' ? ` ${fr.data.planar}` : instance.meta.projected ? ` ${fr.data.projected}` : ''}
           </span>
         </p>
       )}

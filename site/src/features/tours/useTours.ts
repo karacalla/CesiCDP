@@ -49,5 +49,8 @@ export function useTours() {
   }, [result, instance])
 
   const stale = !!(result && instance && resultKey !== instanceKey(instance))
-  return { instance, result, customers, tours, selected, state, kpis, stale, geo: instance?.meta.coordinates === 'geo' }
+  const geo = instance?.meta.coordinates === 'geo'
+  // distances dans l'unité de l'instance (pas des km) : coordonnées planes, ou positions projetées pour l'affichage
+  const abstractUnits = !geo || instance?.meta.projected === true
+  return { instance, result, customers, tours, selected, state, kpis, stale, geo, abstractUnits, projected: instance?.meta.projected === true }
 }

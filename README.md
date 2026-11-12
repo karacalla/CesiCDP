@@ -22,6 +22,7 @@ cd site && npm run dev:solveur          # terminal 2 : site branché sur ce serv
 ```
 
 Puis : vue **Données** → choisir l'instance (ex. `c101`) → vue **Tournées** → « Calculer les tournées ».
+Les instances Solomon et X sont **projetées** autour de Nancy pour l'affichage ; le calcul utilise le fichier d'origine (coûts et écarts inchangés).
 
 Documentation : `site/docs/SUIVI.md` (état d'avancement) et `site/docs/DOSSIER_CONCEPTION.md` (dossier de conception).
 

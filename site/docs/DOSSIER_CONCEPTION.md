@@ -258,6 +258,13 @@ Format : contexte → options → critique → choix → conséquence. La pile f
 - **Choix** : (c), `algorithme/serveur.py` (127.0.0.1:8000) : traduit l'instance du site vers le solveur (planes : distances du jeu, temps = distance ; géographiques : haversine, temps = distance / vitesse de la flotte), lance `resoudre()` ou `clarke_wright()`, renvoie tournées, horaires (`horaires()` du solveur), trajets et historique au format d'`adapters.ts`. PLNE refusé (trop lent). Site : `npm run dev:solveur` (`.env.solveur` : `VITE_API_MODE=http`) ; le mode simulé reste le défaut.
 - **Conséquences** : instances planes affichées en « u » (unité de l'instance), sans CO₂ ni carte (`lib/units.ts`) ; tracés géographiques en **lignes droites** (pas de réseau routier sans OSRM local) ; trafic toujours « non pris en compte » ; progression connue seulement à la fin (historique renvoyé avec le résultat) ; nombre de camions non imposé (comme l'étude).
 
+### ADR-027 — Instances de référence projetées sur la carte pour l'affichage (12/11/2026)
+- **Contexte** : demande du propriétaire : garder l'effet de carte (tracé parcouru / à venir, curseur, pins, carte d'info) pour tout calcul, y compris Solomon et X, qui n'ont que des coordonnées planes (x, y) sans lieu réel.
+- **Options** : (a) pas de carte pour ces jeux (ADR-026) ; (b) projeter (x, y) sur une zone réelle et calculer sur ces positions ; (c) projeter pour l'AFFICHAGE seulement, calculer sur le fichier d'origine.
+- **Critique** : (a) perd l'effet visuel ; (b) changerait les distances, donc les coûts et les gaps (faux résultats vis-à-vis des BKS).
+- **Choix** : (c). `serveur.py` projette linéairement les (x, y) sur un carré d'environ 60 km entre Nancy et les Vosges (même échelle en x et y, forme conservée) et marque `meta.projected = true` ; au calcul, il relit le fichier d'origine (distances, fenêtres) et refuse une instance modifiée dans le site. Le site affiche les distances dans l'unité de l'instance (« u ») partout (KPI, cartes de tournée, carte d'info, distance restante), sans CO₂ ni profil d'altitude, avec la mention « positions projetées ».
+- **Conséquences** : tracés en lignes droites ; le fond de carte (villes, relief) n'a aucun lien avec l'instance ; coûts et gaps identiques à ceux du notebook (c101 : 827,3).
+
 ## 5. Essais techniques S1–S6
 
 Poste de mesure : Windows 11, Chromium (Playwright 1.65), GPU « AMD Radeon (TM) Graphics » via ANGLE Direct3D 11, fenêtre de 1280 × 800. Mesures brutes : `docs/spikes/resultats.json`. Pour rejouer : `npm run spikes`. Code des essais : `spikes/` (jetable, non inclus dans le build).

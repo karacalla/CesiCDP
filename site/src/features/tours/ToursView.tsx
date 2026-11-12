@@ -38,8 +38,7 @@ function ShareButton({ vehicleId, onClick }: { vehicleId: number; onClick: () =>
 }
 
 export function ToursView() {
-  const { instance, result, tours, selected, customers, kpis, stale, geo } = useTours()
-  const planar = !geo
+  const { instance, result, tours, selected, customers, kpis, stale, abstractUnits: planar, projected } = useTours()
   const vehicleId = useSelection((s) => s.vehicleId)
   const stopId = useSelection((s) => s.stopId)
   const clock = useSelection((s) => s.clock)
@@ -81,7 +80,7 @@ export function ToursView() {
       </div>
       <p className="-mt-2 text-xs text-panel-ink-2">
         {fr.run.objective} : {result.objective}. {result.comparison ? `${fr.tours.comparison} : ${result.comparison.label}. ` : ''}
-        {planar ? fr.tours.planarNote : `${fr.tours.co2Source(num(CO2_KG_PER_KM, 2))}.`}
+        {projected ? fr.tours.projectedNote : planar ? fr.tours.planarNote : `${fr.tours.co2Source(num(CO2_KG_PER_KM, 2))}.`}
       </p>
 
       <label className="flex flex-col gap-2 text-xs font-medium text-panel-ink-2">

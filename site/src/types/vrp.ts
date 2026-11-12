@@ -99,6 +99,9 @@ export const InstanceMetaSchema = z.object({
   source: z.enum(['demo', 'generated', 'csv', 'json', 'vrplib', 'solomon']),
   /** 'geo' : lat/lng réels ; 'planar' : coordonnées planes (VRPLIB, Solomon) → pas d'affichage cartographique. */
   coordinates: z.enum(['geo', 'planar']),
+  /** Instance de référence (Solomon, X) placée sur la carte par PROJECTION de ses (x, y), pour l'affichage seulement :
+   *  distances et coûts restent ceux de l'instance (unité abstraite), jamais des km (ADR-027). */
+  projected: z.boolean().optional(),
   /** Meilleure solution connue (jeux de référence) et définition de son objectif. */
   bks: z.number().positive().optional(),
   bksObjective: z.string().optional(),

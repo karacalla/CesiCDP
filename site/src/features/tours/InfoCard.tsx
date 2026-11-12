@@ -8,6 +8,7 @@
 import { AlertTriangle, CheckCircle2, Clock3, X } from 'lucide-react'
 import { fr } from '@/i18n/fr'
 import { formatDuration, formatHm } from '@/lib/time'
+import { formatDistance } from '@/lib/units'
 import { useSelection } from '@/store/selection'
 import { stopStatus, useTours } from './useTours'
 import { useElevationProfile } from './useElevationProfile'
@@ -40,7 +41,7 @@ function Pill({ label, value }: { label: string; value: string }) {
 }
 
 export function InfoCard() {
-  const { instance, selected, customers, state, geo } = useTours()
+  const { instance, selected, customers, state, geo, abstractUnits, projected } = useTours()
   const stopId = useSelection((s) => s.stopId)
   const selectStop = useSelection((s) => s.selectStop)
   const selectVehicle = useSelection((s) => s.selectVehicle)
@@ -74,7 +75,7 @@ export function InfoCard() {
     title = [fr.tours.truck(route.vehicleId), `vers ${nextName ?? fr.tours.depot}`]
     status = { icon: CheckCircle2, text: `${fr.tours.phase[state?.phase ?? 'before']} · ${formatHm(clock)}`, cls: 'text-ink' }
     pills = [[fr.tours.load, `${route.load} / ${instance.fleet.Q}`], [fr.tours.nStops, `${done} / ${route.stops.length}`]]
-    footer = `${km(total)} km · ${route.start !== null && route.end !== null ? formatDuration(route.end - route.start) : '—'}`
+    footer = `${abstractUnits ? formatDistance(route.distanceM, true) : `${km(total)} km`} · ${route.start !== null && route.end !== null ? formatDuration(route.end - route.start) : '—'}`
   }
   const StatusIcon = status.icon
 
@@ -95,7 +96,7 @@ export function InfoCard() {
         </div>
         <div className="mt-4 flex items-end justify-between gap-3 pr-6">
           <p className="text-sm font-semibold tabular-nums">{footer}</p>
-          {!stop && profile && <Profile values={profile} at={total ? (state?.distance ?? 0) / total : 0} />}
+          {!stop && profile && !projected && <Profile values={profile} at={total ? (state?.distance ?? 0) / total : 0} />}
         </div>
       </div>
       <button
