@@ -1,6 +1,14 @@
 # télécharge les instances X (Uchoa et al. 2017) et leurs meilleures solutions connues
 # puis écrit bks.json (BKS = Best Known Solution)
 # source : https://github.com/PyVRP/Instances
+#
+# Rôle          : rendre l'étude reproductible : n'importe qui retrouve exactement nos instances et nos BKS
+# Choix retenu  : jeu X d'Uchoa et al. (2017) : 100 instances de 100 à 1000 clients, variées (position du dépôt,
+#                 répartition des clients aléatoire / en grappes, demandes), référence actuelle du CVRP
+# Alternative   : jeux A/B/P (Augerat 1995) : trop petits (≤ 100 clients) pour étudier le passage à l'échelle ;
+#   écartée       Golden (1998) : grandes instances mais peu nombreuses
+# Question jury : « BKS = optimum ? » -> non : meilleure solution CONNUE ; prouvée optimale pour certaines
+#                 instances seulement. Un gap de 0 % veut dire « aussi bon que le meilleur connu »
 
 import json
 import os

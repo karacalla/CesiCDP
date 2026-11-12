@@ -5,6 +5,17 @@
 #     -> ../site/src/data/tournees.json  (lu par le site React)
 #
 # python gen_carte.py [durée en secondes, 60 par défaut]
+#
+# Rôle          : passer d'un jeu de référence (plan, unités abstraites) à des données GÉOGRAPHIQUES réelles
+#                 (lat/lon en France) et produire un fichier lisible par le premier prototype du site
+# Choix retenu  : distance à vol d'oiseau (haversine), matrice passée directement à resoudre() via inst["D"]
+#                 -> le même recuit sert sans modification (il ne connaît que D)
+# Alternative   : distance routière (OSRM / API d'itinéraire) : plus réaliste mais service externe, n² requêtes
+#   écartée       ou une grosse matrice, et envoi des coordonnées des clients à un tiers (RGPD)
+# Question jury : « pourquoi k_max ici et pas dans les expériences ? » -> ici la flotte est réelle (30 camions) ;
+#                 dans le jeu X le nombre de camions est libre
+# NB : tournees.json n'est plus lu par la version actuelle du site (qui tourne sur données simulées NANCY-60) ;
+#      le branchement prévu est une API HTTP (voir site/docs/CONTRAT_SOLVEUR.md)
 
 import json
 import math
@@ -22,6 +33,8 @@ FICHIER_SITE = os.path.join("..", "site", "src", "data", "tournees.json")
 
 # distance en km entre deux points GPS (formule de haversine)
 # on ne peut pas faire Pythagore sur des latitudes / longitudes car la Terre est ronde
+# (1° de longitude = 111 km à l'équateur mais ≈ 73 km à Paris : cos(48,9°) × 111)
+# haversine = distance du grand cercle sur une sphère de rayon R ; erreur < 0,5 % par rapport à l'ellipsoïde
 def distance_km(lat1, lon1, lat2, lon2):
     R = 6371.0  # rayon de la Terre
     phi1 = math.radians(lat1)

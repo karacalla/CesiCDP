@@ -1,3 +1,9 @@
+/**
+ * Rôle : bordure lumineuse qui parcourt le contour d'un bloc pendant le calcul (effet n° 1, ADR-015).
+ * Provenance : Magic UI (licence MIT), code copié puis relu (aucun texte, aucun appel réseau).
+ * Technique : un petit dégradé suit le bord grâce à `offset-path: rect(...)` (offset-distance animé par motion) ;
+ *   masqué partout sauf sur la bordure (`mask-intersect` + `mask-clip`). Non rendu si l'utilisateur demande moins d'animations.
+ */
 import { motion, type MotionStyle, type Transition } from "motion/react"
 
 import { cn } from "@/lib/utils"
