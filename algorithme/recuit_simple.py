@@ -1,15 +1,18 @@
-# Recuit simulé pour le CVRP (tournées de camions avec capacité)
+# Recuit simulé pour le CVRP (camions avec capacité) et le CVRPTW (capacité + fenêtres de temps)
 # dépôt = lieu 0, clients = 1..n, chaque camion porte au plus Q
+# avec fenêtres : le client i doit être livré entre a_i et b_i ; si le camion arrive
+# avant a_i il attend, s'il arrive après b_i la tournée est interdite
 #
 # plan du fichier :
-#   1. lecture d'une instance .vrp
+#   1. lecture d'une instance (.vrp sans fenêtres, .txt de Solomon avec fenêtres)
 #   2. distances et voisins proches
 #   3. solution de départ (Clarke et Wright)
-#   4. fonctions utiles (longueur, charge, vérification)
-#   5. les 4 mouvements
+#   4. fonctions utiles (longueur, charge, horaires, vérification)
+#   5. les 5 mouvements
 #   6. le recuit + resoudre() qui enchaîne tout
 #
-# exemple : python recuit_simple.py instances/X-n101-k25.vrp
+# exemples : python recuit_simple.py instances/X-n101-k25.vrp
+#            python recuit_simple.py solomon/r101.txt
 
 import math
 import random
@@ -72,9 +75,45 @@ def lire_instance(chemin):
     }
 
 
+# lit un fichier de Solomon (.txt) : mêmes informations + fenêtres de temps
+# colonnes : numéro, x, y, demande, début de fenêtre, fin de fenêtre, durée de service
+def lire_instance_solomon(chemin):
+    with open(chemin, encoding="utf-8") as fichier:
+        lignes = [ligne.split() for ligne in fichier if ligne.strip() != ""]
+    nom = lignes[0][0]
+    coords = []
+    demandes = []
+    fenetres = []
+    services = []
+    capacite = 0
+    for k in range(len(lignes)):
+        morceaux = lignes[k]
+        # la ligne qui suit "NUMBER CAPACITY" donne le nombre de camions et la capacité
+        if morceaux[0] == "NUMBER":
+            capacite = int(lignes[k + 1][1])
+        # une ligne de 7 nombres = un lieu (la première est le dépôt)
+        if len(morceaux) == 7 and morceaux[0].isdigit():
+            coords.append((float(morceaux[1]), float(morceaux[2])))
+            demandes.append(int(float(morceaux[3])))
+            fenetres.append((float(morceaux[4]), float(morceaux[5])))
+            services.append(float(morceaux[6]))
+    return {
+        "nom": nom,
+        "coords": coords,
+        "demandes": demandes,
+        "Q": capacite,
+        # convention des instances de Solomon sur CVRPLIB : distances coupées à 1 décimale
+        "arrondi": "dixieme",
+        "fenetres": fenetres,   # fenetres[i] = (a_i, b_i) ; fenetres[0] = horaires du dépôt
+        "services": services,   # durée de la livraison chez chaque client
+    }
+
+
 # ---------- 2. distances et voisins proches ----------
 
 # matrice des distances : D[i][j] = distance entre le lieu i et le lieu j
+# arrondi = True : entier le plus proche (instances .vrp)
+# arrondi = "dixieme" : coupé à 1 décimale (instances de Solomon), False : rien
 def calcul_distances(coords, arrondi=True):
     nb_lieux = len(coords)
     D = []
@@ -85,7 +124,9 @@ def calcul_distances(coords, arrondi=True):
             dy = coords[i][1] - coords[j][1]
             # Pythagore
             d = math.sqrt(dx * dx + dy * dy)
-            if arrondi:
+            if arrondi == "dixieme":
+                d = math.floor(d * 10) / 10
+            elif arrondi:
                 d = math.floor(d + 0.5)  # convention EUC_2D
             ligne.append(d)
         D.append(ligne)
@@ -112,7 +153,8 @@ def voisins_proches(D, K):
 
 # on fusionne les tournées dans l'ordre des plus grosses économies
 # s(i, j) = D[0][i] + D[0][j] - D[i][j] tant que la capacité est respectée
-def clarke_wright(D, demandes, Q):
+# (et les fenêtres de temps, s'il y en a)
+def clarke_wright(D, demandes, Q, fenetres=None, services=None):
     n = len(D) - 1
 
     # au début chaque client a sa propre tournée
@@ -141,22 +183,27 @@ def clarke_wright(D, demandes, Q):
 
         A = tournees[ti]
         B = tournees[tj]
-        # i doit être à la fin de A et j au début de B
+        # i et j doivent être chacun à un bout de leur tournée
+        if i not in (A[0], A[-1]) or j not in (B[0], B[-1]):
+            continue
+        # on met i à la fin de A et j au début de B (en retournant si besoin)
         if A[-1] != i:
-            if A[0] == i:
-                A.reverse()
-            else:
-                continue
+            A = A[::-1]
         if B[0] != j:
-            if B[-1] == j:
-                B.reverse()
-            else:
-                continue
+            B = B[::-1]
+        fusion = A + B
 
-        # fusion : B est mis au bout de A et la tournée tj disparaît
-        A.extend(B)
+        if fenetres is not None:
+            # avec des fenêtres le sens de parcours compte : on essaie les deux sens
+            if not horaires_ok(fusion, D, fenetres, services):
+                fusion = fusion[::-1]
+                if not horaires_ok(fusion, D, fenetres, services):
+                    continue
+
+        # fusion acceptée : la tournée tj disparaît
+        tournees[ti] = fusion
         charge[ti] += charge[tj]
-        for c in B:
+        for c in tournees[tj]:
             ou[c] = ti
         del tournees[tj]
         del charge[tj]
@@ -166,7 +213,7 @@ def clarke_wright(D, demandes, Q):
 
 # s'il y a plus de tournées que de camions, on vide la moins chargée
 # et on remet ses clients là où ça rallonge le moins
-def reduire_nb_tournees(tournees, D, demandes, Q, k_max):
+def reduire_nb_tournees(tournees, D, demandes, Q, k_max, fenetres=None, services=None):
     tournees = [t[:] for t in tournees]
     while len(tournees) > k_max:
         # on enlève la tournée la moins chargée
@@ -190,8 +237,12 @@ def reduire_nb_tournees(tournees, D, demandes, Q, k_max):
                     else:
                         apres = 0
                     rallonge = D[avant][c] + D[c][apres] - D[avant][apres]
-                    if meilleur is None or rallonge < meilleur[0]:
-                        meilleur = (rallonge, t, p)
+                    if meilleur is not None and rallonge >= meilleur[0]:
+                        continue
+                    # avec des fenêtres, il faut que la tournée reste à l'heure
+                    if fenetres is not None and not horaires_ok(t[:p] + [c] + t[p:], D, fenetres, services):
+                        continue
+                    meilleur = (rallonge, t, p)
             if meilleur is None:
                 raise ValueError(f"impossible de tout livrer avec {k_max} camions")
             # on insère c au meilleur endroit trouvé
@@ -221,6 +272,37 @@ def charge_de(tournee, demandes):
     return total
 
 
+# vrai si la tournée respecte toutes les fenêtres de temps
+# le camion part du dépôt à l'ouverture ; le temps de trajet = la distance
+def horaires_ok(tournee, D, fenetres, services):
+    heure = fenetres[0][0]
+    avant = 0
+    for c in tournee:
+        heure += D[avant][c]            # on roule jusqu'au client c
+        if heure > fenetres[c][1]:
+            return False                # arrivé après la fermeture : interdit
+        if heure < fenetres[c][0]:
+            heure = fenetres[c][0]      # arrivé trop tôt : on attend l'ouverture
+        heure += services[c]            # durée de la livraison
+        avant = c
+    # il faut aussi être rentré au dépôt avant sa fermeture
+    return heure + D[avant][0] <= fenetres[0][1]
+
+
+# détail des horaires d'une tournée : pour chaque client (arrivée, attente, départ)
+def horaires(tournee, D, fenetres, services):
+    resultat = []
+    heure = fenetres[0][0]
+    avant = 0
+    for c in tournee:
+        arrivee = heure + D[avant][c]
+        attente = max(0, fenetres[c][0] - arrivee)
+        heure = arrivee + attente + services[c]
+        resultat.append((arrivee, attente, heure))
+        avant = c
+    return resultat
+
+
 # coût d'une solution = somme des longueurs des tournées
 def cout_total(tournees, D):
     total = 0
@@ -230,7 +312,7 @@ def cout_total(tournees, D):
 
 
 # vérifie qu'une solution est correcte, renvoie (True/False, message)
-def verifier(tournees, demandes, Q, k_max=None):
+def verifier(tournees, demandes, Q, k_max=None, D=None, fenetres=None, services=None):
     n = len(demandes) - 1
     # chaque client doit apparaître exactement une fois
     tous = []
@@ -245,10 +327,15 @@ def verifier(tournees, demandes, Q, k_max=None):
     # pas plus de camions qu'autorisé
     if k_max is not None and len(tournees) > k_max:
         return False, "trop de camions"
+    # toutes les fenêtres de temps sont respectées
+    if fenetres is not None:
+        for t in tournees:
+            if not horaires_ok(t, D, fenetres, services):
+                return False, "fenêtre de temps non respectée"
     return True, "solution valable"
 
 
-# ---------- 5. les 4 mouvements ----------
+# ---------- 5. les 5 mouvements ----------
 # chaque mouvement renvoie {numéro de tournée: nouvelle tournée} sans modifier
 # la solution, ou None si le mouvement n'a pas de sens
 
@@ -325,10 +412,24 @@ def deux_opt_etoile(tournees, tu, pu, tv, pv):
     return {tu: nouvelle_A, tv: nouvelle_B}
 
 
+# nouvelle tournée : u quitte sa tournée et part seul avec un camion de plus
+# (la nouvelle tournée porte le numéro len(tournees) : le recuit l'ajoute au bout de la liste)
+# utile surtout avec des fenêtres de temps, quand un client gêne tous les autres
+def nouvelle_tournee(tournees, tu, pu, tv, pv):
+    if len(tournees[tu]) == 1:
+        return None  # u est déjà seul
+    u = tournees[tu][pu]
+    return {tu: tournees[tu][:pu] + tournees[tu][pu + 1:], len(tournees): [u]}
+
+
 # liste des mouvements et probabilité de tirer chacun (même ordre)
-MOUVEMENTS = [deplacer, echanger, deux_opt, deux_opt_etoile]
-NOMS_MOUVEMENTS = ["déplacer", "échanger", "2-opt", "2-opt*"]
-PROBAS_DEFAUT = [0.4, 0.2, 0.2, 0.2]
+MOUVEMENTS = [deplacer, echanger, deux_opt, deux_opt_etoile, nouvelle_tournee]
+NOMS_MOUVEMENTS = ["déplacer", "échanger", "2-opt", "2-opt*", "nouvelle tournée"]
+# sans fenêtres de temps : on n'utilise pas "nouvelle tournée" (un client seul dans un
+# camion ne peut souvent plus être repris par un autre camion déjà presque plein)
+PROBAS_DEFAUT = [0.4, 0.2, 0.2, 0.2, 0.0]
+# avec fenêtres de temps : on l'utilise rarement (1 fois sur 200), ça suffit (partie 8.2)
+PROBAS_FENETRES = [0.395, 0.2, 0.2, 0.2, 0.005]
 
 
 # tire le numéro d'un mouvement au hasard en respectant les probabilités
@@ -356,8 +457,10 @@ def numeroter(tournees, ou):
 # à chaque tour : on tire u, un voisin v et un mouvement, on calcule delta,
 # on accepte si ça raccourcit, sinon avec la proba exp(-delta / T)
 # T baisse de T_debut à T_fin au cours du temps
+# s'il y a des fenêtres de temps, un mouvement qui met un camion en retard est refusé
 def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
-           probas=PROBAS_DEFAUT, pas_historique=0.5, verbose=False):
+           probas=PROBAS_DEFAUT, pas_historique=0.5, verbose=False,
+           fenetres=None, services=None, k_max=None):
     n = len(D) - 1
     # on copie pour ne pas modifier la solution de départ
     tournees = [t[:] for t in tournees]
@@ -416,6 +519,9 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
         proposition = MOUVEMENTS[m](tournees, tu, pu, tv, pv)
         if proposition is None:
             continue
+        # le mouvement "nouvelle tournée" est interdit s'il n'y a plus de camion libre
+        if len(tournees) in proposition and k_max is not None and len(tournees) >= k_max:
+            continue
 
         # 2) on vérifie la capacité
         nouvelles_charges = {}
@@ -432,7 +538,10 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
         delta = 0
         for numero in proposition:
             nouvelles_longueurs[numero] = longueur(proposition[numero], D)
-            delta += nouvelles_longueurs[numero] - longueurs[numero]
+            if numero < len(tournees):
+                delta += nouvelles_longueurs[numero] - longueurs[numero]
+            else:
+                delta += nouvelles_longueurs[numero]  # tournée qui n'existait pas avant
 
         # 4) on accepte si ça raccourcit, sinon avec une probabilité exp(-delta / T)
         if delta <= 0:
@@ -444,9 +553,24 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
         if not accepte:
             continue
 
-        # 5) on applique le changement
+        # 5) fenêtres de temps : on les vérifie en dernier car c'est le test le plus long
+        if fenetres is not None:
+            a_l_heure = True
+            for numero in proposition:
+                if not horaires_ok(proposition[numero], D, fenetres, services):
+                    a_l_heure = False
+                    break
+            if not a_l_heure:
+                continue
+
+        # 6) on applique le changement
         tournee_vide = False
-        for numero in proposition:
+        for numero in sorted(proposition):
+            if numero == len(tournees):
+                # nouvelle tournée : on l'ajoute au bout des listes
+                tournees.append([])
+                longueurs.append(0)
+                charges.append(0)
             tournees[numero] = proposition[numero]
             longueurs[numero] = nouvelles_longueurs[numero]
             charges[numero] = nouvelles_charges[numero]
@@ -477,14 +601,23 @@ def recuit(tournees, D, demandes, Q, voisins, duree, T_debut, T_fin,
 # t0 et t1 sont en fraction de la longueur moyenne d'un trajet
 # (si inst contient déjà "D", on l'utilise : c'est le cas dans gen_carte.py)
 # fait tout : distances, solution de départ, recuit, vérification
-def resoudre(inst, duree=10.0, graine=0, K=20, t0=0.5, t1=0.01,
-             probas=PROBAS_DEFAUT, k_max=None, verbose=False):
+def resoudre(inst, duree=10.0, graine=0, K=20, t0=2.0, t1=0.01,
+             probas=None, k_max=None, verbose=False):
     debut = time.time()
     # même graine = mêmes tirages au hasard, pour pouvoir refaire une expérience
     random.seed(graine)
     demandes = inst["demandes"]
     Q = inst["Q"]
     n = len(demandes) - 1
+    # None s'il n'y a pas de fenêtres de temps (CVRP simple)
+    fenetres = inst.get("fenetres")
+    services = inst.get("services")
+    # probabilités des mouvements : elles dépendent de la présence de fenêtres de temps
+    if probas is None:
+        if fenetres is None:
+            probas = PROBAS_DEFAUT
+        else:
+            probas = PROBAS_FENETRES
 
     # étape 1 : distances et voisins proches
     if "D" in inst:
@@ -494,9 +627,9 @@ def resoudre(inst, duree=10.0, graine=0, K=20, t0=0.5, t1=0.01,
     voisins = voisins_proches(D, K)
 
     # étape 2 : solution de départ avec Clarke et Wright
-    depart = clarke_wright(D, demandes, Q)
+    depart = clarke_wright(D, demandes, Q, fenetres, services)
     if k_max is not None and len(depart) > k_max:
-        depart = reduire_nb_tournees(depart, D, demandes, Q, k_max)
+        depart = reduire_nb_tournees(depart, D, demandes, Q, k_max, fenetres, services)
     cout_depart = cout_total(depart, D)
 
     # étape 3 : températures, proportionnelles à la longueur moyenne d'un trajet
@@ -509,10 +642,11 @@ def resoudre(inst, duree=10.0, graine=0, K=20, t0=0.5, t1=0.01,
     if verbose:
         print(f"{inst['nom']} : départ = {cout_depart:.0f} ({len(depart)} tournées)")
     tournees, cout, iterations, historique, acceptes = recuit(
-        depart, D, demandes, Q, voisins, duree, T_debut, T_fin, probas, verbose=verbose)
+        depart, D, demandes, Q, voisins, duree, T_debut, T_fin, probas, verbose=verbose,
+        fenetres=fenetres, services=services, k_max=k_max)
 
     # étape 5 : on vérifie et on recalcule le coût depuis zéro
-    valide, message = verifier(tournees, demandes, Q, k_max)
+    valide, message = verifier(tournees, demandes, Q, k_max, D, fenetres, services)
     cout_recalcule = cout_total(tournees, D)
 
     return {
@@ -539,7 +673,10 @@ if __name__ == "__main__":
     chemin = "instances/X-n101-k25.vrp"
     if len(sys.argv) > 1:
         chemin = sys.argv[1]
-    instance = lire_instance(chemin)
+    if chemin.endswith(".txt"):
+        instance = lire_instance_solomon(chemin)
+    else:
+        instance = lire_instance(chemin)
     resultat = resoudre(instance, duree=10, graine=1, verbose=True)
     print("solution :", resultat["message"])
     print(f"départ (Clarke et Wright) : {resultat['cout_initial']:.0f}")
